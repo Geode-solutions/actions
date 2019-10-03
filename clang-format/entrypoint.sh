@@ -10,3 +10,5 @@ clang-format-8 -style=file -i $files
 if [[ `git status --porcelain` ]]; then
     echo ::error::Format requirement is not satisfied
 fi
+
+return 1

@@ -14,7 +14,7 @@ if [ -n "$changes" ]; then
     git checkout `echo ${GITHUB_REF##*/*/}`
     git add --all "${GITHUB_WORKSPACE}"
     git commit -m "style: CI format update"
-    git push https://BotellaA:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}
+    git push https://BotellaA:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
     echo ::error::Format requirement is not satisfied
     exit 1
 fi

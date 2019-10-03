@@ -13,6 +13,6 @@ if ! git diff-index --quiet HEAD --; then
     git checkout `echo ${GITHUB_REF##*/*/}`
     git add --all "${GITHUB_WORKSPACE}"
     git commit -m "style: CI format update"
-    git push https://${GITHUB_ACTOR}@github.com/${GITHUB_REPOSITORY}
+    git push https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
     echo ::error::Format requirement is not satisfied
 fi

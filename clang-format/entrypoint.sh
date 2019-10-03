@@ -7,7 +7,7 @@ wget https://raw.githubusercontent.com/Geode-solutions/actions/master/clang-form
 files=$(find . \( -name "*.h" -o -name "*.cpp" \))
 clang-format-8 -style=file -i $files
 
-if [[ `git status --porcelain` ]]; then
+if ! git diff-index --quiet HEAD --; then
     echo ::error::Format requirement is not satisfied
 fi
 

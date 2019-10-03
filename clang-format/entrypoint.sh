@@ -16,5 +16,5 @@ if [ -n "$changes" ]; then
     git commit -m "style: CI format update"
     git push https://BotellaA:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}
     echo ::error::Format requirement is not satisfied
-    return 1
+    exit 1
 fi

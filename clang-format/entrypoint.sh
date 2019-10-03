@@ -15,4 +15,5 @@ if ! git diff-index --quiet HEAD --; then
     git commit -m "style: CI format update"
     git push https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
     echo ::error::Format requirement is not satisfied
+    return 1
 fi

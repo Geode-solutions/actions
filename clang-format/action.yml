@@ -1,0 +1,5 @@
+name: 'Clang Format'
+description: 'Format C++ code using clang-format'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

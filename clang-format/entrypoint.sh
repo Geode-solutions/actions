@@ -7,7 +7,8 @@ wget https://raw.githubusercontent.com/Geode-solutions/actions/master/clang-form
 files=$(find . \( -name "*.h" -o -name "*.cpp" \))
 clang-format-8 -style=file -i $files
 
-if git diff --quiet; then
+changes=$(git diff)
+if [ -n "$changes" ]; then
     git config user.email ${GITHUB_ACTOR}@users.noreply.github.com
     git config user.name ${GITHUB_ACTOR}
     git checkout `echo ${GITHUB_REF##*/*/}`

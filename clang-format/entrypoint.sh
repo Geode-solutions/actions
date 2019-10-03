@@ -10,10 +10,6 @@ clang-format-8 -style=file -i $files
 if ! git diff-index --quiet HEAD --; then
     git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
     git config user.name "${GITHUB_ACTOR}"
-    echo ${GITHUB_REF}
-    echo ${GITHUB_REF##*/*/}
-    echo ${"${GITHUB_REF}"##*/*/}
-    echo "${${GITHUB_REF}##*/*/}"    
     git checkout `echo ${GITHUB_REF##*/*/}`
     git add --all "${GITHUB_WORKSPACE}"
     git commit -m "style: CI format update"

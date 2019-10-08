@@ -1,23 +1,17 @@
 #!/bin/bash
 set -e
 
-OUTPUT_DIR="${GITHUB_WORKSPACE}/kcov"
-mkdir -p $OUTPUT_DIR
-echo "input"
-ls "$1"
-cd "$1"
-ls
-
+OUTPUT_DIRECTORY="${GITHUB_WORKSPACE}/kcov"
+mkdir -p $OUTPUT_DIRECTORY
+cd $INPUT_DIRECTORY
 
 for test in test-*
 do
-    kcov --include-path="${GITHUB_WORKSPACE}/include","${GITHUB_WORKSPACE}/src" --exclude-pattern=common.cpp $OUTPUT_DIR $test
+    kcov --include-path="${GITHUB_WORKSPACE}/include","${GITHUB_WORKSPACE}/src" --exclude-pattern=common.cpp $OUTPUT_DIRECTORY $test
 done
 
-TEST_NAME="$(ls $OUTPUT_DIR)"
-NB_TESTS="$(find $OUTPUT_DIR/test-* | wc -l)"
+TEST_NAME="$(ls $OUTPUT_DIRECTORY)"
+NB_TESTS="$(find $OUTPUT_DIRECTORY/test-* | wc -l)"
 if [ ${NB_TESTS} -eq "1" ]; then 
-    cp $OUTPUT_DIR/$TEST_NAME/cobertura.xml $OUTPUT_DIR/kcov-merged;
+    cp $OUTPUT_DIRECTORY/$TEST_NAME/cobertura.xml $OUTPUT_DIRECTORY/kcov-merged;
 fi
-
-ls $OUTPUT_DIR/kcov-merged

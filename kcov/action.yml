@@ -1,0 +1,10 @@
+name: 'Kcov'
+description: 'Coverage C++ executables using kcov'
+inputs:
+  directory:
+    description: 'Directory containing the executables'
+    required: true
+runs:
+  using: 'docker'
+  image: 'docker://kcov/kcov:latest'
+  entrypoint: 'entrypoint.sh'

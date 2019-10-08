@@ -9,7 +9,7 @@ sudo cmake --build . --target install
 
 OUTPUT_DIRECTORY="${GITHUB_WORKSPACE}/kcov"
 mkdir -p $OUTPUT_DIRECTORY
-cd $INPUT_DIRECTORY
+cd $1
 
 for test in test-*
 do

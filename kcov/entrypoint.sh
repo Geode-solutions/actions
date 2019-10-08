@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+git clone https://github.com/SimonKagstrom/kcov kcov_src
+cd kcov_src
+cmake .
+cmake --build . -- -j2
+sudo cmake --build . --target install
+
 OUTPUT_DIRECTORY="${GITHUB_WORKSPACE}/kcov"
 mkdir -p $OUTPUT_DIRECTORY
 cd $INPUT_DIRECTORY

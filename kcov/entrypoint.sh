@@ -3,13 +3,15 @@ set -e
 
 OUTPUT_DIR="${GITHUB_WORKSPACE}/kcov"
 mkdir -p $OUTPUT_DIR
+echo "input"
+ls "$1"
 cd "$1"
 ls
 
 
 for test in test-*
 do
-    kcov $OUTPUT_DIR $test --include-path="${GITHUB_WORKSPACE}/include","${GITHUB_WORKSPACE}/src" --exclude-pattern=common.cpp
+    kcov --include-path="${GITHUB_WORKSPACE}/include","${GITHUB_WORKSPACE}/src" --exclude-pattern=common.cpp $OUTPUT_DIR $test
 done
 
 TEST_NAME="$(ls $OUTPUT_DIR)"

@@ -6,5 +6,4 @@ inputs:
     required: true
 runs:
   using: 'docker'
-  image: 'docker://kcov/kcov:latest'
-  entrypoint: './entrypoint.sh'
+  image: 'Dockerfile'

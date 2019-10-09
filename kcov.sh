@@ -1,23 +1,26 @@
 #!/bin/bash
 set -e
 
-OUTPUT_DIR="${GITHUB_WORKSPACE}/kcov"
-mkdir -p $OUTPUT_DIR
-echo "input"
-ls "$1"
-cd "$1"
-ls
+sudo apt update
+sudo apt install pkg-config binutils-dev build-essential libcurl4-openssl-dev libdw-dev libiberty-dev python zlib1g-dev
+        
+git clone https://github.com/SimonKagstrom/kcov kcov_src
+cd kcov_src
+cmake .
+cmake --build . -- -j2
+sudo cmake --build . --target install
 
+OUTPUT_DIRECTORY="${GITHUB_WORKSPACE}/kcov"
+mkdir -p $OUTPUT_DIRECTORY
+cd $1
 
 for test in test-*
 do
-    kcov --include-path="${GITHUB_WORKSPACE}/include","${GITHUB_WORKSPACE}/src" --exclude-pattern=common.cpp $OUTPUT_DIR $test
+    kcov --include-path="${GITHUB_WORKSPACE}/include","${GITHUB_WORKSPACE}/src" --exclude-pattern=common.cpp $OUTPUT_DIRECTORY $test
 done
 
-TEST_NAME="$(ls $OUTPUT_DIR)"
-NB_TESTS="$(find $OUTPUT_DIR/test-* | wc -l)"
+TEST_NAME="$(ls $OUTPUT_DIRECTORY)"
+NB_TESTS="$(find $OUTPUT_DIRECTORY/test-* | wc -l)"
 if [ ${NB_TESTS} -eq "1" ]; then 
-    cp $OUTPUT_DIR/$TEST_NAME/cobertura.xml $OUTPUT_DIR/kcov-merged;
+    cp $OUTPUT_DIRECTORY/$TEST_NAME/cobertura.xml $OUTPUT_DIRECTORY/kcov-merged;
 fi
-
-ls $OUTPUT_DIR/kcov-merged

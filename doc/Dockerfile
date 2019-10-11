@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 
 RUN \
   apt-get update && \
-  apt-get install -y wget cmake git doxygen python3-pip
+  apt-get install -y wget cmake git python3-pip
 
 COPY entrypoint.sh /entrypoint.sh
 COPY conf.py /doc/conf.py

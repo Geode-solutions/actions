@@ -10,7 +10,7 @@ tar -xJf $doxyrest_name.tar.xz
 doxyrest_path="$third_party_path/$doxyrest_name"
 
 cd "$GITHUB_WORKSPACE/$INPUT_DIRECTORY"
-make doc
+cmake --build . --target doc
 cd doc
 $doxyrest_path/bin/doxyrest xml/index.xml -c $doxyrest_path/share/doxyrest/frame/doxyrest-config.lua -F $doxyrest_path/share/doxyrest/frame/common -F $doxyrest_path/share/doxyrest/frame/cfamily 
 pip3 install -U sphinx

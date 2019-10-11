@@ -1,11 +1,13 @@
 #!/bin/bash
 set -e
 
-cd "${GITHUB_WORKSPACE}/doxyrest"
+third_party_path="${GITHUB_WORKSPACE}/doxyrest"
+mkdir -p $third_party_path
+cd $third_party_path
 doxyrest_name="doxyrest-2.0.0-linux-amd64"
 wget https://github.com/vovkos/doxyrest/releases/download/doxyrest-2.0.0/$doxyrest_name.tar.xz
 tar -xJf $doxyrest_name.tar.xz
-doxyrest_path="`pwd`/$doxyrest_name"
+doxyrest_path="$third_party_path/$doxyrest_name"
 
 cd $INPUT_DIRECTORY
 make doc
@@ -15,7 +17,7 @@ pip3 install -U sphinx
 export PYTHONPATH=$doxyrest_path/share/doxyrest/sphinx:$PYTHONPATH
 sphinx-build -b html -c /doc rst site
 
-docs_path="${GITHUB_WORKSPACE}/doxyrest/docs"
+docs_path="$third_party_path/docs"
 repo_name=${GITHUB_REPOSITORY##*/}
 git clone https://github.com/Geode-solutions/docs $docs_path
 rm -rf $docs_path/static/docs/$repo_name

@@ -9,7 +9,7 @@ wget https://github.com/vovkos/doxyrest/releases/download/doxyrest-2.0.0/$doxyre
 tar -xJf $doxyrest_name.tar.xz
 doxyrest_path="$third_party_path/$doxyrest_name"
 
-cd $INPUT_DIRECTORY
+cd "${GITHUB_WORKSPACE}/$INPUT_DIRECTORY"
 make doc
 cd doc
 $doxyrest_path/bin/doxyrest xml/index.xml -c $doxyrest_path/share/doxyrest/frame/doxyrest-config.lua -F $doxyrest_path/share/doxyrest/frame/common -F $doxyrest_path/share/doxyrest/frame/cfamily 

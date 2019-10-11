@@ -3,6 +3,7 @@ description: 'Doxyrest + Sphinx'
 inputs:
   directory:
     description: 'Directory to build'
+    default: 'build'
     required: true
 runs:
   using: 'docker'

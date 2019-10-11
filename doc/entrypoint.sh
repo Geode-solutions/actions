@@ -27,4 +27,4 @@ git config user.name ${GITHUB_ACTOR}
 git checkout master
 git add --all
 git commit -m "Update $repo_name documentation"
-git push origin
+git push https://BotellaA:${GITHUB_TOKEN}@github.com/Geode-solutions/docs

@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
-echo $GITHUB_WORKSPACE
-echo $RUNNER_WORKSPACE
-echo $RUNNER_TEMP
+
 third_party_path="$GITHUB_WORKSPACE/doxyrest"
 mkdir -p $third_party_path
 cd $third_party_path
@@ -11,7 +9,8 @@ wget https://github.com/vovkos/doxyrest/releases/download/doxyrest-2.0.0/$doxyre
 tar -xJf $doxyrest_name.tar.xz
 doxyrest_path="$third_party_path/$doxyrest_name"
 
-cd "$GITHUB_WORKSPACE/$INPUT_DIRECTORY"
+cd "$RUNNER_WORKSPACE/$INPUT_DIRECTORY"
+cmake .
 cmake --build . --target doc
 cd doc
 $doxyrest_path/bin/doxyrest xml/index.xml -c $doxyrest_path/share/doxyrest/frame/doxyrest-config.lua -F $doxyrest_path/share/doxyrest/frame/common -F $doxyrest_path/share/doxyrest/frame/cfamily 

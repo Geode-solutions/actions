@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
-
+echo $GITHUB_WORKSPACE
+echo $RUNNER_WORKSPACE
+echo $RUNNER_TEMP
 third_party_path="$GITHUB_WORKSPACE/doxyrest"
 mkdir -p $third_party_path
 cd $third_party_path

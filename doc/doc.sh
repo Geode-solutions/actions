@@ -2,7 +2,7 @@
 set -e
 
 sudo apt update
-sudo apt install doxygen python3-sphinx
+sudo apt install doxygen python3-pip
 
 third_party_path="$GITHUB_WORKSPACE/doxyrest"
 mkdir -p $third_party_path
@@ -20,8 +20,11 @@ $doxyrest_path/bin/doxyrest xml/index.xml -c $doxyrest_path/share/doxyrest/frame
 
 actions_path="$third_party_path/actions"
 git clone https://github.com/Geode-solutions/actions $actions_path
+pip3 install -U Sphinx
+sphinx --version
+sphinx-build --version
 export PYTHONPATH=$doxyrest_path/share/doxyrest/sphinx:$PYTHONPATH
-sphinx-build -b html -c $actions_path/doc rst site
+sphinx -b html -c $actions_path/doc rst site
 
 docs_path="$third_party_path/docs"
 repo_name=${GITHUB_REPOSITORY##*/}

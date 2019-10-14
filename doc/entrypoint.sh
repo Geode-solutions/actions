@@ -12,7 +12,7 @@ wget https://github.com/vovkos/doxyrest/releases/download/doxyrest-2.0.0/$doxyre
 tar -xJf $doxyrest_name.tar.xz
 doxyrest_path="$third_party_path/$doxyrest_name"
 
-cd "$GITHUB_WORKSPACE/$INPUT_DIRECTORY"
+cd $1
 cmake .
 cmake --build . --target doc
 cd doc

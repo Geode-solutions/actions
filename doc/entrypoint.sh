@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+sudo apt update
+sudo apt install doxygen python3-pip
+
 third_party_path="$GITHUB_WORKSPACE/doxyrest"
 mkdir -p $third_party_path
 cd $third_party_path
@@ -9,14 +12,17 @@ wget https://github.com/vovkos/doxyrest/releases/download/doxyrest-2.0.0/$doxyre
 tar -xJf $doxyrest_name.tar.xz
 doxyrest_path="$third_party_path/$doxyrest_name"
 
-cd "$RUNNER_WORKSPACE/$INPUT_DIRECTORY"
+cd "$GITHUB_WORKSPACE/$INPUT_DIRECTORY"
 cmake .
 cmake --build . --target doc
 cd doc
 $doxyrest_path/bin/doxyrest xml/index.xml -c $doxyrest_path/share/doxyrest/frame/doxyrest-config.lua -F $doxyrest_path/share/doxyrest/frame/common -F $doxyrest_path/share/doxyrest/frame/cfamily 
+
+actions_path="$third_party_path/actions"
+git clone https://github.com/Geode-solutions/actions $actions_path
 pip3 install -U sphinx
 export PYTHONPATH=$doxyrest_path/share/doxyrest/sphinx:$PYTHONPATH
-sphinx-build -b html -c /doc rst site
+sphinx-build -b html -c $actions_path/doc rst site
 
 docs_path="$third_party_path/docs"
 repo_name=${GITHUB_REPOSITORY##*/}

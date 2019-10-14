@@ -22,7 +22,7 @@ actions_path="$third_party_path/actions"
 git clone https://github.com/Geode-solutions/actions $actions_path
 pip3 install -U sphinx
 export PYTHONPATH=$doxyrest_path/share/doxyrest/sphinx:$PYTHONPATH
-sphinx-build -b html -c $actions_path/doc rst site
+sphinx -b html -c $actions_path/doc rst site
 
 docs_path="$third_party_path/docs"
 repo_name=${GITHUB_REPOSITORY##*/}

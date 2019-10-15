@@ -31,9 +31,13 @@ rm -rf $docs_path/static/docs/$repo_name
 mkdir -p $docs_path/static/docs/$repo_name
 cp -r ./site/* $docs_path/static/docs/$repo_name
 cd $docs_path
-git config user.email $GITHUB_ACTOR@users.noreply.github.com
-git config user.name $GITHUB_ACTOR
-git checkout master
-git add --all
-git commit -m "Update $repo_name documentation"
-git push https://BotellaA:$GITHUB_TOKEN@github.com/Geode-solutions/docs
+
+changes=$(git diff)
+if [ -n "$changes" ]; then
+    git config user.email $GITHUB_ACTOR@users.noreply.github.com
+    git config user.name $GITHUB_ACTOR
+    git checkout master
+    git add --all
+    git commit -m "Update $repo_name documentation"
+    git push https://BotellaA:$GITHUB_TOKEN@github.com/Geode-solutions/docs
+fi

@@ -10,7 +10,7 @@ changes=$(git diff)
 if [ -n "$changes" ]; then
     git config user.email $GITHUB_ACTOR@users.noreply.github.com
     git config user.name $GITHUB_ACTOR
-    git checkout `echo ${GITHUB_REF##*/*/}`
+    git checkout `echo ${GITHUB_REF#*/*/}`
     git add --all
     git commit -m "style: CI format update"
     git push https://BotellaA:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY

@@ -53,5 +53,5 @@ gh_get_asset $ASSET_ID > $OUTPUT_FILE
 gh_extract_asset
 
 folder=$(ls `pwd`)
-echo ::set-output name=path::$TARGET_PATH/$folder
+echo ::set-output name=path::$INPUT_REPOSITORY/$folder
 

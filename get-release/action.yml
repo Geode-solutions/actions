@@ -1,0 +1,16 @@
+name: 'Download Geode-solutions GitHub Release'
+description: 'Download Geode-solutions Github Release'
+inputs: 
+  repository:
+    description: 'Geode-solutions repository name'
+    required: true
+  file:
+    description: 'regex of the file to download'
+    required: true
+  token:
+    description: 'Github token'
+    required: false
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+

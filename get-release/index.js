@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const github = require('@actions/github');
+const Octokit = require('@octokit/rest');
 const fetch = require( 'node-fetch');
 const fs = require('fs');
 const unzipper = require('unzipper');
@@ -11,7 +11,13 @@ try {
   const file = core.getInput('file', { required: true });
   const outputFile = repo.concat(file);
   const token = core.getInput('token');
-  const octokit = new github.GitHub(token);
+  if (token){
+    var octokit = new Octokit({auth: token});
+    var hasToken = true;
+  } else {
+    var octokit = new Octokit();
+    var hasToken = false;
+  }
 
   octokit.repos.getLatestRelease({owner,repo})
     .then(latest => {
@@ -19,8 +25,11 @@ try {
       octokit.repos.listAssetsForRelease({owner,repo,release_id})
         .then(assets => {
           const asset = assets.data.find(asset => asset.name.includes(file));
-          const assetUrl = asset.url
-          fetch(`${assetUrl}?access_token=${token}`, {
+          let assetUrl = asset.url
+          if (hasToken){
+            assetUrl = assetUrl.concat('?access_token=', token);
+          }
+          fetch(assetUrl, {
             headers: {
               accept: 'application/octet-stream'
             }
@@ -30,16 +39,15 @@ try {
               const extension = outputFile.split('.').pop();
               if (extension == "zip"){
                 archive.pipe(unzipper.Extract({ path: repo })).on('finish', function() {
-                  core.setOutput('path', repo.concat('/',fs.readdirSync(repo)[0]));
                   fs.unlinkSync(outputFile);
                 });
               } else if (extension == "gz"){
                 archive.pipe(tar.x({ C: repo })).on('finish', function() {
-                  core.setOutput('path', repo.concat('/',fs.readdirSync(repo)[0]));
                   fs.unlinkSync(outputFile);
                 });
               }
-            });            
+            });
+            core.setOutput('path', repo.concat('/', asset.name));            
           });
         }
       );

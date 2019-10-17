@@ -38,7 +38,7 @@ try {
               const archive = fs.createReadStream(outputFile);
               const extension = outputFile.split('.').pop();
               if (extension == "zip"){
-                archive.pipe(unzipper.Extract()).on('finish', function() {
+                archive.pipe(unzipper.Extract({ path: '.' })).on('finish', function() {
                   core.setOutput('path', asset.name.slice(0,-4));
                   fs.unlinkSync(outputFile);
                 });

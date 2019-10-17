@@ -10,7 +10,7 @@ try {
   const owner = 'Geode-solutions';
   const file = core.getInput('file', { required: true });
   const outputFile = repo.concat(file);
-  const token = core.getInput('token'));
+  const token = core.getInput('token');
   const octokit = new github.GitHub(token);
 
   octokit.repos.getLatestRelease({owner,repo})

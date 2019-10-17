@@ -38,12 +38,17 @@ try {
               const archive = fs.createReadStream(outputFile);
               const extension = outputFile.split('.').pop();
               if (extension == "zip"){
-                archive.pipe(unzipper.Extract());
+                archive.pipe(unzipper.Extract()).on('finish', function() {
+                  core.setOutput('path', asset.name.slice(0,-4));
+                  fs.unlinkSync(outputFile);
+                });
               } else if (extension == "gz"){
-                archive.pipe(tar.x());
+                archive.pipe(tar.x()).on('finish', function() {
+                  core.setOutput('path', asset.name.slice(0,-7));
+                  fs.unlinkSync(outputFile);
+                });
               }
             });
-            core.setOutput('path', asset.name);            
           });
         }
       );

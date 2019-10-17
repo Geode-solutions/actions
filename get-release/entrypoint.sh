@@ -1,10 +1,13 @@
 #!/bin/sh
 set -e
 
+INPUT_REPOSITORY="prez"
+INPUT_FILE=".png"
 RELEASE_REPOSITORY="Geode-solutions/$INPUT_REPOSITORY"
-TARGET_PATH="$GITHUB_WORKSPACE/$INPUT_REPOSITORY"
+TARGET_PATH="$INPUT_REPOSITORY"
 RELEASE_URL="https://api.github.com/repos/$RELEASE_REPOSITORY/releases"
 OUTPUT_FILE="$INPUT_REPOSITORY$INPUT_FILE"
+INPUT_TOKEN="dd84fc8568250b276763c49f491053d1207b0ba5"
 
 gh_curl() {
   if [ -z "$INPUT_TOKEN" ]; then
@@ -43,6 +46,7 @@ cd "$TARGET_PATH"
 
 PARSER=".assets | map(select(.name|test(\"$INPUT_FILE\")))[0].id"
 ASSET_ID=`gh_curl $RELEASE_URL/latest | jq "$PARSER"`
+echo $ASSET_ID
 if [ "$ASSET_ID" = "null" ]; then
   >&2 echo "ERROR: file not found '$FILE'"
   exit 1

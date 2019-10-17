@@ -10,7 +10,10 @@ inputs:
   token:
     description: 'Github token'
     required: false
+outputs:
+  path:
+    description: 'path of the extracted asset'
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: 'node12'
+  main: 'index.js'
 

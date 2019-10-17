@@ -38,16 +38,12 @@ try {
               const archive = fs.createReadStream(outputFile);
               const extension = outputFile.split('.').pop();
               if (extension == "zip"){
-                archive.pipe(unzipper.Extract({ path: repo })).on('finish', function() {
-                  fs.unlinkSync(outputFile);
-                });
+                archive.pipe(unzipper.Extract());
               } else if (extension == "gz"){
-                archive.pipe(tar.x({ C: repo })).on('finish', function() {
-                  fs.unlinkSync(outputFile);
-                });
+                archive.pipe(tar.x());
               }
             });
-            core.setOutput('path', repo.concat('/', asset.name));            
+            core.setOutput('path', asset.name);            
           });
         }
       );

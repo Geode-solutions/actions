@@ -38,17 +38,16 @@ try {
           }).then(response => {
             console.log("Downloading to:", outputFile);
             response.body.pipe(fs.createWriteStream(outputFile)).on('finish', function() {
-              const archive = fs.createReadStream(outputFile);
               const extension = outputFile.split('.').pop();
               console.log("Extension:", extension);
               if (extension == "zip"){
-                archive.pipe(unzipper.Extract({ path: '.' })).on('finish', function() {
+                fs.createReadStream(outputFile).pipe(unzipper.Extract({ path: '.' })).on('close', function() {
                   console.log("Unzip to:", asset.name.slice(0,-4));
                   core.setOutput('path', asset.name.slice(0,-4));
                   fs.unlinkSync(outputFile);
                 });
               } else if (extension == "gz"){
-                archive.pipe(tar.x()).on('finish', function() {
+                fs.createReadStream(outputFile).pipe(tar.x()).on('close', function() {
                   console.log("Untar to:", asset.name.slice(0,-7));
                   core.setOutput('path', asset.name.slice(0,-7));
                   fs.unlinkSync(outputFile);

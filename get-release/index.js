@@ -41,12 +41,14 @@ try {
               const extension = outputFile.split('.').pop();
               console.log("Extension:", extension);
               if (extension == "zip"){
-                fs.createReadStream(outputFile).pipe(unzipper.Extract({ path: '.' })).on('close', function() {
+                console.log("Unzipping");
+                fs.createReadStream(outputFile).pipe(unzipper.Extract({ path: process.env.GITHUB_WORKSPACE })).on('close', function() {
                   console.log("Unzip to:", asset.name.slice(0,-4));
                   core.setOutput('path', asset.name.slice(0,-4));
                   fs.unlinkSync(outputFile);
                 });
               } else if (extension == "gz"){
+                console.log("Untaring");
                 fs.createReadStream(outputFile).pipe(tar.x()).on('close', function() {
                   console.log("Untar to:", asset.name.slice(0,-7));
                   core.setOutput('path', asset.name.slice(0,-7));

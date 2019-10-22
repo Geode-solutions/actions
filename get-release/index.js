@@ -40,6 +40,7 @@ try {
             response.body.pipe(fs.createWriteStream(outputFile)).on('finish', function() {
               const archive = fs.createReadStream(outputFile);
               const extension = outputFile.split('.').pop();
+              console.log("Extension:", extension);
               if (extension == "zip"){
                 archive.pipe(unzipper.Extract({ path: '.' })).on('finish', function() {
                   console.log("Unzip to:", asset.name.slice(0,-4));

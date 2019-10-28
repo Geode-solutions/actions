@@ -19,8 +19,10 @@ do
     kcov --include-path="${GITHUB_WORKSPACE}/include","${GITHUB_WORKSPACE}/src" --exclude-pattern=common.cpp $OUTPUT_DIRECTORY $test
 done
 
-TEST_NAME="$(ls $OUTPUT_DIRECTORY)"
+TEST_PATH="$(ls -d $OUTPUT_DIRECTORY/*/)"
 NB_TESTS="$(find $1/test-* | wc -l)"
+echo $TEST_NAME
+echo $NB_TESTS
 if [ ${NB_TESTS} -eq "1" ]; then 
-    cp $OUTPUT_DIRECTORY/$TEST_NAME/cobertura.xml $OUTPUT_DIRECTORY/kcov-merged;
+    cp $TEST_PATH/cobertura.xml $OUTPUT_DIRECTORY/kcov-merged;
 fi

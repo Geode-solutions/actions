@@ -21,7 +21,7 @@ done
 
 ls $OUTPUT_DIRECTORY
 TEST_PATH="$(ls -d $OUTPUT_DIRECTORY/*/)"
-TEST_PATH2="$(find -type d -mindepth 1 -maxdepth 1  $OUTPUT_DIRECTORY/*/)"
+TEST_PATH2="$(find -type d -mindepth 1 -maxdepth 1  $OUTPUT_DIRECTORY/test-*)"
 NB_TESTS="$(find $OUTPUT_DIRECTORY/test-* | wc -l)"
 echo $TEST_NAME
 echo $NB_TESTS

@@ -13,18 +13,22 @@ try {
   const outputFile = repo.concat(file);
   const token = core.getInput('token');
   if (token){
+    console.log("Ocktokit with token");
     var octokit = new Octokit({auth: token});
     var hasToken = true;
   } else {
+    console.log("Ocktokit without token");
     var octokit = new Octokit();
     var hasToken = false;
   }
 
   octokit.repos.getLatestRelease({owner,repo})
     .then(latest => {
+      console.log(latest);
       const release_id = latest.data.id;
       octokit.repos.listAssetsForRelease({owner,repo,release_id})
         .then(assets => {
+          console.log(assets);
           const asset = assets.data.find(asset => asset.name.includes(file));
           console.log("Asset name:", asset.name);
           let assetUrl = asset.url

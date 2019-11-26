@@ -12,7 +12,8 @@ function get_results(directory){
   files.forEach(file => {
     console.log(file);
     const result = {name:'', value:{}};
-    const output_file = file + '.xml';
+    const output_file = directory +'/'+file + '.xml';
+    child_process.spawnSync(directory +'/'+file,['-r xml']);
     child_process.spawnSync(directory +'/'+file,['-r xml','-o ' + output_file]);
     const xml = fs.readFileSync(output_file, {encoding: 'utf8'});
     xml2js.parseString(xml, (err, json) => {

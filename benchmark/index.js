@@ -32,7 +32,7 @@ function get_results(directory){
 try {
   const repository = core.getInput('repository', { required: true });
   const path = 'assets/' + repository + '.json';
-  const directory = core.getInput('directory', { required: true });
+  const directory = process.env.GITHUB_WORKSPACE + '/' + core.getInput('directory', { required: true });
   const token = core.getInput('token', { required: true });
   console.log("Using directory:", directory);
   const results = get_results(directory);

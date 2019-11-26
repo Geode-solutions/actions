@@ -1,0 +1,19 @@
+{
+  "name": "benchmark",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@actions/core": "^1.1.3",
+    "@octokit/rest": "^16.33.1",
+    "fs": "0.0.1-security",
+    "request": "^2.88.0",
+    "xml2js": "^0.4.22"
+  }
+}

@@ -1,6 +1,9 @@
 name: 'Compute Geode-solutions benchmarks'
 description: 'Compute Geode-solutions benchmarks'
 inputs:
+  repository:
+    description: 'Repository'
+    required: true
   directory:
     description: 'Directory of tests'
     required: true

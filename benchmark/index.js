@@ -30,13 +30,15 @@ function get_results(directory){
 
 
 try {
+  const repository = core.getInput('repository', { required: true });
+  const path = 'assets/' + repository + '.json';
   const directory = core.getInput('directory', { required: true });
   const token = core.getInput('token', { required: true });
   console.log("Using directory:", directory);
   const results = get_results(directory);
   console.log(results);
 
-  request.get('https://raw.githubusercontent.com/Geode-solutions/benchmarks/master/assets/OpenGeode.json', (error, response, data) => {
+  request.get('https://raw.githubusercontent.com/Geode-solutions/benchmarks/master/' + path, (error, response, data) => {
     if (!error && response.statusCode == 200) {
         data = JSON.parse(data);
         results.forEach(result => {
@@ -51,7 +53,6 @@ try {
         const content = Buffer.from(JSON.stringify(data)).toString("base64");
         const owner = 'Geode-solutions';
         const repo = 'benchmarks';
-        const path = 'assets/OpenGeode.json';
         const octokit = new Octokit({auth: token});
         octokit.repos.getContents({owner, repo, path }).then(response => {
           const sha = response.data.sha;

@@ -13,13 +13,10 @@ function get_results(directory){
     console.log(file);
     const result = {name:'', value:{}};
     const output_file = directory +'/'+file + '.xml';
-    console.log(output_file);
-    console.log(directory +'/'+file);
-    child_process.spawnSync(directory +'/'+file,['-r xml']);
     child_process.spawnSync(directory +'/'+file,['-r xml','-o ' + output_file]);
     const xml = fs.readFileSync(output_file, {encoding: 'utf8'});
     xml2js.parseString(xml, (err, json) => {
-console.log(json);
+      if( json.Catch ) {
       const data = json.Catch.Group[0].TestCase[0].BenchmarkResults[0];
       result.name = data.$.name;
       const values = data.mean[0].$;
@@ -27,6 +24,7 @@ console.log(json);
       result.value.down = parseFloat(values.lowerBound);
       result.value.up = parseFloat(values.upperBound);
       results.push(result);
+      }
     });
   });
   return results;

@@ -16,7 +16,7 @@ function get_results(directory){
     child_process.spawnSync(directory +'/'+file,['-r xml','-o ' + output_file]);
     const xml = fs.readFileSync(output_file, {encoding: 'utf8'});
     xml2js.parseString(xml, (err, json) => {
-      if( json.Catch ) {
+      if( json && json.Catch ) {
       const data = json.Catch.Group[0].TestCase[0].BenchmarkResults[0];
       result.name = data.$.name;
       const values = data.mean[0].$;

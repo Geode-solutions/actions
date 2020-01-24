@@ -3,6 +3,7 @@ set -e
 
 wget https://raw.githubusercontent.com/Geode-solutions/actions/master/clang-format/.clang-format -O .clang-format
 
+git checkout `echo ${GITHUB_REF#*/*/}`
 files=$(find . \( -name "*.h" -o -name "*.cpp" \))
 clang-format-8 -style=file -i $files
 
@@ -10,7 +11,6 @@ changes=$(git diff)
 if [ -n "$changes" ]; then
     git config user.email $GITHUB_ACTOR@users.noreply.github.com
     git config user.name $GITHUB_ACTOR
-    git checkout `echo ${GITHUB_REF#*/*/}`
     git add --all
     git commit -m "style: CI format update"
     git push https://BotellaA:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY

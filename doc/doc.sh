@@ -37,3 +37,5 @@ if [ -n "$changes" ]; then
     git commit -m "Update $repo_name documentation"
     git push https://BotellaA:$GITHUB_TOKEN@github.com/Geode-solutions/docs
 fi
+
+rm -rf $GITHUB_WORKSPACE/build/opengeode/doc

@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-echo LD2 $LD_LIBRARY_PATH
-
 sudo apt update	|| true
 sudo apt install pkg-config binutils-dev build-essential libcurl4-openssl-dev libdw-dev libiberty-dev python zlib1g-dev	
 

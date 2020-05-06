@@ -15,8 +15,6 @@ if [ -n "$changes" ]; then
     git checkout $branch
     git add --all
     git commit -m "style: CI format update"
-    echo $1
-    echo $GITHUB_TOKEN
     git push https://$1:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY HEAD:$branch
     echo ::error::Format requirement is not satisfied
     exit 1

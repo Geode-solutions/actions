@@ -1,8 +1,12 @@
-name: 'Download Geode-solutions GitHub Release'
-description: 'Download Geode-solutions Github Release'
+name: 'Download GitHub Release'
+description: 'Download Github Release'
 inputs: 
+  owner:
+    description: 'GitHub owner name (user/organization)'
+    default: 'Geode-solutions'
+    requiered: false
   repository:
-    description: 'Geode-solutions repository name'
+    description: 'GitHub repository name'
     required: true
   file:
     description: 'regex of the file to download'

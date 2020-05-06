@@ -4,7 +4,7 @@ inputs:
   owner:
     description: 'GitHub owner name (user/organization)'
     default: 'Geode-solutions'
-    requiered: true
+    requiered: false
   repository:
     description: 'GitHub repository name'
     required: true

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-sudo apt update	
+sudo apt update	|| true
 sudo apt install pkg-config binutils-dev build-essential libcurl4-openssl-dev libdw-dev libiberty-dev python zlib1g-dev	
 
 git clone https://github.com/SimonKagstrom/kcov kcov_src	

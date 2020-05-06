@@ -8,7 +8,7 @@ const tar = require('tar');
 try {
   const repo = core.getInput('repository', {required: true});
   console.log('Looking for repository:', repo);
-  const owner = core.getInput('user', {required: true});
+  const owner = core.getInput('owner', {required: true});
   const file = core.getInput('file', {required: true});
   const outputFile = repo.concat(file);
   const token = core.getInput('token');

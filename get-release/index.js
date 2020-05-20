@@ -10,6 +10,7 @@ try {
   console.log('Looking for repository:', repo);
   const owner = core.getInput('owner', {required: true});
   const file = core.getInput('file', {required: true});
+  const version = core.getInput('version');
   const outputFile = repo.concat(file);
   const token = core.getInput('token');
   if (token) {
@@ -22,9 +23,10 @@ try {
     var hasToken = false;
   }
 
-  octokit.repos.getLatestRelease({owner, repo}).then(latest => {
-    console.log(latest);
-    const release_id = latest.data.id;
+  const promise = version ? octokit.repos.GetgetReleaseByTag({owner, repo, tag: version}) : octokit.repos.getLatestRelease({owner, repo});
+  promise.then(release => {
+    console.log(release);
+    const release_id = release.data.id;
     octokit.repos.listAssetsForRelease({owner, repo, release_id})
         .then(assets => {
           console.log(assets);

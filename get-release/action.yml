@@ -11,6 +11,9 @@ inputs:
   file:
     description: 'regex of the file to download'
     required: true
+  version:
+    description: 'Release version'
+    requiered: false
   token:
     description: 'Github token'
     required: false

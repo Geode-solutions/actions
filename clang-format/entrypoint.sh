@@ -4,7 +4,7 @@ set -e
 wget https://raw.githubusercontent.com/Geode-solutions/actions/master/clang-format/.clang-format -O .clang-format
 
 files=$(find . \( -name "*.h" -o -name "*.cpp" \))
-clang-format-8 -style=file -i $files
+clang-format-10 -style=file -i $files
 
 changes=$(git diff)
 if [ -n "$changes" ]; then

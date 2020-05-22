@@ -23,7 +23,7 @@ try {
     var hasToken = false;
   }
 
-  const promise = version ? octokit.repos.GetgetReleaseByTag({owner, repo, tag: version}) : octokit.repos.getLatestRelease({owner, repo});
+  const promise = version ? octokit.repos.getReleaseByTag({owner, repo, tag: version}) : octokit.repos.getLatestRelease({owner, repo});
   promise.then(release => {
     console.log(release);
     const release_id = release.data.id;

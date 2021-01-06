@@ -16,7 +16,7 @@ inputs:
     requiered: false
   token:
     description: 'Github token'
-    required: false
+    required: true
 outputs:
   path:
     description: 'path of the extracted asset'

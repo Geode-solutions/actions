@@ -13,31 +13,22 @@ try {
   const version = core.getInput('version');
   const outputFile = repo.concat(file);
   const token = core.getInput('token');
-  if (token) {
-    console.log('Ocktokit with token');
-    var octokit = new Octokit({auth: token});
-    var hasToken = true;
-  } else {
-    console.log('Ocktokit without token');
-    var octokit = new Octokit();
-    var hasToken = false;
-  }
+  const octokit = new Octokit({auth: token});
 
   const promise = version ? octokit.repos.getReleaseByTag({owner, repo, tag: version}) : octokit.repos.getLatestRelease({owner, repo});
   promise.then(release => {
     console.log(release);
     const release_id = release.data.id;
-    octokit.repos.listAssetsForRelease({owner, repo, release_id})
+    octokit.repos.listReleaseAssets({owner, repo, release_id})
         .then(assets => {
           console.log(assets);
           const asset = assets.data.find(asset => asset.name.includes(file));
           console.log('Asset name:', asset.name);
-          let assetUrl = asset.url
-          if (hasToken) {
-            assetUrl = assetUrl.concat('?access_token=', token);
-          }
-          fetch(assetUrl, {
-            headers: {accept: 'application/octet-stream'}
+          fetch(asset.url, {
+            headers: {
+              accept: 'application/octet-stream',
+              Authorization: 'Bearer ' + token
+            }
           }).then(response => {
             console.log('Downloading to:', outputFile);
             response.body.pipe(fs.createWriteStream(outputFile))

@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const {Octokit} = require('@octokit/rest');
-const fetch = require('node-fetch');
 const fs = require('fs');
+const request = require('request');
 const unzipper = require('unzipper');
 const tar = require('tar');
 
@@ -24,14 +24,15 @@ try {
           console.log(assets);
           const asset = assets.data.find(asset => asset.name.includes(file));
           console.log('Asset name:', asset.name);
-          fetch(asset.url, {
+          request({
+            url:asset.url,
+            method: "GET",
             headers: {
               accept: 'application/octet-stream',
-              Authorization: 'Bearer ' + token
+              Authorization: 'Bearer ' + token,
+              "User-Agent": ""
             }
-          }).then(response => {
-            console.log('Downloading to:', outputFile);
-            response.body.pipe(fs.createWriteStream(outputFile))
+          }).pipe(fs.createWriteStream(outputFile))
                 .on('finish', function() {
                   const extension = outputFile.split('.').pop();
                   console.log('Extension:', extension);
@@ -56,7 +57,7 @@ try {
                         });
                   }
                 });
-          });
+          //});
         });
   });
 } catch (error) {

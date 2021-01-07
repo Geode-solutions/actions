@@ -13,7 +13,7 @@
     "@actions/core": "^1.2.6",
     "@octokit/rest": "^17.11.2",
     "fs": "0.0.1-security",
-    "node-fetch": "^2.6.1",
+    "request": "^2.88.2",
     "tar": "^6.0.5",
     "unzipper": "^0.10.11"
   }

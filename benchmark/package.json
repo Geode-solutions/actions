@@ -10,8 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@actions/core": "^1.2.4",
-    "@octokit/rest": "^17.9.2",
+    "@actions/core": "^1.2.6",
+    "@octokit/rest": "^17.11.2",
     "fs": "0.0.1-security",
     "request": "^2.88.2",
     "xml2js": "^0.4.23"

@@ -1,0 +1,10 @@
+name: 'Download GitHub Release'
+description: 'Download Github Release'
+inputs: 
+  token:
+    description: 'Github token'
+    required: true
+runs:
+  using: 'node12'
+  main: 'index.js'
+

@@ -7,12 +7,16 @@ try {
   const token = core.getInput('token');
   const octokit = new Octokit({auth: token});
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+  console.log("owner", owner);
+  console.log("repo", repo);
   const public = repo.slice(0, -8);
+  console.log("public", public);
 
   const promise = octokit.repos.getLatestRelease({owner, repo});
-  promise.then(release_res => {
+  promise
+  .then(release_res => {
     const release = release_res.data;
-
+    console.log("release name", release.name);
     octokit.repos.createRelease({
       owner, 
       repo: public, 
@@ -21,10 +25,11 @@ try {
       body: release.body
     }).then(public_release_res =>{
      const public_release = public_release_res.data;
+     console.log("public_release name", public_release.name);
     octokit.repos.listReleaseAssets({owner, repo, release_id: release.id})
         .then(assets => {
-          console.log(assets.data);
           assets.data.forEach(asset => {
+          console.log(asset.url);
           request({
             url: asset.url,
             method: "GET",
@@ -48,9 +53,9 @@ try {
                   });
                 });
               })
-          });
-      } );
-  });
+          }).catch(err => console.log(err));
+      } ).catch(err => console.log(err));
+  }).catch(err => console.log(err));
 } catch (error) {
   core.setFailed(error.message);
 }

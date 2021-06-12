@@ -7,6 +7,9 @@ p.rubric{
 .highlight {
     background: #E0F2F1
 }
+a {
+    color: #00897b
+}
 @font-face {
     font-family: 'Roboto';
     src: url('Roboto-Thin.woff') format('woff');

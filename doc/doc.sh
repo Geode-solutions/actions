@@ -25,14 +25,10 @@ repo_name=${GITHUB_REPOSITORY##*/}
 git clone https://github.com/Geode-solutions/docs $docs_path
 rm -rf $docs_path/static/docs/$repo_name
 mkdir -p $docs_path/static/docs/$repo_name
-ls $docs_path/static/docs
-ls site
 cp -r ./site/* $docs_path/static/docs/$repo_name
 cd $docs_path
 
-git diff
-
-changes=$(git diff)
+changes=$(git status --porcelain 2>/dev/null | wc -l)
 if [ -n "$changes" ]; then
     git config user.email $GITHUB_ACTOR@users.noreply.github.com
     git config user.name $GITHUB_ACTOR

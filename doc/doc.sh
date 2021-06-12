@@ -25,8 +25,12 @@ repo_name=${GITHUB_REPOSITORY##*/}
 git clone https://github.com/Geode-solutions/docs $docs_path
 rm -rf $docs_path/static/docs/$repo_name
 mkdir -p $docs_path/static/docs/$repo_name
+ls $docs_path/static/docs
+ls site
 cp -r ./site/* $docs_path/static/docs/$repo_name
 cd $docs_path
+
+git diff
 
 changes=$(git diff)
 if [ -n "$changes" ]; then
@@ -37,5 +41,3 @@ if [ -n "$changes" ]; then
     git commit -m "Update $repo_name documentation"
     git push https://BotellaA:$GITHUB_TOKEN@github.com/Geode-solutions/docs
 fi
-
-rm -rf $GITHUB_WORKSPACE/build/opengeode/doc

@@ -88,7 +88,7 @@ html_theme = 'alabaster'
 #
 html_theme_options = {
     'font_family': 'Roboto',
-    'base_bg': '#fafafa'
+    'base_bg': 'white'
 }
 
 html_add_permalinks = ''

@@ -29,10 +29,6 @@ cp -r ./site/* $docs_path/static/docs/$repo_name
 cd $docs_path
 
 changes=$(git status --porcelain 2>/dev/null | wc -l)
-echo "###"
-echo "$changes"
-echo `"$changes" -ne 0`
-echo `"$changes" -ne "0"`
 if [ "$changes" -ne "0" ]; then
     git config user.email $GITHUB_ACTOR@users.noreply.github.com
     git config user.name $GITHUB_ACTOR

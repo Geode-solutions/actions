@@ -4,8 +4,8 @@ set -e
 third_party_path="$GITHUB_WORKSPACE/doxyrest"
 mkdir -p $third_party_path
 cd $third_party_path
-doxyrest_name="doxyrest-2.1.0-linux-amd64"
-wget https://github.com/vovkos/doxyrest/releases/download/doxyrest-2.1.0/$doxyrest_name.tar.xz
+doxyrest_name="doxyrest-2.1.2-linux-amd64"
+wget https://github.com/vovkos/doxyrest/releases/download/doxyrest-2.1.2/$doxyrest_name.tar.xz
 tar -xJf $doxyrest_name.tar.xz
 doxyrest_path="$third_party_path/$doxyrest_name"
 

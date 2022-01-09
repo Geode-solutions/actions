@@ -30,6 +30,9 @@ try {
         .then(assets => {
           assets.data.forEach(asset => {
           console.log(asset.url);
+          if(asset.name.includes("private")) {
+            return;
+          }
           request({
             url: asset.url,
             method: "GET",

@@ -42,8 +42,12 @@ try {
                         .pipe(unzipper.Extract(
                             {path: process.env.GITHUB_WORKSPACE}))
                         .on('close', function() {
-                          console.log('Unzip to:', asset.name.slice(0, -4));
-                          core.setOutput('path', asset.name.slice(0, -4));
+                          let extract_name = asset.name.slice(0, -4);
+                          if(extract_name.endsWith("-private")){
+                            extract_name = extract_name.slice(0, -8);
+                          }
+                          console.log('Unzip to:', extract_name);
+                          core.setOutput('path', extract_name);
                           fs.unlinkSync(outputFile);
                         });
                   } else if (extension == 'gz') {
@@ -51,8 +55,12 @@ try {
                     fs.createReadStream(outputFile)
                         .pipe(tar.x())
                         .on('close', function() {
-                          console.log('Untar to:', asset.name.slice(0, -7));
-                          core.setOutput('path', asset.name.slice(0, -7));
+                          let extract_name = asset.name.slice(0, -7);
+                          if(extract_name.endsWith("-private")){
+                            extract_name = extract_name.slice(0, -8);
+                          }
+                          console.log('Untar to:', extract_name);
+                          core.setOutput('path', extract_name);
                           fs.unlinkSync(outputFile);
                         });
                   }

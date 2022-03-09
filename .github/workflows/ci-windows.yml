@@ -1,0 +1,52 @@
+on: 
+  workflow_call:
+    inputs:
+      name:
+        type: string
+        required: true
+      directory:
+        type: string
+        default: "."
+
+jobs:
+  run:
+    runs-on: ${{ matrix.image }}
+    strategy:
+      matrix:
+        image: [windows-2019, windows-2022]
+        generator: ["Visual Studio 16 2019", "Visual Studio 17 2022"]
+        python: ["3.7", "3.8", "3.9", "3.10"]
+        exclude:
+          - image: windows-2019
+            generator: "Visual Studio 17 2022"
+          - image: windows-2022
+            generator: "Visual Studio 16 2019"
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python }}
+    - name: Compile & Test
+      run: |
+        pip install wheel
+        choco install openssl
+        if(!(test-path build)) { mkdir build }
+        cd build
+        cmake -G "${{ matrix.generator }}" -A x64 -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} ..
+        cmake --build . --config Debug
+        cd ${{ inputs.directory }}
+        ctest -C Debug --output-on-failure
+        cmake --build . --target wheel --config Debug
+      env:
+        GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+    - name: Notify slack
+      if: failure() && github.ref == 'refs/heads/master'
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
+      

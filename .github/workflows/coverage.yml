@@ -23,11 +23,3 @@ jobs:
       with: 
         token: ${{ secrets.CODECOV_TOKEN }}
         file: kcov/kcov-merged/cobertura.xml
-    - name: Notify slack
-      if: failure() && github.ref == 'refs/heads/master'
-      uses: 8398a7/action-slack@v2
-      with:
-        status: failure
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

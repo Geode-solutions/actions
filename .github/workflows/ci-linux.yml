@@ -1,0 +1,44 @@
+on: 
+  workflow_call:
+    inputs:
+      directory:
+        type: string
+        default: "."
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    container: ${{ matrix.config.container }}
+    strategy:
+      matrix:
+        config:
+        - {container: "geodesolutions/ubuntu", system: "ubuntu"}
+        - {container: "geodesolutions/centos", system: "rhel"}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Compile
+      run: |
+        mkdir -p build
+        cd build
+        cmake -DCMAKE_BUILD_TYPE=Debug -DINCLUDE_PYBIND11:BOOL=ON ..
+        cmake --build . -- -j2
+        cd ${{ inputs.directory }}        
+        ctest --output-on-failure
+    - name: Test
+      run: |
+        mkdir -p test
+        cd test
+        cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH:PATH="$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
+        cmake --build . -- -j2
+        ctest --output-on-failure
+      env:
+        GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+    - name: Notify slack
+      if: failure() && github.ref == 'refs/heads/master'
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 

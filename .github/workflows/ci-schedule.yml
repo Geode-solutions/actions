@@ -13,7 +13,7 @@ on:
         required: true
 
 jobs:
-  run:
+  linux:
     runs-on: ubuntu-latest
     container: ${{ matrix.config.container }}
     strategy:
@@ -33,7 +33,7 @@ jobs:
       run: |
         mkdir -p build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DINCLUDE_PYBIND11:BOOL=ON ..
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DINCLUDE_PYBIND11:BOOL=ON ..
         cmake --build . -- -j2
         cd ${{ inputs.directory }}        
         ctest --output-on-failure
@@ -43,7 +43,7 @@ jobs:
       run: |
         mkdir -p test
         cd test
-        cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
         cmake --build . -- -j2
         ctest --output-on-failure
       env:
@@ -57,3 +57,36 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
+
+  windows:  
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v3
+    - uses: Geode-solutions/actions/get-release@master
+      id: repos
+      with:
+        repository: ${{ inputs.repos }}
+        file: '-win64-private.zip'
+        token: ${{ secrets.TOKEN }}
+    - name: Compile & Test
+      run: |
+        pip install wheel
+        choco install openssl
+        if(!(test-path build)) { mkdir build }
+        cd build
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+        cmake --build . --config Release
+        cd ${{ inputs.directory }}
+        ctest -C Release --output-on-failure
+      env:
+        GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+    - name: Notify slack
+      if: failure() && github.ref == 'refs/heads/master'
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
+      

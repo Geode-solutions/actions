@@ -7,6 +7,13 @@ on:
       directory:
         type: string
         default: "."
+      repos:
+        type: string
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
 
 jobs:
   run:
@@ -27,13 +34,19 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python }}
+    - uses: Geode-solutions/actions/get-release@master
+      id: repos
+      with:
+        repository: ${{ inputs.repos }}
+        file: '-win64-private.zip'
+        token: ${{ secrets.TOKEN }}
     - name: Compile & Test
       run: |
         pip install wheel
         choco install openssl
         if(!(test-path build)) { mkdir build }
         cd build
-        cmake -G "${{ matrix.generator }}" -A x64 -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} ..
+        cmake -G "${{ matrix.generator }}" -A x64 -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} ..
         cmake --build . --config Debug
         cd ${{ inputs.directory }}
         ctest -C Debug --output-on-failure

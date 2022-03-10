@@ -1,12 +1,17 @@
 on: 
   workflow_call:
+    secrets:
+      TOKEN:
+        required: true
 
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: Geode-solutions/actions/clang-format@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+    - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.TOKEN }}
+    - uses: Geode-solutions/actions/clang-format@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
       

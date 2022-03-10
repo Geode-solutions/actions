@@ -4,6 +4,11 @@ on:
       directory:
         type: string
         default: "."
+      repos:
+        type: string
+    secrets:
+      TOKEN:
+        required: true
 
 jobs:
   run:
@@ -11,11 +16,17 @@ jobs:
     if: (github.event_name == 'pull_request' || github.ref == 'refs/heads/master')
     steps:
     - uses: actions/checkout@v3
+    - uses: Geode-solutions/actions/get-release@master
+      id: repos
+      with:
+        repository: ${{ inputs.repos }}
+        file: '-ubuntu-private.tar.gz'
+        token: ${{ secrets.TOKEN }}
     - name: Compile
       run: |
         mkdir -p build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Debug ..
+        cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
         cmake --build . -- -j2
     - name: Kcov
       run: curl -s https://raw.githubusercontent.com/Geode-solutions/actions/master/kcov.sh | bash -s -- ${GITHUB_WORKSPACE}/build/${{ inputs.directory }}/bin

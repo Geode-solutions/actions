@@ -9,10 +9,15 @@ on:
         default: "."
       repos:
         type: string
+      package:
+        type: string
+        required: true
     secrets:
       TOKEN:
         required: true
       SLACK_WEBHOOK_URL:
+        required: true
+      PYPI_TOKEN:
         required: true
 
 jobs:
@@ -35,17 +40,26 @@ jobs:
         file: '-rhel-private.tar.gz'
         token: ${{ secrets.TOKEN }}
     - name: Compile
+      id: package
       run: |
         export PATH=/opt/python/${{ matrix.config.tag }}/bin:$PATH
         mkdir -p build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.config.python }} ..
+        version="${GITHUB_REF##*/*/v}"
+        echo ::set-output name=version::$version
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.config.python }} -DCMAKE_PACKAGE_VERSION:STRING=$version ..
         cmake --build . -- -j2
-        cd ${{ inputs.directory}}
-        ctest --output-on-failure -R -py-
-        cmake --build . --target wheel --config Debug
-      env:
-        GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+        cd ${{ inputs.directory }}
+        cmake --build . --target wheel --config Release
+        mv wheel/dist/*.whl wheel/dist/${{ inputs.package }}-$version-${{ matrix.config.tag }}-manylinux2014_x86_64.whl
+    - name: PyPI
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        skip_existing: true
+        verbose: true
+        user: __token__
+        password: ${{ secrets.PYPI_TOKEN }}
+        packages_dir: "build/${{ inputs.directory }}/wheel/dist/"
     - name: Notify slack
       if: failure() && github.ref == 'refs/heads/master'
       uses: 8398a7/action-slack@v3
@@ -53,5 +67,5 @@ jobs:
         status: failure
         fields: repo,message,commit,author,action,eventName,ref,workflow
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 

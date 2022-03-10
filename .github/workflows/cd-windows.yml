@@ -1,0 +1,61 @@
+on: 
+  workflow_call:
+    inputs:
+      name:
+        type: string
+        required: true
+      directory:
+        type: string
+        default: "."
+      repos:
+        type: string
+      package:
+        type: string
+        required: true
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  run:
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v3
+    - uses: Geode-solutions/actions/get-release@master
+      id: repos
+      with:
+        repository: ${{ inputs.repos }}
+        file: '-win64-private.zip'
+        token: ${{ secrets.TOKEN }}
+    - name: Generate package
+      id: package
+      run: |
+        choco install openssl
+        if(!(test-path build)) { mkdir build }
+        cd build
+        $version = ${env:GITHUB_REF} -replace 'refs\/tags\/v', ''
+        echo "::set-output name=version::$version"
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=win64 ..
+        cmake --build . --config Release
+        cpack -D CPACK_COMPONENTS_ALL="public;private" -C Release .
+        mv ${{ inputs.package }}-$version-win64.zip ${{ inputs.package }}-$version-win64-private.zip
+        cmake --build . --target PACKAGE --config Release
+    - name: Upload
+      uses: geode-solutions/action-gh-release@master
+      with:
+        files: |
+          build/${{ inputs.package }}-${{ steps.package.outputs.version }}-win64.zip
+          build/${{ inputs.package }}-${{ steps.package.outputs.version }}-win64-private.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+    - name: Notify slack
+      if: failure() && github.ref == 'refs/heads/master'
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 

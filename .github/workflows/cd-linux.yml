@@ -1,0 +1,71 @@
+on: 
+  workflow_call:
+    inputs:
+      name:
+        type: string
+        required: true
+      directory:
+        type: string
+        default: "."
+      repos:
+        type: string
+      package:
+        type: string
+        required: true
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    container: ${{ matrix.config.container }}
+    strategy:
+      matrix:
+        config:
+        - {container: "geodesolutions/ubuntu", system: "ubuntu", doc: true}
+        - {container: "geodesolutions/centos", system: "rhel", doc: false}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: Geode-solutions/actions/get-release@master
+      id: repos
+      with:
+        repository: ${{ inputs.repos }}
+        file: '-${{ matrix.config.system }}-private.tar.gz'
+        token: ${{ secrets.TOKEN }}
+    - name: Generate package
+      id: package
+      run: |
+        mkdir -p build
+        cd build
+        version="${GITHUB_REF##*/*/v}"
+        echo ::set-output name=version::$version
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
+        cmake --build . -- -j2
+        cpack -D CPACK_COMPONENTS_ALL="public;private" .
+        mv ${{ inputs.package }}-$version-${{ matrix.config.system }}.tar.gz ${{ inputs.package }}-$version-${{ matrix.config.system }}-private.tar.gz
+        cmake --build . --target package
+    - name: Upload
+      uses: geode-solutions/action-gh-release@master
+      with:
+        files: |
+          build/${{ inputs.package }}-${{ steps.package.outputs.version }}-${{ matrix.config.system }}.tar.gz
+          build/${{ inputs.package }}-${{ steps.package.outputs.version }}-${{ matrix.config.system }}-private.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+    - name: Doc
+      if: matrix.config.doc
+      run: curl -s https://raw.githubusercontent.com/Geode-solutions/actions/master/doc/doc.sh | bash -s -- ${GITHUB_WORKSPACE}/build/${{ inputs.directory }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+    - name: Notify slack
+      if: failure() && github.ref == 'refs/heads/master'
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 

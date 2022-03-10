@@ -1,0 +1,70 @@
+on: 
+  workflow_call:
+    inputs:
+      name:
+        type: string
+        required: true
+      directory:
+        type: string
+        default: "."
+      repos:
+        type: string
+      package:
+        type: string
+        required: true
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+      PYPI_TOKEN:
+        required: true
+
+jobs:
+  run:
+    runs-on: windows-2019
+    strategy:
+      matrix:
+        config:
+        - {python: "3.7", tag: "cp37-cp37m"}
+        - {python: "3.8", tag: "cp38-cp38"}
+        - {python: "3.9", tag: "cp39-cp39"}
+        - {python: "3.10", tag: "cp310-cp310"}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.config.python }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.config.python }}
+    - uses: Geode-solutions/actions/get-release@master
+      id: repos
+      with:
+        repository: ${{ inputs.repos }}
+        file: 'win64.zip'
+        token: ${{ secrets.TOKEN }}
+    - name: Compile
+      run: |
+        pip install wheel
+        choco install openssl
+        if(!(test-path build)) { mkdir build }
+        cd build
+        $version = ${env:GITHUB_REF} -replace 'refs\/tags\/v', ''
+        echo "::set-output name=version::$version"
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=win64 -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.config.python }} ..
+        cmake --build . --config Release
+        cd ${{ inputs.directory }}
+        cmake --build . --target wheel --config Release
+        mv wheel/dist/*.whl wheel/dist/${{ inputs.package }}-$version-${{ matrix.config.tag }}-win_amd64.whl
+    - name: PyPI
+      run: |
+        pip install twine
+        twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --skip-existing --verbose build/${{ inputs.directory }}/wheel/dist/*.whl
+    - name: Notify slack
+      if: failure() && github.ref == 'refs/heads/master'
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 

@@ -50,12 +50,10 @@ jobs:
         cd build
         $version = ${env:GITHUB_REF} -replace 'refs\/tags\/v', ''
         echo "::set-output name=version::$version"
-        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_PROJECT_VERSION:STRING=$version -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.config.python }} ..
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DWHEEL_VERSION:STRING=$version -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.config.python }} ..
         cmake --build . --config Release
         cd ${{ inputs.directory }}
         cmake --build . --target wheel --config Release
-        dir wheel/dist/
-        mv wheel/dist/*.whl wheel/dist/${{ inputs.package }}-$version-${{ matrix.config.tag }}-win_amd64.whl
     - name: PyPI
       run: |
         pip install twine

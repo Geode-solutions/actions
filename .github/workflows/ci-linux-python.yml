@@ -18,7 +18,7 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    container: "geodesolutions/centos"
+    container: "ghcr.io/geode-solutions/centos:master"
     strategy:
       matrix:
         config:

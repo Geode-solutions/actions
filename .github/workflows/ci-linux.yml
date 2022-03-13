@@ -19,8 +19,8 @@ jobs:
     strategy:
       matrix:
         config:
-        - {container: "geodesolutions/ubuntu", system: "ubuntu"}
-        - {container: "geodesolutions/centos", system: "rhel"}
+        - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu", lib: "lib"}
+        - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel", lib: "lib64"}
     steps:
     - uses: actions/checkout@v3
     - uses: Geode-solutions/actions/get-release@master
@@ -29,6 +29,13 @@ jobs:
         repository: ${{ inputs.repos }}
         file: '-${{ matrix.config.system }}-private.tar.gz'
         token: ${{ secrets.TOKEN }}
+    - name: Libraries
+      id: libraries
+      run: |
+        echo ${{ steps.repos.outputs.path }}
+        new_path=$(echo ${{ steps.repos.outputs.path }} | sed 's/\;/\/${{ matrix.config.lib }}\;/g')
+        echo $new_path
+        echo ::set-output name=path::$new_path
     - name: Compile
       run: |
         mkdir -p build

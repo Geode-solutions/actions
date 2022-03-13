@@ -1,0 +1,13 @@
+on: 
+  workflow_call:
+    secrets:
+      TOKEN:
+        required: true
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Geode-solutions/actions/public-release@master
+        with:
+          token: ${{ secrets.TOKEN }}

@@ -9,9 +9,6 @@ on:
         default: "."
       repos:
         type: string
-      package:
-        type: string
-        required: true
     secrets:
       TOKEN:
         required: true
@@ -25,8 +22,8 @@ jobs:
     strategy:
       matrix:
         config:
-        - {container: "geodesolutions/ubuntu", system: "ubuntu", doc: true}
-        - {container: "geodesolutions/centos", system: "rhel", doc: false}
+        - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu", doc: true}
+        - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel", doc: false}
     steps:
     - uses: actions/checkout@v3
     - uses: Geode-solutions/actions/get-release@master
@@ -36,7 +33,6 @@ jobs:
         file: '-${{ matrix.config.system }}-private.tar.gz'
         token: ${{ secrets.TOKEN }}
     - name: Generate package
-      id: package
       run: |
         mkdir -p build
         cd build
@@ -45,14 +41,12 @@ jobs:
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
         cmake --build . -- -j2
         cpack -D CPACK_COMPONENTS_ALL="public;private" .
-        mv ${{ inputs.package }}-$version-${{ matrix.config.system }}.tar.gz ${{ inputs.package }}-$version-${{ matrix.config.system }}-private.tar.gz
+        for i in *.tar.gz; do mv $i $(echo $i | sed 's/\.tar\.gz/\-private\.tar\.gz/g'); done
         cmake --build . --target package
     - name: Upload
       uses: geode-solutions/action-gh-release@master
       with:
-        files: |
-          build/${{ inputs.package }}-${{ steps.package.outputs.version }}-${{ matrix.config.system }}.tar.gz
-          build/${{ inputs.package }}-${{ steps.package.outputs.version }}-${{ matrix.config.system }}-private.tar.gz
+        files: build/*.tar.gz
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
     - name: Doc

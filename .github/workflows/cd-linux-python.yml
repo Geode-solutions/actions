@@ -9,9 +9,6 @@ on:
         default: "."
       repos:
         type: string
-      package:
-        type: string
-        required: true
     secrets:
       TOKEN:
         required: true
@@ -23,7 +20,7 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    container: "geodesolutions/centos"
+    container: "ghcr.io/geode-solutions/centos:master"
     strategy:
       matrix:
         config:
@@ -40,19 +37,17 @@ jobs:
         file: '-rhel-private.tar.gz'
         token: ${{ secrets.TOKEN }}
     - name: Compile
-      id: package
       run: |
         export PATH=/opt/python/${{ matrix.config.tag }}/bin:$PATH
         mkdir -p build
         cd build
         version="${GITHUB_REF##*/*/v}"
-        echo ::set-output name=version::$version
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.config.python }} -DWHEEL_VERSION:STRING=$version ..
         cmake --build . -- -j2
         cd ${{ inputs.directory }}
         cmake --build . --target wheel --config Release
-        auditwheel show wheel/dist/*.whl
-        auditwheel repair wheel/dist/*.whl
+        cd wheel/dist
+        rename linux manylinux2014 *.whl
     - name: PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
@@ -60,7 +55,7 @@ jobs:
         verbose: true
         user: __token__
         password: ${{ secrets.PYPI_TOKEN }}
-        packages_dir: "build/${{ inputs.directory }}/wheel/dist/"
+        packages_dir: "build/${{ inputs.directory }}/wheel/dist"
     - name: Notify slack
       if: failure() && github.ref == 'refs/heads/master'
       uses: 8398a7/action-slack@v3

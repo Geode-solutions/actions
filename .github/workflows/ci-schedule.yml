@@ -29,6 +29,11 @@ jobs:
         repository: ${{ inputs.repos }}
         file: '-${{ matrix.config.system }}-private.tar.gz'
         token: ${{ secrets.TOKEN }}
+    - name: Libraries
+      id: libraries
+      run: |
+        new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/${{ matrix.config.lib }}\:/g')
+        echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
     - name: Compile
       run: |
         mkdir -p build
@@ -68,6 +73,12 @@ jobs:
         repository: ${{ inputs.repos }}
         file: '-win64-private.zip'
         token: ${{ secrets.TOKEN }}
+    - name: Libraries
+      id: libraries
+      run: |
+        $old_path = "${{ steps.repos.outputs.path }}"
+        $new_path = $old_path.replace(";", "\bin;")
+        echo "$new_path" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
     - name: Compile & Test
       run: |
         pip install wheel

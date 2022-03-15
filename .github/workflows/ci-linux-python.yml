@@ -34,6 +34,11 @@ jobs:
         repository: ${{ inputs.repos }}
         file: '-rhel-private.tar.gz'
         token: ${{ secrets.TOKEN }}
+    - name: Libraries
+      id: libraries
+      run: |
+        new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/lib64\:/g')
+        echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
     - name: Compile
       run: |
         export PATH=/opt/python/${{ matrix.config.tag }}/bin:$PATH

@@ -40,6 +40,12 @@ jobs:
         repository: ${{ inputs.repos }}
         file: '-win64-private.zip'
         token: ${{ secrets.TOKEN }}
+    - name: Libraries
+      id: libraries
+      run: |
+        $old_path = "${{ steps.repos.outputs.path }}"
+        $new_path = $old_path.replace(";", "\bin;")
+        echo "$new_path" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
     - name: Compile & Test
       run: |
         pip install wheel

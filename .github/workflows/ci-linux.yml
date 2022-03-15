@@ -32,10 +32,8 @@ jobs:
     - name: Libraries
       id: libraries
       run: |
-        echo ${{ steps.repos.outputs.path }}
-        new_path=$(echo ${{ steps.repos.outputs.path }} | sed 's/\;/\/${{ matrix.config.lib }}\;/g')
-        echo $new_path
-        echo ::set-output name=path::$new_path
+        new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/${{ matrix.config.lib }}\:/g')
+        echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
     - name: Compile
       run: |
         mkdir -p build

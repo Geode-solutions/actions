@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const {Octokit} = require('@octokit/rest');
 const fs = require('fs');
+const path = require('path');
 const request = require('request');
 const unzipper = require('unzipper');
 const tar = require('tar');
@@ -21,7 +22,7 @@ try {
       let promise = new Promise(function(resolve) {
         console.log('Looking for repository:', repo);
         const outputFile = repo.concat(file);
-        
+
         const query = version ?
             octokit.repos.getReleaseByTag({owner, repo, tag: version}) :
             octokit.repos.getLatestRelease({owner, repo});
@@ -58,8 +59,8 @@ try {
                                 extract_name = extract_name.slice(0, -8);
                               }
                               console.log('Unzip to:', extract_name);
-                              const result = process.env.GITHUB_WORKSPACE +
-                                  '/' + extract_name;
+                              const result = path.join(
+                                  process.env.GITHUB_WORKSPACE, extract_name);
                               console.log('Result:', result);
                               fs.unlinkSync(outputFile);
                               resolve(result);
@@ -74,8 +75,8 @@ try {
                                 extract_name = extract_name.slice(0, -8);
                               }
                               console.log('Untar to:', extract_name);
-                              const result = process.env.GITHUB_WORKSPACE +
-                                  '/' + extract_name;
+                              const result = path.join(
+                                  process.env.GITHUB_WORKSPACE, extract_name);
                               console.log('Result:', result);
                               fs.unlinkSync(outputFile);
                               resolve(result);

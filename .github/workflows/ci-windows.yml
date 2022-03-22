@@ -17,17 +17,10 @@ on:
 
 jobs:
   run:
-    runs-on: ${{ matrix.image }}
+    runs-on: windows-2019
     strategy:
       matrix:
-        image: [windows-2019, windows-2022]
-        generator: ["Visual Studio 16 2019", "Visual Studio 17 2022"]
         python: ["3.7", "3.8", "3.9", "3.10"]
-        exclude:
-          - image: windows-2019
-            generator: "Visual Studio 17 2022"
-          - image: windows-2022
-            generator: "Visual Studio 16 2019"
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python }}
@@ -52,7 +45,7 @@ jobs:
         choco install openssl
         if(!(test-path build)) { mkdir build }
         cd build
-        cmake -G "${{ matrix.generator }}" -A x64 -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} ..
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} ..
         cmake --build . --config Debug
         cd ${{ inputs.directory }}
         ctest -C Debug --output-on-failure

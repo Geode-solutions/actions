@@ -81,6 +81,7 @@ jobs:
         echo "$new_path" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
     - name: Compile & Test
       run: |
+        echo $env:Path 
         pip install wheel
         choco install openssl
         if(!(test-path build)) { mkdir build }

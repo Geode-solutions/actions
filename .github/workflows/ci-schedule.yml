@@ -89,7 +89,7 @@ jobs:
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
         cmake --build . --config Release
         cd ${{ inputs.directory }}
-        ctest -C Release --output-on-failure
+        ctest -V -C Release --output-on-failure
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
     - name: Notify slack

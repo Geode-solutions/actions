@@ -19,8 +19,8 @@ jobs:
     strategy:
       matrix:
         config:
-        - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu"}
-        - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel"}
+        - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu", lib: "lib"}
+        - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel", lib: "lib64"}
     steps:
     - uses: actions/checkout@v3
     - uses: Geode-solutions/actions/get-release@master

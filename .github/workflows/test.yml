@@ -20,7 +20,6 @@ jobs:
       matrix:
         config:
         - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu", lib: "lib"}
-        - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel", lib: "lib64"}
     steps:
     - uses: actions/checkout@v3
     - uses: Geode-solutions/actions/get-release@master
@@ -48,6 +47,8 @@ jobs:
       if: ${{ failure() }}
       uses: mxschmitt/action-tmate@v3
       timeout-minutes: 15
+      with:
+        sudo: false
     - name: Test
       run: |
         mkdir -p test

@@ -38,6 +38,7 @@ jobs:
       run: |
         $old_path = "${{ steps.repos.outputs.path }}"
         $new_path = $old_path.replace(";", "\bin;")
+        echo "::set-output name=path::$new_path"
         echo "$new_path" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
     - name: Compile & Test
       run: |
@@ -48,6 +49,8 @@ jobs:
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} ..
         cmake --build . --config Debug
         cd ${{ inputs.directory }}
+        $paths = "${{ steps.libraries.outputs.path }}"
+        Foreach($path in $paths.split(";")){if(Test-Path -Path $path) {Copy-Item -Path $path\* -Destination bin\Debug}}
         ctest -C Debug --output-on-failure
         cmake --build . --target wheel --config Debug
       env:

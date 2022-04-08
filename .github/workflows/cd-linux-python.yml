@@ -62,7 +62,7 @@ jobs:
         password: ${{ secrets.PYPI_TOKEN }}
         packages_dir: "build/${{ inputs.directory }}/wheel/dist"
     - name: Notify slack
-      if: failure() && github.ref == 'refs/heads/master'
+      if: failure()
       uses: 8398a7/action-slack@v3
       with:
         status: failure

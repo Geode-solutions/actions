@@ -8,10 +8,9 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v2
       with:
         token: ${{ secrets.TOKEN }}
-        fetch-depth: 0
     - uses: Geode-solutions/actions/clang-format@master
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}

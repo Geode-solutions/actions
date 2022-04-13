@@ -3,13 +3,10 @@ set -e
 
 wget https://raw.githubusercontent.com/Geode-solutions/actions/master/clang-format/.clang-format -O .clang-format
 
-ls .git
-git --version
-git status
 files=$(find . \( -name "*.h" -o -name "*.cpp" \))
 clang-format-12 -style=file -i $files
-git status
 
+git config --global --add safe.directory /github/workspace
 changes=$(git diff)
 if [ -n "$changes" ]; then
     git config user.email $GITHUB_ACTOR@users.noreply.github.com

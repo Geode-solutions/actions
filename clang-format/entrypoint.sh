@@ -3,7 +3,7 @@ set -e
 
 wget https://raw.githubusercontent.com/Geode-solutions/actions/master/clang-format/.clang-format -O .clang-format
 pwd
-ls
+ls -a
 files=$(find . \( -name "*.h" -o -name "*.cpp" \))
 clang-format-12 -style=file -i $files
 

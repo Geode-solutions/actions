@@ -5,8 +5,10 @@ wget https://raw.githubusercontent.com/Geode-solutions/actions/master/clang-form
 
 ls .git
 git --version
+git status
 files=$(find . \( -name "*.h" -o -name "*.cpp" \))
 clang-format-12 -style=file -i $files
+git status
 
 changes=$(git diff)
 if [ -n "$changes" ]; then

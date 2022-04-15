@@ -12,6 +12,6 @@ jobs:
       with:
         persist-credentials: false
     - run: npx semantic-release
-      env:
+      env:      
         GH_TOKEN: ${{ secrets.TOKEN }}
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -33,8 +33,8 @@ BraceWrapping:
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Custom
 BreakBeforeTernaryOperators: true
-BreakConstructorInitializers: AfterColon
-BreakInheritanceList: AfterColon
+BreakConstructorInitializers: BeforeColon
+BreakInheritanceList: BeforeColon
 #BreakStringLiterals
 ColumnLimit: 80
 CommentPragmas: ''

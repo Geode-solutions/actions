@@ -1,6 +1,5 @@
 AccessModifierOffset: -4
 AlignAfterOpenBracket: DontAlign
-AlignArrayOfStructures: Right
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: Right
@@ -52,7 +51,7 @@ FixNamespaceComments: true
 #IncludeCategories: TODO
 #IncludeIsMainRegex (this option needs a newer clang version)
 IndentCaseLabels: true
-IndentPPDirectives: true
+IndentPPDirectives: AfterHash
 IndentWidth: 4
 IndentWrappedFunctionNames: true
 KeepEmptyLinesAtTheStartOfBlocks: false

@@ -17,7 +17,7 @@ AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: true
 BinPackArguments: true
-BinPackParameters: true
+BinPackParameters: false
 BraceWrapping:
     AfterClass: true
     AfterControlStatement: true
@@ -76,7 +76,7 @@ SpaceAfterTemplateKeyword: true
 SpaceBeforeAssignmentOperators: true
 SpaceBeforeCpp11BracedList: false
 SpaceBeforeCtorInitializerColon: false
-SpaceBeforeInheritanceColon: false
+SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: Never
 SpaceBeforeSquareBrackets: false
 SpaceInEmptyParentheses: false

@@ -49,6 +49,15 @@ jobs:
         for i in *.tar.gz; do mv $i $(echo $i | sed 's/\.tar\.gz/\-private\.tar\.gz/g'); done
         cmake --build . --target package
     - name: Upload
+      id: upload
+      continue-on-error: true
+      uses: geode-solutions/action-gh-release@master
+      with:
+        files: build/*.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+    - name: Upload2
+      if: steps.upload.outcome == 'failure'
       uses: geode-solutions/action-gh-release@master
       with:
         files: build/*.tar.gz

@@ -53,8 +53,8 @@ jobs:
       if: ${{ failure() }}
       timeout-minutes: 15
       with:
-        sudo: false
         install-dependencies: false
+        sudo: false
     - name: Notify slack
       if: failure() && github.ref == 'refs/heads/master'
       uses: 8398a7/action-slack@v3

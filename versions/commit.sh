@@ -10,8 +10,8 @@ if [ -n "$changes" ]; then
     echo $branch
     git checkout $branch
     git add --all
-    git commit -m "update versions"
-    git push https://$1:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY
+    git commit -m "Update versions"
+    git push https://$1:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY HEAD:$branch
     echo ::error::Format requirement is not satisfied
     exit 1
 fi

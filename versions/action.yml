@@ -8,18 +8,9 @@ inputs:
   repository:
     description: 'GitHub repository name'
     required: true
-  file:
-    description: 'regex of the file to download'
-    required: true
-  version:
-    description: 'Release version'
-    requiered: false
   token:
     description: 'Github token'
     required: true
-outputs:
-  path:
-    description: 'path of the extracted asset'
 runs:
   using: 'node16'
   main: 'index.js'

@@ -7,14 +7,11 @@ const child_process = require('child_process');
 const tar = require('tar');
 
 try {
-  // const repos = core.getInput('repository');
-  const repos = 'OpenGeode;Geode-Common_private';
+  const repos = core.getInput('repository');
   if (repos.length) {
     let results = [];
-    // const owner = core.getInput('owner', {required: true});
-    const owner = 'Geode-solutions';
-    // const token = core.getInput('token');
-    const token = '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';
+    const owner = core.getInput('owner', {required: true});
+    const token = core.getInput('token');
     const octokit = new Octokit({auth: token});
     repos.split(';').forEach(repo => {
       if (!repo.length) {

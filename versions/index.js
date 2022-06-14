@@ -2,9 +2,7 @@ const core = require('@actions/core');
 const {Octokit} = require('@octokit/rest');
 const fs = require('fs');
 const path = require('path');
-const request = require('request');
 const child_process = require('child_process');
-const tar = require('tar');
 
 try {
   const repos = core.getInput('repository');
@@ -43,7 +41,7 @@ try {
       fs.writeFile('versions.json', json, (err) => {
         if (err) throw err;
         console.log('The file has been saved!');
-        child_process.execSync("./commit.sh")
+        child_process.execSync(path.join(__dirname, 'commit.sh'))
       })
     })
   }

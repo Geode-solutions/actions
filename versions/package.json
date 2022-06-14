@@ -11,9 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "@actions/core": "^1.8.2",
-    "@octokit/rest": "^18.12.0",
-    "request": "^2.88.2",
-    "tar": "^6.1.11",
-    "unzipper": "^0.10.11"
+    "@octokit/rest": "^18.12.0"
   }
 }

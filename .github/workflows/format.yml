@@ -13,7 +13,7 @@ jobs:
         token: ${{ secrets.TOKEN }}
     - name: "Get file config"
       run: |
-        curl -H "Accept: application/vnd.github.VERSION.raw" https://api.github.com/repos/Geode-solutions/actions/contents/clang-format/.clang-format\?ref\=master > .clang-format
+        curl -H "Accept: application/vnd.github.VERSION.raw" https://api.github.com/repos/Geode-solutions/actions/contents/.clang-format\?ref\=master > .clang-format
     - uses: DoozyX/clang-format-lint-action@master
       with:
         extensions: 'h,cpp'

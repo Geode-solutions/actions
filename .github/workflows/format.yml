@@ -11,7 +11,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         token: ${{ secrets.TOKEN }}
-    - uses: DoozyX/clang-format-lint-action@v0
+    - uses: DoozyX/clang-format-lint-action@master
       with:
         extensions: 'h,cpp'
         clangFormatVersion: 14

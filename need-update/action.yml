@@ -1,0 +1,10 @@
+name: 'Need update dependencies'
+description: 'Need update dependencies'
+inputs: 
+  token:
+    description: 'Github token'
+    required: true
+runs:
+  using: 'node16'
+  main: 'index.js'
+

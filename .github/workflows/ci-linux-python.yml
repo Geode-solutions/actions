@@ -49,6 +49,7 @@ jobs:
         cd ${{ inputs.directory}}
         ctest --output-on-failure -R -py-
         cmake --build . --target wheel --config Debug
+        pip3 install wheel/dist/*.whl
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
     - name: Notify slack

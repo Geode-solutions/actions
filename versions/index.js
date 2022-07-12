@@ -1,9 +1,6 @@
 const core = require('@actions/core');
 const {Octokit} = require('@octokit/rest');
 const fs = require('fs');
-const path = require('path');
-const child_process = require('child_process');
-const {exit} = require('process');
 
 try {
   const repos = core.getInput('repository');
@@ -43,9 +40,6 @@ try {
           fs.writeFile('versions.json', json, (err) => {
             if (err) throw err;
             console.log('The file has been saved!');
-            const log =
-                child_process.execSync(path.join(__dirname, 'commit.sh'))
-            console.log(log.toString())
           })
         })
         .catch(error => core.setFailed(error))

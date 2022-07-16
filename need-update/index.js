@@ -13,7 +13,7 @@ try {
     .then(wf => {
       const conclusion = wf.data.workflow_runs[0].conclusion;
       console.log(conclusion);
-      core.setOutput('update', conclusion == 'success');
+      core.setOutput('update', conclusion == 'success'? 'true' :'false' );
     })
     .catch(error => core.setFailed(error));
 } catch (error) {

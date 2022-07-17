@@ -39,7 +39,7 @@ jobs:
         mkdir -p build
         cd build
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DINCLUDE_PYBIND11:BOOL=ON ..
-        cmake --build . -- -j2
+        cmake --build . -j 2
         cd ${{ inputs.directory }}        
         ctest --output-on-failure
       env:
@@ -49,7 +49,7 @@ jobs:
         mkdir -p test
         cd test
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
-        cmake --build . -- -j2
+        cmake --build . -j 2
         ctest --output-on-failure
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
@@ -87,7 +87,7 @@ jobs:
         if(!(test-path build)) { mkdir build }
         cd build
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
-        cmake --build . --config Release
+        cmake --build . --config Release -j 2
         cd ${{ inputs.directory }}
         $paths = "${{ steps.libraries.outputs.path }}"
         Foreach($path in $paths.split(";")){if(Test-Path -Path $path) {Copy-Item -Path $path\* -Destination bin\Release}}

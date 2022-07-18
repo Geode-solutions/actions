@@ -80,13 +80,11 @@ jobs:
         $new_path = $old_path.replace(";", "\bin;")
         echo "::set-output name=path::$new_path"
     - name: Cache
-      id: cache
       uses: actions/cache@v3
       with:
         path: "C:\\ProgramData\\chocolatey\\.chocolatey"
         key: ${{ runner.os }}-ssl
     - name: Install dependencies
-      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         choco install openssl -r --no-progress
     - name: Compile & Test

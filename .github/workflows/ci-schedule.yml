@@ -50,7 +50,7 @@ jobs:
         cd test
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
         cmake --build . -j 2
-        ctest --output-on-failure
+        ctest --output-on-failure -j 2
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
     - name: Notify slack
@@ -79,22 +79,26 @@ jobs:
         $old_path = "${{ steps.repos.outputs.path }}"
         $new_path = $old_path.replace(";", "\bin;")
         echo "::set-output name=path::$new_path"
+    - name: Cache
+      id: cache
+      uses: actions/cache@v3
+      with:
+        path: "C:\\ProgramData\\chocolatey\\.chocolatey"
+        key: ${{ runner.os }}-ssl
     - name: Install dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        pip install wheel
         choco install openssl -r --no-progress
-        pip show wheel
-        choco list --local-only --exact openssl --trace
     - name: Compile & Test
       run: |
-        if(!(test-path build)) { mkdir build }
+        mkdir build
         cd build
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
         cmake --build . --config Release -j 2
         cd ${{ inputs.directory }}
         $paths = "${{ steps.libraries.outputs.path }}"
         Foreach($path in $paths.split(";")){if(Test-Path -Path $path) {Copy-Item -Path $path\* -Destination bin\Release}}
-        ctest -V -C Release --output-on-failure
+        ctest -V -C Release --output-on-failure -j 2
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
     - name: Notify slack

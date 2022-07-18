@@ -46,11 +46,11 @@ jobs:
         if(!(test-path build)) { mkdir build }
         cd build
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} ..
-        cmake --build . --config Debug
+        cmake --build . --config Debug -j 2
         cd ${{ inputs.directory }}
         $paths = "${{ steps.libraries.outputs.path }}"
         Foreach($path in $paths.split(";")){if(Test-Path -Path $path) {Copy-Item -Path $path\* -Destination bin\Debug}}
-        ctest -C Debug --output-on-failure
+        ctest -C Debug --output-on-failure -j 2
         cmake --build . --target wheel --config Debug
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

@@ -33,7 +33,7 @@ jobs:
         mkdir -p build
         cd build
         cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
-        cmake --build . -- -j2
+        cmake --build . -j 2
     - name: Kcov
       run: curl -s https://raw.githubusercontent.com/Geode-solutions/actions/master/kcov.sh | bash -s -- ${GITHUB_WORKSPACE}/build/${{ inputs.directory }}/bin
     - uses: codecov/codecov-action@v2

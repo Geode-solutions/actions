@@ -48,7 +48,7 @@ jobs:
         cd build
         version="${GITHUB_REF##*/*/v}"
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.config.python }} -DWHEEL_VERSION:STRING=$version ..
-        cmake --build . -- -j2
+        cmake --build . -j 2
         cd ${{ inputs.directory }}
         cmake --build . --target wheel --config Release
         cd wheel/dist

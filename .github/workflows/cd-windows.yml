@@ -34,7 +34,7 @@ jobs:
         $version = ${env:GITHUB_REF} -replace 'refs\/tags\/v', ''
         echo "::set-output name=version::$version"
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=win64 ..
-        cmake --build . --config Release
+        cmake --build . --config Release -j 2
         cpack -D CPACK_COMPONENTS_ALL="public;private" -C Release .
         get-childitem *.zip | foreach { rename-item $_ $_.Name.Replace(".zip", "-private.zip") }
         cmake --build . --target PACKAGE --config Release

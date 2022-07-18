@@ -38,7 +38,7 @@ jobs:
         mkdir -p build
         cd build
         cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DINCLUDE_PYBIND11:BOOL=ON ..
-        cmake --build . -- -j2
+        cmake --build . -j 2
         cd ${{ inputs.directory }}        
         ctest --output-on-failure
       env:
@@ -54,7 +54,7 @@ jobs:
         mkdir -p test
         cd test
         cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
-        cmake --build . -- -j2
+        cmake --build . -j 2
         ctest --output-on-failure
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

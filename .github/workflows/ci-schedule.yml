@@ -79,20 +79,9 @@ jobs:
         $old_path = "${{ steps.repos.outputs.path }}"
         $new_path = $old_path.replace(";", "\bin;")
         echo "::set-output name=path::$new_path"
-    - name: Cache
-      uses: actions/cache@v3
-      with:
-        path: |
-          "C:\\ProgramData\\chocolatey\\.chocolatey"
-          "C:\\PROGRA~1\\OpenSSL-Win64"
-        key: ${{ runner.os }}-ssl
-    - name: Install dependencies
-      run: |
-        choco install openssl -r --no-progress
-        dir "C:\\ProgramData\\chocolatey\\.chocolatey"
-        dir "C:\\PROGRA~1\\OpenSSL-Win64"
     - name: Compile & Test
       run: |
+        choco install openssl -r --no-progress
         mkdir build
         cd build
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..

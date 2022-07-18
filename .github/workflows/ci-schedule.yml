@@ -83,6 +83,8 @@ jobs:
       run: |
         pip install wheel
         choco install openssl -r
+        pip show wheel
+        choco list --local-only --exact openssl --trace
     - name: Compile & Test
       run: |
         if(!(test-path build)) { mkdir build }

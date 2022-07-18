@@ -98,7 +98,7 @@ jobs:
         cd ${{ inputs.directory }}
         $paths = "${{ steps.libraries.outputs.path }}"
         Foreach($path in $paths.split(";")){if(Test-Path -Path $path) {Copy-Item -Path $path\* -Destination bin\Release}}
-        ctest -V -C Release --output-on-failure -j 2
+        ctest -C Release --output-on-failure -j 2
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
     - name: Notify slack

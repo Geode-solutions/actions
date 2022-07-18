@@ -79,11 +79,12 @@ jobs:
         $old_path = "${{ steps.repos.outputs.path }}"
         $new_path = $old_path.replace(";", "\bin;")
         echo "::set-output name=path::$new_path"
+    - name: Install dependencies
+      run: |
+        pip install wheel
+        choco install openssl -r
     - name: Compile & Test
       run: |
-        echo $env:Path 
-        pip install wheel
-        choco install openssl
         if(!(test-path build)) { mkdir build }
         cd build
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..

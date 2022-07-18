@@ -83,8 +83,8 @@ jobs:
       uses: actions/cache@v3
       with:
         path: |
-          "C:\\ProgramData\\chocolatey\\.chocolatey"
-          "C:\\Program Files\\OpenSSL-Win64"
+          "%ProgramData%\\chocolatey\\.chocolatey"
+          "%ProgramFiles%\\OpenSSL-Win64"
         key: ${{ runner.os }}-ssl
     - name: Install dependencies
       run: |

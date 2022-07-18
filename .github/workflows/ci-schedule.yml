@@ -83,12 +83,14 @@ jobs:
       uses: actions/cache@v3
       with:
         path: |
-          "%ProgramData%\\chocolatey\\.chocolatey"
-          "%ProgramFiles%\\OpenSSL-Win64"
+          "C:\\ProgramData\\chocolatey\\.chocolatey"
+          "C:\\PROGRA~1\\OpenSSL-Win64"
         key: ${{ runner.os }}-ssl
     - name: Install dependencies
       run: |
         choco install openssl -r --no-progress
+        dir "C:\\ProgramData\\chocolatey\\.chocolatey"
+        dir "C:\\PROGRA~1\\OpenSSL-Win64"
     - name: Compile & Test
       run: |
         mkdir build

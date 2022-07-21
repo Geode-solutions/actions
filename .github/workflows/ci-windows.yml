@@ -50,7 +50,8 @@ jobs:
         cd ${{ inputs.directory }}
         $paths = "${{ steps.libraries.outputs.path }}"
         Foreach($path in $paths.split(";")){if(Test-Path -Path $path) {Copy-Item -Path $path\* -Destination bin\Debug}}
-        ctest -C Debug --output-on-failure -j 2
+        dir bin\Debug
+        ctest -V -C Debug --output-on-failure -j 2
         cmake --build . --target wheel --config Debug
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

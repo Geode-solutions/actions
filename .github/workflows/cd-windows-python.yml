@@ -42,7 +42,7 @@ jobs:
     - name: Compile
       run: |
         pip install wheel
-        choco install openssl
+        choco install openssl -r --no-progress
         if(!(test-path build)) { mkdir build }
         cd build
         $version = ${env:GITHUB_REF} -replace 'refs\/tags\/v', ''

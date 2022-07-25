@@ -42,7 +42,7 @@ jobs:
     - name: Compile & Test
       run: |
         pip install wheel
-        choco install openssl
+        choco install openssl -r --no-progress
         if(!(test-path build)) { mkdir build }
         cd build
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} ..

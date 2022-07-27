@@ -4,6 +4,7 @@ on:
       TOKEN:
         required: true
       NPM_TOKEN:
+        required: false
 
 jobs:
   run:

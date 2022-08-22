@@ -8,23 +8,23 @@ const tar = require('tar');
 
 try {
   const repos = core.getInput('repository');
-  const owners = core.getInput('owner');
   if (repos.length) {
     let results = [];
     const file = core.getInput('file', {required: true});
     const version = core.getInput('version');
     const token = core.getInput('token');
     const octokit = new Octokit({auth: token});
-    const array_repos = repos.split(';')
-    const array_owners = owners.split(';')
-    for (let itr = 0; itr < array_repos.length; itr++){
-      const repo = array_repos[itr]
-      owner = array_owners[itr]
-      if (!repo.length) {
+    repos.split(';').forEach(owner_repo => {
+      if (!owner_repo.length) {
         return;
       }
-      if(!owner.length){
-        owner = array_owners[0]
+      const owner_repo_array = owner_repo.split('/')
+      owner = 'Geode-solutions'
+      repo = owner_repo_array[2]
+      if (!repo.length) {
+        repo = owner_repo_array[1]
+      } else {
+        owner = owner_repo_array[1]
       }
       let promise = new Promise(function(resolve) {
         console.log('Looking for repository:', repo);

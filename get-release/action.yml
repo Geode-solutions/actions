@@ -2,11 +2,11 @@ name: 'Download GitHub Release'
 description: 'Download Github Release'
 inputs: 
   owner:
-    description: 'GitHub owner name (user/organization)'
+    description: 'GitHub owner name (user/organization - several owners can be given separated by a ";")'
     default: 'Geode-solutions'
     requiered: false
   repository:
-    description: 'GitHub repository name'
+    description: 'GitHub repository name (several repos can be given separated by a ";")'
     required: true
   file:
     description: 'regex of the file to download'

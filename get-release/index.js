@@ -8,16 +8,23 @@ const tar = require('tar');
 
 try {
   const repos = core.getInput('repository');
+  const owners = core.getInput('owner');
   if (repos.length) {
     let results = [];
-    const owner = core.getInput('owner', {required: true});
     const file = core.getInput('file', {required: true});
     const version = core.getInput('version');
     const token = core.getInput('token');
     const octokit = new Octokit({auth: token});
-    repos.split(';').forEach(repo => {
+    const array_repos = repos.split(';')
+    const array_owners = owners.split(';')
+    for (let itr = 0; itr < array_repos.length; itr++){
+      const repo = array_repos[itr]
+      owner = array_owners[itr]
       if (!repo.length) {
         return;
+      }
+      if(!owner.length){
+        owner = array_owners[0]
       }
       let promise = new Promise(function(resolve) {
         console.log('Looking for repository:', repo);

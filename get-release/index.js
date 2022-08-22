@@ -10,14 +10,20 @@ try {
   const repos = core.getInput('repository');
   if (repos.length) {
     let results = [];
-    const owner = core.getInput('owner', {required: true});
     const file = core.getInput('file', {required: true});
     const version = core.getInput('version');
     const token = core.getInput('token');
     const octokit = new Octokit({auth: token});
-    repos.split(';').forEach(repo => {
-      if (!repo.length) {
+    repos.split(';').forEach(owner_repo => {
+      if (!owner_repo.length) {
         return;
+      }
+      const owner_repo_array = owner_repo.split('/')
+      let owner = 'Geode-solutions'
+      let repo = owner_repo_array[0]
+      if (owner_repo_array.length == 2) {
+        owner = owner_repo_array[0]
+        repo = owner_repo_array[1]
       }
       let promise = new Promise(function(resolve) {
         console.log('Looking for repository:', repo);

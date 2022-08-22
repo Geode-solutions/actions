@@ -19,8 +19,8 @@ try {
         return;
       }
       const owner_repo_array = owner_repo.split('/')
-      owner = 'Geode-solutions'
-      repo = owner_repo_array[0]
+      let owner = 'Geode-solutions'
+      let repo = owner_repo_array[0]
       if (owner_repo_array.length == 2) {
         owner = owner_repo_array[0]
         repo = owner_repo_array[1]

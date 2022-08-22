@@ -20,11 +20,10 @@ try {
       }
       const owner_repo_array = owner_repo.split('/')
       owner = 'Geode-solutions'
-      repo = owner_repo_array[2]
-      if (!repo.length) {
+      repo = owner_repo_array[0]
+      if (owner_repo_array.length == 2) {
+        owner = owner_repo_array[0]
         repo = owner_repo_array[1]
-      } else {
-        owner = owner_repo_array[1]
       }
       let promise = new Promise(function(resolve) {
         console.log('Looking for repository:', repo);

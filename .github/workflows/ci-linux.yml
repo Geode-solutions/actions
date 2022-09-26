@@ -19,8 +19,10 @@ jobs:
     strategy:
       matrix:
         config:
-        - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu", lib: "lib"}
-        - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel", lib: "lib64"}
+        - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu", lib: "lib", shared: "ON"}
+        - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel", lib: "lib64", shared: "ON"}
+        - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu-static", lib: "lib", shared: "OFF"}
+        - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel-static", lib: "lib64", shared: "OFF"}
     steps:
     - uses: actions/checkout@v3
     - uses: Geode-solutions/actions/get-release@master
@@ -38,7 +40,7 @@ jobs:
       run: |
         mkdir -p build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DINCLUDE_PYBIND11:BOOL=ON ..
+        cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
         cmake --build . -j 2
         cd ${{ inputs.directory }}        
         ctest --output-on-failure -j 2

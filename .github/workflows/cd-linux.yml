@@ -24,8 +24,8 @@ jobs:
         config:
         - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu", doc: true, lib: "lib", shared: "ON"}
         - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel", doc: false, lib: "lib64", shared: "ON"}
-        # - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu-static", doc: false, lib: "lib", shared: "OFF"}
-        # - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel-static", doc: false, lib: "lib64", shared: "OFF"}
+        - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu-static", doc: false, lib: "lib", shared: "OFF"}
+        - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel-static", doc: false, lib: "lib64", shared: "OFF"}
     steps:
     - uses: actions/checkout@v3
     - uses: Geode-solutions/actions/get-release@master

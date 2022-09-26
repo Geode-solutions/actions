@@ -54,7 +54,7 @@ jobs:
         cd wheel/dist
         rename linux manylinux2014 *.whl
     - name: PyPI
-      uses: pypa/gh-action-pypi-publish@master
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         skip_existing: true
         verbose: true

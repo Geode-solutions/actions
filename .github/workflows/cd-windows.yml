@@ -9,6 +9,9 @@ on:
         default: "."
       repos:
         type: string
+      repo:
+        type: string
+        default: ${{ github.repository }}
       extra:
         type: string
         default: ""
@@ -28,6 +31,8 @@ jobs:
         - {system: "win64-static", shared: "OFF"}
     steps:
     - uses: actions/checkout@v3
+      with:
+        repository: ${{ inputs.repo }}
     - uses: Geode-solutions/actions/get-release@master
       id: repos
       with:

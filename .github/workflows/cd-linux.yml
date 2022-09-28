@@ -9,6 +9,9 @@ on:
         default: "."
       repos:
         type: string
+      repo:
+        type: string
+        default: ${{ github.repository }}
       extra:
         type: string
         default: ""
@@ -31,6 +34,8 @@ jobs:
         - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel-static", doc: false, lib: "lib64", shared: "OFF"}
     steps:
     - uses: actions/checkout@v3
+      with:
+        repository: ${{ inputs.repo }}
     - uses: Geode-solutions/actions/get-release@master
       id: repos
       with:

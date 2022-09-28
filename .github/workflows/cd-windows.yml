@@ -31,7 +31,7 @@ jobs:
     - uses: Geode-solutions/actions/get-release@master
       id: repos
       with:
-        repository: ${{ inputs.repos }}
+        repository: ${{ inputs.repos }}
         file: '-${{ matrix.config.system }}-private.zip'
         token: ${{ secrets.TOKEN }}
     - name: Generate package
@@ -41,7 +41,7 @@ jobs:
         cd build
         $version = ${env:GITHUB_REF} -replace 'refs\/tags\/v', ''
         echo "::set-output name=version::$version"
-        cmake ${{ inputs.extra }} -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
+        cmake ${{ inputs.extra }} -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
         cmake --build . --config Release -j 2
         cpack -D CPACK_COMPONENTS_ALL="public;private" -C Release .
         get-childitem *.zip | foreach { rename-item $_ $_.Name.Replace(".zip", "-private.zip") }

@@ -43,6 +43,7 @@ jobs:
     - name: Generate package
       run: |
         choco install openssl -r --no-progress
+        if(!$?) { exit 1 }
         if(!(test-path build)) { mkdir build }
         cd build
         $version = ${env:GITHUB_REF} -replace 'refs\/tags\/v', ''

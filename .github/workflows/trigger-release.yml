@@ -1,0 +1,18 @@
+on:
+  workflow_call:
+    secrets:
+      TOKEN:
+        required: true
+
+jobs:     
+  release:
+    runs-on: ubuntu-latest
+    steps:    
+    - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.TOKEN }}
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        skip_dirty_check: true
+        commit_message: 'fix(Package): trigger new release'
+        commit_options: '--allow-empty'

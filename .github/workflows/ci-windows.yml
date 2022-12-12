@@ -22,6 +22,10 @@ jobs:
         - {system: "win64-static", shared: "OFF"}
     steps:
     - uses: actions/checkout@v3
+    - uses: actions/cache@v3
+      with:
+        path: build/third_party
+        key: ${{ runner.os }}-${{ matrix.config.system }}-${{ hashFiles('cmake/**.cmake') }}
     - uses: Geode-solutions/actions/get-release@master
       id: repos
       with:

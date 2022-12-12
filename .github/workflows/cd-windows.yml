@@ -53,7 +53,7 @@ jobs:
         get-childitem *.zip | foreach { rename-item $_ $_.Name.Replace(".zip", "-private.zip") }
         cmake --build . --target PACKAGE --config Release
     - name: Upload
-      run: gh release upload ${env:GITHUB_REF} build/*.zip
+      run: Get-ChildItem -Path "build" -Recurse -Filter *.zip | Foreach-Object { gh release upload ${env:GITHUB_REF} $_.FullName}
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
     - name: Notify slack

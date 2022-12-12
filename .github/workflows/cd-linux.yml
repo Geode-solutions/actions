@@ -59,7 +59,10 @@ jobs:
         for i in *.tar.gz; do mv $i $(echo $i | sed 's/\.tar\.gz/\-private\.tar\.gz/g'); done
         cmake --build . --target package
     - name: Upload
-      run: ls build/*.tar.gz | xargs gh release upload $GITHUB_REF 
+      run: |
+        echo $GITHUB_WORKSPACE
+        git config --global --add safe.directory $GITHUB_WORKSPACE
+        ls build/*.tar.gz | xargs gh release upload $GITHUB_REF 
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
     - name: Doc

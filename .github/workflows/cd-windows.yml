@@ -54,6 +54,7 @@ jobs:
         cmake --build . --target PACKAGE --config Release
     - name: Upload
       run: gh release upload ${env:GITHUB_REF} build/*.zip
+      env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
     - name: Notify slack
       if: failure()

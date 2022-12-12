@@ -30,7 +30,7 @@ jobs:
     - uses: Geode-solutions/actions/get-release@master
       id: repos
       with:
-        repository: ${{ inputs.repos }}
+        repository: ${{ inputs.repos }}
         file: '-${{ matrix.config.system }}-private.tar.gz'
         token: ${{ secrets.TOKEN }}
     - name: Libraries
@@ -44,7 +44,7 @@ jobs:
         cd build
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DINCLUDE_PYBIND11:BOOL=ON ..
         cmake --build . -j 2
-        cd ${{ inputs.directory }}        
+        cd ${{ inputs.directory }}        
         ctest --output-on-failure
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
@@ -52,7 +52,7 @@ jobs:
       run: |
         mkdir -p test
         cd test
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
         cmake --build . -j 2
         ctest --output-on-failure -j 2
       env:
@@ -78,7 +78,7 @@ jobs:
     - uses: Geode-solutions/actions/get-release@master
       id: repos
       with:
-        repository: ${{ inputs.repos }}
+        repository: ${{ inputs.repos }}
         file: '-win64-private.zip'
         token: ${{ secrets.TOKEN }}
     - name: Libraries
@@ -86,7 +86,7 @@ jobs:
       run: |
         $old_path = "${{ steps.repos.outputs.path }}"
         $new_path = $old_path.replace(";", "\bin;")
-        echo "::set-output name=path::$new_path"
+        echo "path=$new_path" >> $GITHUB_OUTPUT
     - name: Compile & Test
       run: |
         choco install openssl -r --no-progress

@@ -34,7 +34,7 @@ jobs:
     - uses: Geode-solutions/actions/get-release@master
       id: repos
       with:
-        repository: ${{ inputs.repos }}
+        repository: ${{ inputs.repos }}
         file: '-win64-private.zip'
         token: ${{ secrets.TOKEN }}
     - name: Libraries
@@ -42,7 +42,7 @@ jobs:
       run: |
         $old_path = "${{ steps.repos.outputs.path }}"
         $new_path = $old_path.replace(";", "\bin;")
-        echo "::set-output name=path::$new_path"
+        echo "path=$new_path" >> $GITHUB_OUTPUT
     - name: Compile & Test
       run: |
         pip install wheel

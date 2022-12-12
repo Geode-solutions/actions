@@ -33,7 +33,7 @@ jobs:
     - uses: Geode-solutions/actions/get-release@master
       id: repos
       with:
-        repository: ${{ inputs.repos }}
+        repository: ${{ inputs.repos }}
         file: '-rhel-private.tar.gz'
         token: ${{ secrets.TOKEN }}
     - name: Libraries
@@ -47,9 +47,9 @@ jobs:
         mkdir -p build
         cd build
         version="${GITHUB_REF##*/*/v}"
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.config.python }} -DWHEEL_VERSION:STRING=$version ..
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.config.python }} -DWHEEL_VERSION:STRING=$version ..
         cmake --build . -j 2
-        cd ${{ inputs.directory }}
+        cd ${{ inputs.directory }}
         cmake --build . --target wheel --config Release
         cd wheel/dist
         rename linux manylinux2014 *.whl
@@ -60,7 +60,7 @@ jobs:
         verbose: true
         user: __token__
         password: ${{ secrets.PYPI_TOKEN }}
-        packages_dir: "build/${{ inputs.directory }}/wheel/dist"
+        packages_dir: "build/${{ inputs.directory }}/wheel/dist"
     - name: Notify slack
       if: failure()
       uses: 8398a7/action-slack@v3

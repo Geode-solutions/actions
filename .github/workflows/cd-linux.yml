@@ -60,9 +60,8 @@ jobs:
         cmake --build . --target package
     - name: Upload
       run: |
-        echo $GITHUB_WORKSPACE
         git config --global --add safe.directory $GITHUB_WORKSPACE
-        ls build/*.tar.gz | xargs gh release upload $GITHUB_REF 
+        ls build/*.tar.gz | xargs gh release upload $GITHUB_REF_NAME 
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
     - name: Doc

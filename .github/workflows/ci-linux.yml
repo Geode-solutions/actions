@@ -25,6 +25,10 @@ jobs:
         - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel-static", lib: "lib64", shared: "OFF"}
     steps:
     - uses: actions/checkout@v3
+    - uses: actions/cache@v3
+      with:
+        path: build/third_party
+        key: ${{ runner.os }}-${{ matrix.config.system }}-${{ hashFiles('cmake/**.cmake') }}
     - uses: Geode-solutions/actions/get-release@master
       id: repos
       with:

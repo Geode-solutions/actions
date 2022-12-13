@@ -61,7 +61,7 @@ jobs:
     - name: Upload
       run: |
         git config --global --add safe.directory $GITHUB_WORKSPACE
-        ls build/*.tar.gz | xargs gh release upload $GITHUB_REF_NAME 
+        ls build/*.tar.gz | xargs gh release upload --clobber $GITHUB_REF_NAME 
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
     - name: Doc

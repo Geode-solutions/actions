@@ -61,7 +61,11 @@ jobs:
     - name: Upload
       run: |
         git config --global --add safe.directory $GITHUB_WORKSPACE
-        ls build/*.tar.gz | xargs gh release upload --clobber $GITHUB_REF_NAME 
+        files="build/*.tar.gz"
+        for file in $files
+        do
+          for i in 1 2 3 4 5; do gh release upload --clobber $GITHUB_REF_NAME $file && break || sleep 15; done
+        done
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
     - name: Doc

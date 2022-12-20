@@ -37,7 +37,7 @@ jobs:
       run: |
         $old_path = "${{ steps.repos.outputs.path }}"
         $new_path = $old_path.replace(";", "\bin;")
-        echo "path=$new_path" >> $GITHUB_OUTPUT
+        echo "path=$new_path\n" >> $GITHUB_OUTPUT
     - name: Compile & Test
       run: |
         choco install openssl -r --no-progress
@@ -48,6 +48,7 @@ jobs:
         cmake --build . --config Debug -j 2
         cd ${{ inputs.directory }}
         $paths = "${{ steps.libraries.outputs.path }}"
+        echo $paths
         Foreach($path in $paths.split(";")){if(Test-Path -Path $path) {Copy-Item -Path $path\* -Destination bin\Debug}}
         dir bin\Debug
         ctest -C Debug --output-on-failure -j 2

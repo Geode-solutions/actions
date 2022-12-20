@@ -86,7 +86,7 @@ jobs:
       run: |
         $old_path = "${{ steps.repos.outputs.path }}"
         $new_path = $old_path.replace(";", "\bin;")
-        echo "path=$new_path" >> $GITHUB_OUTPUT
+        echo "path=$new_path" >> $env:GITHUB_OUTPUT
     - name: Compile & Test
       run: |
         choco install openssl -r --no-progress

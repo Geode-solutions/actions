@@ -54,7 +54,7 @@ jobs:
         cmake --build . --target PACKAGE --config Release
     - name: Upload
       run: |
-        Get-ChildItem -Path "build" -Filter *.zip | Foreach-Object { gh release upload --clobber ${env:GITHUB_REF_NAME} $_.FullName }
+        Get-ChildItem -Path "build" -Filter *.zip | Foreach-Object { gh release upload --clobber --repo ${env:GITHUB_REPOSITORY} ${env:GITHUB_REF_NAME} $_.FullName }
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
     - name: Notify slack

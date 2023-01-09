@@ -66,7 +66,7 @@ jobs:
         for file in $files
         do
           echo $file
-          for i in 1 2 3 4 5; do gh release upload --clobber $GITHUB_REF_NAME $file && break || sleep 15; done
+          for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY $GITHUB_REF_NAME $file && break || sleep 15; done
         done
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}

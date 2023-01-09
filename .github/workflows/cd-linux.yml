@@ -62,8 +62,10 @@ jobs:
       run: |
         git config --global --add safe.directory $GITHUB_WORKSPACE
         files="build/*.tar.gz"
+        echo $GITHUB_REF_NAME
         for file in $files
         do
+          echo $file
           for i in 1 2 3 4 5; do gh release upload --clobber $GITHUB_REF_NAME $file && break || sleep 15; done
         done
       env:

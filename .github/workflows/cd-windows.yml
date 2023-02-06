@@ -15,6 +15,9 @@ on:
       extra:
         type: string
         default: ""
+      config:
+        type: string
+        default: "Release"
     secrets:
       TOKEN:
         required: true
@@ -48,10 +51,10 @@ jobs:
         cd build
         $version = ${env:GITHUB_REF} -replace 'refs\/tags\/v', ''
         cmake ${{ inputs.extra }} -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
-        cmake --build . --config Release -j 2
-        cpack -D CPACK_COMPONENTS_ALL="public;private" -C Release .
+        cmake --build . --config ${{ inputs.config }} -j 2
+        cpack -D CPACK_COMPONENTS_ALL="public;private" -C ${{ inputs.config }} .
         get-childitem *.zip | foreach { rename-item $_ $_.Name.Replace(".zip", "-private.zip") }
-        cmake --build . --target PACKAGE --config Release
+        cmake --build . --target PACKAGE --config ${{ inputs.config }}
     - name: Upload
       run: |
         Get-ChildItem -Path "build" -Filter *.zip | Foreach-Object { gh release upload --clobber --repo ${env:GITHUB_REPOSITORY} ${env:GITHUB_REF_NAME} $_.FullName }

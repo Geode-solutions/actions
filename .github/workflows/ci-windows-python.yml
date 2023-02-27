@@ -28,7 +28,7 @@ jobs:
         path: build/third_party
         key: ${{ runner.os }}-win64-${{ hashFiles('cmake/**.cmake') }}
     - name: Set up Python ${{ matrix.python }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python }}
     - uses: Geode-solutions/actions/get-release@master

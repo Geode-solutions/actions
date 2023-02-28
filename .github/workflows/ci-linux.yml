@@ -44,6 +44,10 @@ jobs:
       run: |
         mkdir -p build
         cd build
+        (while true; do 
+        df -h /__w
+        sleep 15
+        done) &
         cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
         cmake --build . -j 2
         cd ${{ inputs.directory }}

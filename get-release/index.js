@@ -55,7 +55,7 @@ try {
                       const extension = outputFile.split('.').pop();
                       console.log('Extension:', extension);
                       if (extension == 'zip') {
-                        console.log('Unzipping');
+                        console.log('Unzipping', asset.name);
                         fs.createReadStream(outputFile)
                             .pipe(unzipper.Extract(
                                 {path: process.env.GITHUB_WORKSPACE}))
@@ -72,7 +72,7 @@ try {
                               resolve(result);
                             });
                       } else if (extension == 'gz') {
-                        console.log('Untaring');
+                        console.log('Untaring', asset.name);
                         fs.createReadStream(outputFile)
                             .pipe(tar.x())
                             .on('close', function() {

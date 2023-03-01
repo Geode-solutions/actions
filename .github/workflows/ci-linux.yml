@@ -45,8 +45,9 @@ jobs:
         mkdir -p build
         cd build
         cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
-        cmake --build . -j 2
+        cmake --build . -t third_party -j 2
         cd ${{ inputs.directory }}
+        cmake --build . -t essential -j 2
         ctest --output-on-failure -j 2
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
@@ -56,7 +57,11 @@ jobs:
         mkdir -p test
         cd test
         cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
-        cmake --build . -j 2
+        if ["{{ matrix.config.shared }}" == "ON"]; then 
+          cmake --build . -j 2
+        else
+          cmake --build . -t essential -j 2
+        fi
         ctest --output-on-failure -j 2
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

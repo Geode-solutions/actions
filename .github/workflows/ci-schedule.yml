@@ -6,6 +6,9 @@ on:
         default: "."
       repos:
         type: string
+      toto:
+        type: string
+        default: ${{ github.repository }}
     secrets:
       TOKEN:
         required: true
@@ -36,6 +39,7 @@ jobs:
     - name: Libraries
       id: libraries
       run: |
+        echo "toto ${{ inputs.toto }}"
         new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/${{ matrix.config.lib }}\:/g')
         echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
     - name: Compile

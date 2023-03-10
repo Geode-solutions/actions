@@ -28,6 +28,8 @@ jobs:
         - {python: "3.9", tag: "cp39-cp39"}
         - {python: "3.10", tag: "cp310-cp310"}
     steps:
+    - name: Support longpaths
+      run: git config --system core.longpaths true
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.config.python }}
       uses: actions/setup-python@v4

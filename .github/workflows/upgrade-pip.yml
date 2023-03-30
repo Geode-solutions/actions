@@ -14,7 +14,9 @@ jobs:
     - name: "pip-compile"
       run: |
         file=bindings/python/requirements.in
-        if [ ! -f "$file" ]; then exit 0 fi
+        if [ ! -f "$file" ]; then 
+          exit 0
+        fi
         pip install pip-tools
         pip-compile --upgrade $file
         sed -i -E 's/==(.+)\.(.+)\.(.+)/>=\1*,==\1\.\2\.\3/' bindings/python/requirements.txt

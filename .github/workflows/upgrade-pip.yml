@@ -19,7 +19,7 @@ jobs:
         fi
         pip install pip-tools
         pip-compile --upgrade $file
-        sed -i -E 's/==(.+)\.(.+)\.(.+)/>=\1*,==\1\.\2\.\3/' bindings/python/requirements.txt
+        sed -i -E 's/==(.+)\.(.+)\.(.+)/==\1*,>=\1\.\2\.\3/' bindings/python/requirements.txt
     - uses: stefanzweifel/git-auto-commit-action@v4
       id: commit
       with:

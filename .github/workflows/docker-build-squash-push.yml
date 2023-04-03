@@ -1,7 +1,10 @@
 on: 
     workflow_call:
       inputs:
-        repo_name:
+        image_name:
+          type: string
+          required: true
+        tag:
           type: string
           required: true
       secrets:
@@ -23,12 +26,12 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Build Docker image
-      run: docker build --rm -f "Dockerfile" -t ghcr.io/geode-solutions/{{$repo_name}} "."
+      run: docker build --rm -f "Dockerfile" -t ghcr.io/geode-solutions/{{$image_name}}:{{$tag}} "."
     - name: Squash Docker image
       run: |
         pip install docker-squash
-        docker-squash ghcr.io/{{$repo_name}} -t ghcr.io/geode-solutions/{{$repo_name}}
+        docker-squash ghcr.io/{{$image_name}}:{{$tag}} -t ghcr.io/geode-solutions/{{$image_name}}:{{$tag}}
     - name: Push Docker image to ghcr.io
-      run: docker push ghcr.io/{{$repo_name}}
+      run: docker push ghcr.io/geode-solutions/{{$image_name}}:{{$tag}}
 
     

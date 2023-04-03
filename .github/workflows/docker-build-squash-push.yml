@@ -1,0 +1,34 @@
+on: 
+    workflow_call:
+      inputs:
+        repo_name:
+          type: string
+          required: true
+      secrets:
+        GITHUB_TOKEN:
+          required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        lfs: True
+    - name: GithubPackages Login
+      uses: docker/login-action@v2.1.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Build Docker image
+      run: docker build --rm -f "Dockerfile" -t ghcr.io/geode-solutions/{{$repo_name}} "."
+    - name: Squash Docker image
+      run: |
+        pip install docker-squash
+        docker-squash ghcr.io/{{$repo_name}} -t ghcr.io/geode-solutions/{{$repo_name}}
+    - name: Push Docker image to ghcr.io
+      run: docker push ghcr.io/{{$repo_name}}
+
+    

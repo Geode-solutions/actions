@@ -48,6 +48,10 @@ jobs:
     - name: Compile
       run: |
         export PATH=/opt/python/${{ matrix.config.tag }}/bin:$PATH
+        requirements="bindings/python/requirements.txt"
+        if [-f "$requirements" ]; then 
+          pip install -r $requirements
+        fi
         mkdir -p build
         cd build
         cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.config.python }} ..

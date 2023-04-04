@@ -18,6 +18,8 @@ jobs:
           echo "inputs.branch_from : ${{ inputs.branch_from }}"
           echo "github.base_ref ${{ github.base_ref }}"
           echo "inputs.branch_to ${{ inputs.branch_to }}"
+          echo "github.head_ref != inputs.branch_from ${{ github.head_ref }} != ${{ inputs.branch_from }}"
+          echo "github.base_ref == inputs.branch_to ${{ github.base_ref }} == ${{ inputs.branch_to }}"
       - name: Check branch
         if: github.head_ref != ${{ inputs.branch_from }} && github.base_ref == ${{ inputs.branch_to }}
         run: |

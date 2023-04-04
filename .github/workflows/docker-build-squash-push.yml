@@ -1,15 +1,15 @@
 on: 
-    workflow_call:
-      inputs:
-        image_name:
-          type: string
-          required: true
-        tag:
-          type: string
-          required: true
-      secrets:
-        TOKEN:
-          required: true
+  workflow_call:
+    inputs:
+      image_name:
+        type: string
+        required: true
+      tag:
+        type: string
+        required: true
+    secrets:
+      TOKEN:
+        required: true
 
 jobs:
   build:

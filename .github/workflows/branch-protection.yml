@@ -1,0 +1,19 @@
+on:
+  workflow_call:
+    inputs:
+      branch_from:
+        type: string
+        required: true
+      branch_to:
+        type: string
+        required: true
+
+jobs:
+  check_branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch
+        if: github.head_ref != ${{ inputs.branch_from }} && github.base_ref == ${{ inputs.branch_to }}
+        run: |
+          echo "ERROR: You can only merge to ${{ inputs.branch_to }} from ${{ inputs.branch_from }}."
+          exit 1

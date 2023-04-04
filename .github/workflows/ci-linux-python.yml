@@ -49,7 +49,7 @@ jobs:
       run: |
         export PATH=/opt/python/${{ matrix.config.tag }}/bin:$PATH
         requirements="bindings/python/requirements.txt"
-        if [-f "$requirements" ]; then 
+        if [ -f "$requirements" ]; then 
           pip install -r $requirements
         fi
         mkdir -p build

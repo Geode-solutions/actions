@@ -36,7 +36,7 @@ jobs:
         cmake --build . -j 2
     - name: Kcov
       run: curl -s https://raw.githubusercontent.com/Geode-solutions/actions/master/kcov.sh | bash -s -- ${GITHUB_WORKSPACE}/build/${{ inputs.directory }}/bin
-    - uses: codecov/codecov-action@v2
+    - uses: codecov/codecov-action@v3
       with: 
         token: ${{ secrets.CODECOV_TOKEN }}
         file: kcov/kcov-merged/cobertura.xml

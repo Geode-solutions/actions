@@ -38,8 +38,12 @@ jobs:
         $old_path = "${{ steps.repos.outputs.path }}"
         $new_path = $old_path.replace(";", "\bin;")
         echo "path=$new_path" >> $env:GITHUB_OUTPUT
+        Foreach($path in $new_path.split(";")){
+          echo "$path" >> $env:GITHUB_PATH
+        }
     - name: Compile & Test
       run: |
+        echo $PATH
         choco install openssl -r --no-progress
         if(!$?) { exit 1 }
         if(!(test-path build)) { mkdir build }

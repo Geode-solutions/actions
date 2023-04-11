@@ -36,15 +36,12 @@ jobs:
       id: libraries
       run: |
         $old_path = "${{ steps.repos.outputs.path }}"
-        $new_path = $old_path.replace(";", "\bin;")
-        echo "path=$new_path" >> $env:GITHUB_OUTPUT
-        Foreach($path in $new_path.split(";")){
-          echo "$path" >> $env:GITHUB_PATH
-          echo $path
-        }
+        $bin_path = $old_path.replace(";", "\bin;")
+        echo "bin=$bin_path" >> $env:GITHUB_OUTPUT
+        $share_path = $old_path.replace(";", "\share;")
+        echo "share=$share_path" >> $env:GITHUB_OUTPUT
     - name: Compile & Test
       run: |
-        echo $env:PATH
         choco install openssl -r --no-progress
         if(!$?) { exit 1 }
         if(!(test-path build)) { mkdir build }
@@ -52,9 +49,20 @@ jobs:
         cmake -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
         cmake --build . --config Debug -j 2
         cd ${{ inputs.directory }}
-        $paths = "${{ steps.libraries.outputs.path }}"
+        $paths = "${{ steps.libraries.outputs.bin }}"
         echo $paths
-        Foreach($path in $paths.split(";")){if(Test-Path -Path $path) {Copy-Item -Path $path\* -Destination bin\Debug}}
+        Foreach($path in $paths.split(";")){
+          if(Test-Path -Path $path) {
+            Copy-Item -Path $path\* -Destination bin\Debug
+          }
+        }
+        $shares = "${{ steps.libraries.outputs.share }}"
+        echo $shares
+        Foreach($share in $shares.split(";")){
+          if(Test-Path -Path $share) {
+            Copy-Item -Path $share -Destination bin\Debug -Recurse
+          }
+        }
         dir bin\Debug
         ctest -C Debug --output-on-failure -j 2
       env:

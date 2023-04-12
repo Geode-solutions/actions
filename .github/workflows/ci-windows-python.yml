@@ -72,7 +72,6 @@ jobs:
         }
         ctest -C Debug --output-on-failure -R -py- -j 2
         cmake --build . --target wheel --config Debug
-        pip install wheel/dist/*.whl
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
     - name: Notify slack

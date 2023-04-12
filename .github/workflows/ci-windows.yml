@@ -53,17 +53,16 @@ jobs:
         echo $paths
         Foreach($path in $paths.split(";")){
           if(Test-Path -Path $path) {
-            Copy-Item -Path $path\* -Destination bin\Debug
+            Copy-Item -Path $path\* -Destination bin\Debug -Verbose
           }
         }
         $shares = "${{ steps.libraries.outputs.share }}"
         echo $shares
         Foreach($share in $shares.split(";")){
           if(Test-Path -Path $share) {
-            Copy-Item -Path $share -Destination bin\Debug -Recurse
+            Copy-Item -Path $share -Destination bin -Recurse -Verbose
           }
         }
-        dir bin\Debug
         ctest -C Debug --output-on-failure -j 2
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

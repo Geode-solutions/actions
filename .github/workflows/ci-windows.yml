@@ -53,14 +53,14 @@ jobs:
         echo $paths
         Foreach($path in $paths.split(";")){
           if(Test-Path -Path $path) {
-            Copy-Item -Path $path\* -Destination bin\Debug -Verbose
+            Copy-Item -Path $path\* -Destination bin\Debug
           }
         }
         $shares = "${{ steps.libraries.outputs.share }}"
         echo $shares
         Foreach($share in $shares.split(";")){
           if(Test-Path -Path $share) {
-            Copy-Item -Path $share -Destination bin -Recurse -Verbose
+            Copy-Item -Path $share -Destination bin -Recurse
           }
         }
         ctest -C Debug --output-on-failure -j 2

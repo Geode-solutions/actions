@@ -30,7 +30,7 @@ jobs:
     - uses: actions/cache/restore@v3
       with:
         path: build/third_party
-        key: ${{ runner.os }}-win64-${{ hashFiles('cmake/**.cmake') }}
+        key: ${{ runner.os }}-win64-${{ hashFiles('cmake/Configure**.cmake') }}
     - name: Set up Python ${{ matrix.python }}
       uses: actions/setup-python@v4
       with:

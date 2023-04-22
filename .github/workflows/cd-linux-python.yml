@@ -33,7 +33,7 @@ jobs:
     - uses: actions/cache/restore@v3
       with:
         path: build/third_party
-        key: ${{ runner.os }}-rhel-${{ hashFiles('cmake/**.cmake') }}
+        key: ${{ runner.os }}-rhel-${{ hashFiles('cmake/Configure**.cmake') }}
     - uses: Geode-solutions/actions/get-release@master
       id: repos
       with:

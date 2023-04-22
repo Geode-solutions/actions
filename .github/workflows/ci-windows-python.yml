@@ -23,10 +23,14 @@ jobs:
         python: ["3.7", "3.8", "3.9", "3.10"]
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/cache@v3
+    # - uses: actions/cache@v3
+    #   with:
+    #     path: C:\ProgramData\chocolatey
+    #     key: ${{ runner.os }}-chocolatey
+    - uses: actions/cache/restore@v3
       with:
-        path: C:\ProgramData\chocolatey
-        key: ${{ runner.os }}-chocolatey
+        path: build/third_party
+        key: ${{ runner.os }}-win64-${{ hashFiles('cmake/**.cmake') }}
     - name: Set up Python ${{ matrix.python }}
       uses: actions/setup-python@v4
       with:

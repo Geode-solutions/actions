@@ -26,7 +26,7 @@ jobs:
         - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel", lib: "lib64"}
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/cache@v3
+    - uses: actions/cache/restore@v3
       with:
         path: build/third_party
         key: ${{ runner.os }}-${{ matrix.config.system }}-${{ hashFiles('cmake/**.cmake') }}
@@ -75,7 +75,7 @@ jobs:
     runs-on: windows-2019
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/cache@v3
+    - uses: actions/cache/restore@v3
       with:
         path: build/third_party
         key: ${{ runner.os }}-win64-${{ hashFiles('cmake/**.cmake') }}

@@ -29,6 +29,10 @@ jobs:
         - {python: "3.10", tag: "cp310-cp310"}
     steps:
     - uses: actions/checkout@v3
+    - uses: actions/cache/restore@v3
+      with:
+        path: build/third_party
+        key: ${{ runner.os }}-win64-${{ hashFiles('cmake/**.cmake') }}
     - name: Set up Python ${{ matrix.config.python }}
       uses: actions/setup-python@v4
       with:

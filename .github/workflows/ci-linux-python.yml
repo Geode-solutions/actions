@@ -53,7 +53,7 @@ jobs:
         mkdir -p build
         cd build
         cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.config.python }} ..
-        cmake --build . -j 2
+        cmake --build .
         cd ${{ inputs.directory}}
         ctest --output-on-failure -R -py- -j 2
         cmake --build . --target wheel

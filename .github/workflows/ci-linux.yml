@@ -45,10 +45,10 @@ jobs:
         mkdir -p build
         cd build
         cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
-        cmake --build . -t third_party -j 2
+        cmake --build . -t third_party
         cd ${{ inputs.directory }}
-        cmake --build . -t essential -j 2
-        cmake --build . -t install -j 2
+        cmake --build . -t essential
+        cmake --build . -t install
         ctest --output-on-failure -j 2 -L essential
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
@@ -59,10 +59,10 @@ jobs:
         cd test
         cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
         if [ "${{ matrix.config.shared }}" = "ON" ]; then 
-          cmake --build . -j 2
+          cmake --build .
           ctest --output-on-failure -j 2
         else
-          cmake --build . -t essential -j 2
+          cmake --build . -t essential
           ctest --output-on-failure -j 2 -L essential
         fi
       env:

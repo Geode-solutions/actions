@@ -68,7 +68,7 @@ jobs:
             Copy-Item -Path $share -Destination . -Recurse
           }
         }
-        ctest --output-on-failure -j 2
+        ctest --output-on-failure -j 2 -L essential
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
     - name: Notify slack

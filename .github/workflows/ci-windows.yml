@@ -52,7 +52,7 @@ jobs:
         cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
         cmake --build . -t third_party
         cd ${{ inputs.directory }}
-        cmake --build . -t essential -j 1
+        cmake --build . -t essential -j 2
         cmake --build . -t install
         $paths = "${{ steps.libraries.outputs.bin }}"
         echo $paths

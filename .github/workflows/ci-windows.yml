@@ -50,8 +50,10 @@ jobs:
         if(!(test-path build)) { mkdir build }
         cd build
         cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
-        cmake --build . -j 2
+        cmake --build . -t third_party
         cd ${{ inputs.directory }}
+        cmake --build . -t essential
+        cmake --build . -t install
         $paths = "${{ steps.libraries.outputs.bin }}"
         echo $paths
         Foreach($path in $paths.split(";")){

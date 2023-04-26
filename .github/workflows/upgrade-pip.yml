@@ -1,9 +1,9 @@
 on: 
   workflow_call:
     inputs:
-      file:
+      directory:
         type: string
-        default: "bindings/python/requirements.in"
+        default: "bindings/python"
     secrets:
       TOKEN:
         required: true
@@ -17,12 +17,13 @@ jobs:
         token: ${{ secrets.TOKEN }}
     - name: "pip-compile"
       run: |
-        if [ ! -f "${{ inputs.file }}" ]; then 
+        file=${{ inputs.directory }}/requirements.in
+        if [ ! -f "$file" ]; then 
           exit 0
         fi
         pip install pip-tools
-        pip-compile --upgrade $${{ inputs.file }}
-        sed -i -E 's/==(.+)\.(.+)\.(.+)/==\1\.*,>=\1\.\2\.\3/' bindings/python/requirements.txt
+        pip-compile --upgrade $file
+        sed -i -E 's/==(.+)\.(.+)\.(.+)/==\1\.*,>=\1\.\2\.\3/' ${{ inputs.directory }}/requirements.txt
     - uses: stefanzweifel/git-auto-commit-action@v4
       id: commit
       with:

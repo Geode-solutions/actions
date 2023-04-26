@@ -63,6 +63,7 @@ jobs:
         cpack -D CPACK_COMPONENTS_ALL="public;private"
         get-childitem *.zip | foreach { rename-item $_ $_.Name.Replace(".zip", "-private.zip") }
         cmake --build . --target package
+        Remove-Item -Recurse -Force _CPack_Packages
     - name: Upload
       run: |
         Get-ChildItem -Path "build/${{ inputs.directory }}" -Filter *.zip | Foreach-Object { gh release upload --clobber --repo ${env:GITHUB_REPOSITORY} ${env:GITHUB_REF_NAME} $_.FullName }

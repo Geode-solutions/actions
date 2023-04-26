@@ -59,7 +59,6 @@ jobs:
         $version = ${env:GITHUB_REF} -replace 'refs\/tags\/v', ''
         cmake ${{ inputs.extra }} -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.config }} -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
         cmake --build .
-        Remove-Item -Recurse -Force third_party
         cd ${{ inputs.directory }}
         cpack -D CPACK_COMPONENTS_ALL="public;private"
         get-childitem *.zip | foreach { rename-item $_ $_.Name.Replace(".zip", "-private.zip") }

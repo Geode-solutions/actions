@@ -83,7 +83,7 @@ jobs:
         }
         ctest --output-on-failure -R -py- -j 2
         cmake --build . --target wheel
-        #cmake --build . --target test-wheel
+        cmake --build . --target test-wheel
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
     - name: Notify slack

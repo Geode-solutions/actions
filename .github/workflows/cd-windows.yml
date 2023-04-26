@@ -47,6 +47,9 @@ jobs:
         repository: ${{ inputs.repos }}
         file: '-${{ matrix.config.system }}-private.zip'
         token: ${{ secrets.TOKEN }}
+    - uses: TheMrMilchmann/setup-msvc-dev@v2
+      with:
+        arch: x64
     - name: Generate package
       run: |
         choco install openssl -r --no-progress
@@ -54,12 +57,12 @@ jobs:
         if(!(test-path build)) { mkdir build }
         cd build
         $version = ${env:GITHUB_REF} -replace 'refs\/tags\/v', ''
-        cmake ${{ inputs.extra }} -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
-        cmake --build . --config ${{ inputs.config }} -j 2
+        cmake ${{ inputs.extra }} -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.config }} -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
+        cmake --build .
         cd ${{ inputs.directory }}
-        cpack -D CPACK_COMPONENTS_ALL="public;private" -C ${{ inputs.config }} .
+        cpack -D CPACK_COMPONENTS_ALL="public;private"
         get-childitem *.zip | foreach { rename-item $_ $_.Name.Replace(".zip", "-private.zip") }
-        cmake --build . --target PACKAGE --config ${{ inputs.config }}
+        cmake --build . --target PACKAGE
     - name: Upload
       run: |
         Get-ChildItem -Path "build/${{ inputs.directory }}" -Filter *.zip | Foreach-Object { gh release upload --clobber --repo ${env:GITHUB_REPOSITORY} ${env:GITHUB_REF_NAME} $_.FullName }

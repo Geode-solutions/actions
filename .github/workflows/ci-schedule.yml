@@ -46,18 +46,18 @@ jobs:
       run: |
         mkdir -p build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DINCLUDE_PYBIND11:BOOL=ON ..
-        cmake --build . -j 2
-        cd ${{ inputs.directory }}        
-        ctest --output-on-failure
+        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DINCLUDE_PYBIND11:BOOL=ON ..
+        cmake --build .
+        cd ${{ inputs.directory }}
+        ctest --output-on-failure -j 2
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
     - name: Test
       run: |
         mkdir -p test
         cd test
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
-        cmake --build . -j 2
+        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
+        cmake --build .
         ctest --output-on-failure -j 2
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
@@ -85,6 +85,9 @@ jobs:
         repository: ${{ inputs.repos }}
         file: '-win64-private.zip'
         token: ${{ secrets.TOKEN }}
+    - uses: TheMrMilchmann/setup-msvc-dev@v2
+      with:
+        arch: x64
     - name: Libraries
       id: libraries
       run: |
@@ -99,8 +102,8 @@ jobs:
         if(!$?) { exit 1 }
         if(!(test-path build)) { mkdir build }
         cd build
-        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
-        cmake --build . --config Release -j 2
+        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+        cmake --build .
         cd ${{ inputs.directory }}
         $paths = "${{ steps.libraries.outputs.bin }}"
         echo $paths
@@ -113,10 +116,10 @@ jobs:
         echo $shares
         Foreach($share in $shares.split(";")){
           if(Test-Path -Path $share) {
-            Copy-Item -Path $share -Destination bin -Recurse
+            Copy-Item -Path $share -Destination . -Recurse
           }
         }
-        ctest -C Release --output-on-failure -j 2
+        ctest --output-on-failure -j 2
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
     - name: Notify slack

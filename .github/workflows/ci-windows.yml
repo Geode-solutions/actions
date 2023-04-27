@@ -61,7 +61,6 @@ jobs:
             Copy-Item -Path $path\* -Destination bin
           }
         }
-        mkdir share
         $shares = "${{ steps.libraries.outputs.share }}"
         echo $shares
         Foreach($share in $shares.split(";")){

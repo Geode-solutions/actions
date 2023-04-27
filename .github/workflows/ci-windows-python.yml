@@ -74,11 +74,11 @@ jobs:
             Copy-Item -Path $path\* -Destination bin
           }
         }
-        mkdir share
         $shares = "${{ steps.libraries.outputs.share }}"
         echo $shares
         Foreach($share in $shares.split(";")){
           if(Test-Path -Path $share) {
+            echo $share
             Copy-Item -Path $share\* -Destination share -Recurse
           }
         }

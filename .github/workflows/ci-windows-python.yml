@@ -74,11 +74,12 @@ jobs:
             Copy-Item -Path $path\* -Destination bin
           }
         }
+        mkdir share
         $shares = "${{ steps.libraries.outputs.share }}"
         echo $shares
         Foreach($share in $shares.split(";")){
           if(Test-Path -Path $share) {
-            Copy-Item -Path $share -Destination . -Recurse
+            Copy-Item -Path $share\* -Destination share -Recurse
           }
         }
         ctest --output-on-failure -R -py- -j 2

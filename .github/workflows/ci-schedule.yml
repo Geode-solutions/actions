@@ -109,7 +109,7 @@ jobs:
         echo $paths
         Foreach($path in $paths.split(";")){
           if(Test-Path -Path $path) {
-            Copy-Item -Path $path\* -Destination bin\Release
+            Copy-Item -Path $path\* -Destination bin
           }
         }
         if(!(test-path share)) { 

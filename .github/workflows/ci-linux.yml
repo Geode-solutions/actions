@@ -39,7 +39,7 @@ jobs:
         file: '-${{ matrix.config.system }}-private.tar.gz'
         token: ${{ secrets.TOKEN }}
         version: ${{ inputs.branch }}
-      - name: Libraries
+    - name: Libraries
       id: libraries
       run: |
         new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/${{ matrix.config.lib }}\:/g')

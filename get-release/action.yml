@@ -9,7 +9,7 @@ inputs:
     required: true
   version:
     description: 'Release version'
-    default: 'latest'
+    default: 'master'
   token:
     description: 'Github token'
     required: true

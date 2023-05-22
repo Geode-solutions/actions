@@ -36,7 +36,7 @@ jobs:
         file: '-${{ matrix.config.system }}-private.zip'
         token: ${{ secrets.TOKEN }}
         version: ${{ inputs.branch }}
-      - name: Libraries
+    - name: Libraries
       id: libraries
       run: |
         $old_path = "${{ steps.repos.outputs.path }}"

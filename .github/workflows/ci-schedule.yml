@@ -6,9 +6,9 @@ on:
         default: "."
       repos:
         type: string
-      toto:
+      branch:
         type: string
-        default: ${{ github.repository }}
+        default: "master"
     secrets:
       TOKEN:
         required: true
@@ -26,6 +26,8 @@ jobs:
         - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel", lib: "lib64"}
     steps:
     - uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.branch }}
     - uses: actions/cache/restore@v3
       with:
         path: build/third_party
@@ -39,7 +41,6 @@ jobs:
     - name: Libraries
       id: libraries
       run: |
-        echo "toto ${{ inputs.toto }}"
         new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/${{ matrix.config.lib }}\:/g')
         echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
     - name: Compile

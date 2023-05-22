@@ -9,6 +9,9 @@ on:
         default: "."
       repos:
         type: string
+      branch:
+        type: string
+        default: "master"
     secrets:
       TOKEN:
         required: true
@@ -38,7 +41,8 @@ jobs:
         repository: ${{ inputs.repos }}
         file: '-rhel-private.tar.gz'
         token: ${{ secrets.TOKEN }}
-    - name: Libraries
+        version: ${{ inputs.branch }}
+      - name: Libraries
       id: libraries
       run: |
         new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/lib64\:/g')

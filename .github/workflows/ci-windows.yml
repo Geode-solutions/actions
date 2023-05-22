@@ -6,6 +6,9 @@ on:
         default: "."
       repos:
         type: string
+      branch:
+        type: string
+        default: "master"
     secrets:
       TOKEN:
         required: true
@@ -32,7 +35,8 @@ jobs:
         repository: ${{ inputs.repos }}
         file: '-${{ matrix.config.system }}-private.zip'
         token: ${{ secrets.TOKEN }}
-    - name: Libraries
+        version: ${{ inputs.branch }}
+      - name: Libraries
       id: libraries
       run: |
         $old_path = "${{ steps.repos.outputs.path }}"

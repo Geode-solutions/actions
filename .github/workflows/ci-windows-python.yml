@@ -9,6 +9,9 @@ on:
         default: "."
       repos:
         type: string
+      branch:
+        type: string
+        default: "master"
     secrets:
       TOKEN:
         required: true
@@ -23,10 +26,6 @@ jobs:
         python: ["3.8", "3.9", "3.10", "3.11"]
     steps:
     - uses: actions/checkout@v3
-    # - uses: actions/cache@v3
-    #   with:
-    #     path: C:\ProgramData\chocolatey
-    #     key: ${{ runner.os }}-chocolatey
     - uses: actions/cache/restore@v3
       with:
         path: build/third_party
@@ -41,6 +40,7 @@ jobs:
         repository: ${{ inputs.repos }}
         file: '-win64-private.zip'
         token: ${{ secrets.TOKEN }}
+        version: ${{ inputs.branch }}
     - name: Libraries
       id: libraries
       run: |

@@ -29,7 +29,7 @@ try {
         console.log('Looking for repository:', repo);
         const outputFile = repo.concat(file);
 
-        const query = version ?
+        const query = version !== 'latest' ?
             octokit.repos.getReleaseByTag({owner, repo, tag: version}) :
             octokit.repos.getLatestRelease({owner, repo});
         query.then(release => {

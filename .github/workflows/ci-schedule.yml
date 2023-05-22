@@ -76,6 +76,8 @@ jobs:
     runs-on: windows-2019
     steps:
     - uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.branch }}
     - uses: actions/cache/restore@v3
       with:
         path: build/third_party

@@ -31,7 +31,9 @@ try {
 
         const query = version === 'master' ?
           octokit.repos.getLatestRelease({ owner, repo }) :
-          octokit.repos.listReleases({ owner, repo }).then(releases => releases[0]);
+          octokit.repos.listReleases({ owner, repo }).then(releases => {
+            console.log(releases); return releases[0];
+          });
         query.then(release => {
           console.log(release);
           const release_id = release.data.id;

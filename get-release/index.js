@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const {Octokit} = require('@octokit/rest');
+const { Octokit } = require('@octokit/rest');
 const fs = require('fs');
 const path = require('path');
 const request = require('request');
@@ -10,10 +10,10 @@ try {
   const repos = core.getInput('repository');
   if (repos.length) {
     let results = [];
-    const file = core.getInput('file', {required: true});
+    const file = core.getInput('file', { required: true });
     const version = core.getInput('version');
     const token = core.getInput('token');
-    const octokit = new Octokit({auth: token});
+    const octokit = new Octokit({ auth: token });
     repos.split(';').forEach(owner_repo => {
       if (!owner_repo.length) {
         return;
@@ -25,71 +25,71 @@ try {
         owner = owner_repo_array[0]
         repo = owner_repo_array[1]
       }
-      let promise = new Promise(function(resolve) {
+      let promise = new Promise(function (resolve) {
         console.log('Looking for repository:', repo);
         const outputFile = repo.concat(file);
 
-        const query = version !== 'master' ?
-            octokit.repos.getReleaseByTag({owner, repo, tag: version}) :
-            octokit.repos.getLatestRelease({owner, repo});
+        const query = version === 'master' ?
+          octokit.repos.getLatestRelease({ owner, repo }) :
+          octokit.repos.listReleases({ owner, repo }).then(releases => releases[0]);
         query.then(release => {
           console.log(release);
           const release_id = release.data.id;
-          octokit.repos.listReleaseAssets({owner, repo, release_id})
-              .then(assets => {
-                console.log(assets);
-                const asset =
-                    assets.data.find(asset => asset.name.includes(file));
-                console.log('Asset name:', asset.name);
-                request({
-                  url: asset.url,
-                  method: 'GET',
-                  headers: {
-                    accept: 'application/octet-stream',
-                    Authorization: 'Bearer ' + token,
-                    'User-Agent': ''
+          octokit.repos.listReleaseAssets({ owner, repo, release_id })
+            .then(assets => {
+              console.log(assets);
+              const asset =
+                assets.data.find(asset => asset.name.includes(file));
+              console.log('Asset name:', asset.name);
+              request({
+                url: asset.url,
+                method: 'GET',
+                headers: {
+                  accept: 'application/octet-stream',
+                  Authorization: 'Bearer ' + token,
+                  'User-Agent': ''
+                }
+              })
+                .pipe(fs.createWriteStream(outputFile))
+                .on('finish', function () {
+                  const extension = outputFile.split('.').pop();
+                  console.log('Extension:', extension);
+                  if (extension == 'zip') {
+                    console.log('Unzipping', asset.name);
+                    fs.createReadStream(outputFile)
+                      .pipe(unzipper.Extract(
+                        { path: process.env.GITHUB_WORKSPACE }))
+                      .on('close', function () {
+                        let extract_name = asset.name.slice(0, -4);
+                        if (extract_name.endsWith('-private')) {
+                          extract_name = extract_name.slice(0, -8);
+                        }
+                        console.log('Unzip to:', extract_name);
+                        const result = path.join(
+                          process.env.GITHUB_WORKSPACE, extract_name);
+                        console.log('Result:', result);
+                        fs.unlinkSync(outputFile);
+                        resolve(result);
+                      });
+                  } else if (extension == 'gz') {
+                    console.log('Untaring', asset.name);
+                    fs.createReadStream(outputFile)
+                      .pipe(tar.x())
+                      .on('close', function () {
+                        let extract_name = asset.name.slice(0, -7);
+                        if (extract_name.endsWith('-private')) {
+                          extract_name = extract_name.slice(0, -8);
+                        }
+                        console.log('Untar to:', extract_name);
+                        const result = path.join(
+                          process.env.GITHUB_WORKSPACE, extract_name);
+                        console.log('Result:', result);
+                        fs.unlinkSync(outputFile);
+                        resolve(result);
+                      });
                   }
-                })
-                    .pipe(fs.createWriteStream(outputFile))
-                    .on('finish', function() {
-                      const extension = outputFile.split('.').pop();
-                      console.log('Extension:', extension);
-                      if (extension == 'zip') {
-                        console.log('Unzipping', asset.name);
-                        fs.createReadStream(outputFile)
-                            .pipe(unzipper.Extract(
-                                {path: process.env.GITHUB_WORKSPACE}))
-                            .on('close', function() {
-                              let extract_name = asset.name.slice(0, -4);
-                              if (extract_name.endsWith('-private')) {
-                                extract_name = extract_name.slice(0, -8);
-                              }
-                              console.log('Unzip to:', extract_name);
-                              const result = path.join(
-                                  process.env.GITHUB_WORKSPACE, extract_name);
-                              console.log('Result:', result);
-                              fs.unlinkSync(outputFile);
-                              resolve(result);
-                            });
-                      } else if (extension == 'gz') {
-                        console.log('Untaring', asset.name);
-                        fs.createReadStream(outputFile)
-                            .pipe(tar.x())
-                            .on('close', function() {
-                              let extract_name = asset.name.slice(0, -7);
-                              if (extract_name.endsWith('-private')) {
-                                extract_name = extract_name.slice(0, -8);
-                              }
-                              console.log('Untar to:', extract_name);
-                              const result = path.join(
-                                  process.env.GITHUB_WORKSPACE, extract_name);
-                              console.log('Result:', result);
-                              fs.unlinkSync(outputFile);
-                              resolve(result);
-                            });
-                      }
-                    });
-              });
+                });
+            });
         });
       });
       results.push(promise);

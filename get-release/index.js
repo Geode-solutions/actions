@@ -5,6 +5,7 @@ const path = require('path');
 const request = require('request');
 const unzipper = require('unzipper');
 const tar = require('tar');
+const { release } = require('os');
 
 try {
   const repos = core.getInput('repository');
@@ -30,13 +31,9 @@ try {
         const outputFile = repo.concat(file);
 
         const query = version === 'master' ?
-          octokit.repos.getLatestRelease({ owner, repo }) :
-          octokit.repos.listReleases({ owner, repo }).then(releases => {
-            console.log(releases); return releases[0];
-          });
-        query.then(release => {
-          console.log(release);
-          const release_id = release.data.id;
+          octokit.repos.getLatestRelease({ owner, repo }).then(release => release.data.id) :
+          octokit.repos.listReleases({ owner, repo }).then(releases => releases.data[0].id);
+        query.then(release_id => {
           octokit.repos.listReleaseAssets({ owner, repo, release_id })
             .then(assets => {
               console.log(assets);

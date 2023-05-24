@@ -5,7 +5,6 @@ const path = require('path');
 const request = require('request');
 const unzipper = require('unzipper');
 const tar = require('tar');
-const { release } = require('os');
 
 try {
   const repos = core.getInput('repository');

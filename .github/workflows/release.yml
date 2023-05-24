@@ -4,6 +4,9 @@ on:
       new_release:
         description: "Whether a new release was published"
         value: ${{ jobs.run.outputs.new_release }}
+      new_version:
+        description: "The new version number"
+        value: ${{ jobs.run.outputs.new_version }}
     secrets:
       TOKEN:
         required: true
@@ -15,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       new_release: ${{ steps.semantic.outputs.new_release_published }}
+      new_version: ${{ steps.semantic.outputs.new_release_version }}
     steps:
     - uses: actions/checkout@v3
       with:

@@ -4,7 +4,7 @@ import { Octokit } from '@octokit/rest'
 const main = async () => {
   try {
     const ref = 'next' //core.getInput('version')
-    const token = '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'// core.getInput('token')
+    const token = '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'// core.getInput('token')
     const octokit = new Octokit({ auth: token })
     const owner = 'Geode-solutions'
 

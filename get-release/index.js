@@ -1,4 +1,5 @@
 const core = require('@actions/core');
+const github = require('@actions/github');
 const { Octokit } = require('@octokit/rest');
 const fs = require('fs');
 const path = require('path');
@@ -8,6 +9,7 @@ const tar = require('tar');
 
 try {
   const repos = core.getInput('repository');
+  console.log("toto", github)
   if (repos.length) {
     let results = [];
     const file = core.getInput('file', { required: true });

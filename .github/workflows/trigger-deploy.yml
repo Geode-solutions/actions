@@ -28,6 +28,7 @@ jobs:
     steps:
       - uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.TOKEN }}
           script: |
             github.rest.actions.createWorkflowDispatch({
               owner: 'Geode-solutions',

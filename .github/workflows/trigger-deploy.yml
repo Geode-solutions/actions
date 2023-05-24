@@ -34,5 +34,5 @@ jobs:
               repo: 'Versions',
               workflow_id: 'deploy.yml',
               ref: 'master',
-              inputs: { branch: next }
+              inputs: { branch: 'next' }
             })

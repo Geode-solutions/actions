@@ -1,0 +1,45 @@
+on: 
+  workflow_call:
+    inputs:
+      directory:
+        type: string
+        default: "bindings/python"
+    secrets:
+      TOKEN:
+        required: true
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Cancel Previous Runs
+      uses: styfle/cancel-workflow-action@main
+      with:
+        access_token: ${{ secrets.TOKEN }}
+    - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.TOKEN }}
+    - name: "pip-compile"
+      run: |
+        file=${{ inputs.directory }}/requirements.in
+        if [ ! -f "$file" ]; then 
+          exit 0
+        fi
+        pip install pip-tools
+        pip-compile --upgrade $file
+        sed -i -E 's/==(.+)\.(.+)\.(.+)/==\1\.*,>=\1\.\2\.\3/' ${{ inputs.directory }}/requirements.txt
+    - name: "Get file config"
+      run: |
+        curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.clang-format\?ref\=master > .clang-format
+    - uses: DoozyX/clang-format-lint-action@master
+      with:
+        extensions: 'h,cpp'
+        clangFormatVersion: 16
+        inplace: True
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      id: commit
+      with:
+        commit_message: Apply format changes
+    - name: "Run if changes have been detected"
+      if: steps.commit.outputs.changes_detected == 'true'
+      run: exit 1

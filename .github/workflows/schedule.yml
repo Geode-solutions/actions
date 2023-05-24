@@ -1,0 +1,142 @@
+on: 
+  workflow_call:
+    inputs:
+      directory:
+        type: string
+        default: "."
+      repos:
+        type: string
+      branch:
+        type: string
+        default: "master"
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    container: ${{ matrix.config.container }}
+    strategy:
+      matrix:
+        config:
+        - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu", lib: "lib"}
+        - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel", lib: "lib64"}
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.TOKEN }}
+        ref: ${{ inputs.branch }}
+    - uses: actions/cache/restore@v3
+      with:
+        path: build/third_party
+        key: ${{ runner.os }}-${{ matrix.config.system }}-${{ hashFiles('cmake/Configure**.cmake') }}
+    - uses: Geode-solutions/actions/get-release@master
+      id: repos
+      with:
+        repository: ${{ inputs.repos }}
+        file: '-${{ matrix.config.system }}-private.tar.gz'
+        token: ${{ secrets.TOKEN }}
+    - name: Libraries
+      id: libraries
+      run: |
+        new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/${{ matrix.config.lib }}\:/g')
+        echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
+    - name: Compile
+      run: |
+        mkdir -p build
+        cd build
+        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DINCLUDE_PYBIND11:BOOL=ON ..
+        cmake --build .
+        cd ${{ inputs.directory }}
+        ctest --output-on-failure -j 2
+      env:
+        GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+    - name: Test
+      run: |
+        mkdir -p test
+        cd test
+        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
+        cmake --build .
+        ctest --output-on-failure -j 2
+      env:
+        GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+    - name: Notify slack
+      if: failure() && github.ref == 'refs/heads/master'
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
+
+  windows:  
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.TOKEN }}
+        ref: ${{ inputs.branch }}
+    - uses: actions/cache/restore@v3
+      with:
+        path: build/third_party
+        key: ${{ runner.os }}-win64-${{ hashFiles('cmake/Configure**.cmake') }}
+    - uses: Geode-solutions/actions/get-release@master
+      id: repos
+      with:
+        repository: ${{ inputs.repos }}
+        file: '-win64-private.zip'
+        token: ${{ secrets.TOKEN }}
+    - uses: TheMrMilchmann/setup-msvc-dev@v2
+      with:
+        arch: x64
+    - name: Libraries
+      id: libraries
+      run: |
+        $old_path = "${{ steps.repos.outputs.path }}"
+        $bin_path = $old_path.replace(";", "\bin;")
+        echo "bin=$bin_path" >> $env:GITHUB_OUTPUT
+        $share_path = $old_path.replace(";", "\share;")
+        echo "share=$share_path" >> $env:GITHUB_OUTPUT
+    - name: Compile & Test
+      run: |
+        choco install openssl -r --no-progress
+        if(!$?) { exit 1 }
+        if(!(test-path build)) { mkdir build }
+        cd build
+        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+        cmake --build .
+        cd ${{ inputs.directory }}
+        $paths = "${{ steps.libraries.outputs.bin }}"
+        echo $paths
+        Foreach($path in $paths.split(";")){
+          if(Test-Path -Path $path) {
+            Copy-Item -Path $path\* -Destination bin
+          }
+        }
+        if(!(test-path share)) { 
+          mkdir share
+        }
+        $shares = "${{ steps.libraries.outputs.share }}"
+        echo $shares
+        Foreach($share in $shares.split(";")){
+          if(Test-Path -Path $share) {
+            Copy-Item -Path $share\* -Destination share -Recurse
+          }
+        }
+        ctest --output-on-failure -j 2
+      env:
+        GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+    - name: Notify slack
+      if: failure()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
+      

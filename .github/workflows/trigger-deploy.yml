@@ -24,7 +24,7 @@ jobs:
   trigger:
     runs-on: ubuntu-latest
     needs: semantic-release
-    if: needs.semantic-release.outputs.new_release
+    if: needs.semantic-release.outputs.new_release == 'true'
     steps:
       - uses: actions/github-script@v6
         with:
@@ -33,6 +33,6 @@ jobs:
               owner: 'Geode-solutions',
               repo: 'Versions',
               workflow_id: 'deploy.yml',
-              ref: 'master'
-              inputs: {branch: next}
+              ref: 'master',
+              inputs: { branch: next }
             })

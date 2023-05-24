@@ -19,7 +19,6 @@ jobs:
   test-linux:
     uses: Geode-solutions/actions/.github/workflows/test-linux.yml@master
     with:
-      name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
     secrets: inherit
@@ -35,7 +34,6 @@ jobs:
   test-windows:
     uses: Geode-solutions/actions/.github/workflows/test-windows.yml@master
     with:
-      name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
     secrets: inherit

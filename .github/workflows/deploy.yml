@@ -1,0 +1,38 @@
+on:
+  workflow_call:
+    inputs:
+      name:
+        type: string
+        required: true
+      directory:
+        type: string
+        default: "."
+      repos:
+        type: string
+      repo:
+        type: string
+        default: ${{ github.repository }}
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+      PYPI_TOKEN:
+        required: true
+
+jobs:
+  semantic-release:
+    uses: Geode-solutions/actions/.github/workflows/release.yml@master
+    secrets: inherit
+
+  deploy-repository:
+    needs: semantic-release
+    if: ${{ needs.semantic-release.outputs.new_release }} == 'true'
+    uses: Geode-solutions/actions/.github/workflows/deploy-repository.yml@master
+    with:
+      name: ${{ inputs.name }}
+      directory: ${{ inputs.directory }}
+      repo: ${{ inputs.repo }}
+      repos: ${{ inputs.repos }}
+      version: ${{ needs.semantic-release.outputs.new_release_version }}
+    secrets: inherit

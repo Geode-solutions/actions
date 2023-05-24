@@ -22,6 +22,8 @@ jobs:
         - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu", lib: "lib"}
     steps:
     - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.TOKEN }}
     - uses: Geode-solutions/actions/get-release@master
       id: repos
       with:

@@ -12,6 +12,9 @@ on:
       repo:
         type: string
         default: ${{ github.repository }}
+      version:
+        type: string
+        required: true
     secrets:
       TOKEN:
         required: true
@@ -31,8 +34,6 @@ jobs:
         - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel-static", doc: false, lib: "lib64", shared: "OFF"}
     steps:
     - uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.TOKEN }}
       with:
         repository: ${{ inputs.repo }}
         token: ${{ secrets.TOKEN }}
@@ -55,8 +56,7 @@ jobs:
       run: |
         mkdir -p build
         cd build
-        version="${GITHUB_REF##*/*/v}"
-        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
+        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=${{ inputs.version }} -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
         cmake --build . -j 2
         cd ${{ inputs.directory }}
         cpack -D CPACK_COMPONENTS_ALL="public;private" .
@@ -66,12 +66,12 @@ jobs:
       run: |
         git config --global --add safe.directory $GITHUB_WORKSPACE
         files="build/${{ inputs.directory }}/*.tar.gz"
-        echo $GITHUB_REF_NAME
+        echo v${{ inputs.version }}
         for file in $files
         do
           echo $file
           counter=0
-          for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY $GITHUB_REF_NAME $file && break || counter=$[$counter +1] && sleep 30; done
+          for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY v${{ inputs.version }} $file && break || counter=$[$counter +1] && sleep 30; done
           echo $counter
           if [ "$counter" -eq "5" ]; then exit 1; fi
         done

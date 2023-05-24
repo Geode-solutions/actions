@@ -18,6 +18,8 @@ jobs:
       IMAGE: ghcr.io/geode-solutions/${{inputs.image_name}}:${{inputs.tag}}
     steps:
     - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.TOKEN }}
     - name: GithubPackages Login
       uses: docker/login-action@v2.1.0
       with:

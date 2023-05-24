@@ -27,6 +27,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
+        token: ${{ secrets.TOKEN }}
         ref: ${{ inputs.branch }}
     - uses: actions/cache/restore@v3
       with:
@@ -78,6 +79,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
+        token: ${{ secrets.TOKEN }}
         ref: ${{ inputs.branch }}
     - uses: actions/cache/restore@v3
       with:

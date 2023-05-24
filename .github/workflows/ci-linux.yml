@@ -28,6 +28,8 @@ jobs:
         - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel-static", lib: "lib64", shared: "OFF"}
     steps:
     - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.TOKEN }}
     - uses: actions/cache@v3
       with:
         path: build/third_party

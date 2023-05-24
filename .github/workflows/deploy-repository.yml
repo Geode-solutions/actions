@@ -1,0 +1,74 @@
+on:
+  workflow_call:
+    inputs:
+      name:
+        type: string
+        required: true
+      directory:
+        type: string
+        default: "."
+      repos:
+        type: string
+      repo:
+        type: string
+        default: ${{ github.repository }}
+      version:
+        type: string
+        required: true
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+      PYPI_TOKEN:
+        required: true
+
+jobs:
+  release-linux:
+    uses: Geode-solutions/actions/.github/workflows/deploy-linux.yml@master
+    with:
+      name: ${{ inputs.name }}
+      directory: ${{ inputs.directory }}
+      repo: ${{ inputs.repo }}
+      repos: ${{ inputs.repos }}
+      version: ${{ inputs.version }}
+    secrets: inherit
+
+  release-linux-python:
+    uses: Geode-solutions/actions/.github/workflows/deploy-linux-python.yml@master
+    with:
+      name: ${{ inputs.name }}
+      directory: ${{ inputs.directory }}
+      repos: ${{ inputs.repos }}
+      version: ${{ inputs.version }}
+    secrets: inherit
+
+  release-windows:
+    uses: Geode-solutions/actions/.github/workflows/deploy-windows.yml@master
+    with:
+      name: ${{ inputs.name }}
+      directory: ${{ inputs.directory }}
+      repo: ${{ inputs.repo }}
+      repos: ${{ inputs.repos }}
+      version: ${{ inputs.version }}
+    secrets: inherit
+
+  release-windows-python:
+    uses: Geode-solutions/actions/.github/workflows/deploy-windows-python.yml@master
+    with:
+      name: ${{ inputs.name }}
+      directory: ${{ inputs.directory }}
+      repos: ${{ inputs.repos }}
+      version: ${{ inputs.version }}
+    secrets: inherit
+
+  public-release:
+    if: github.ref == 'refs/heads/master'
+    needs: [release-linux, release-windows]
+    uses: Geode-solutions/actions/.github/workflows/public-release.yml@master
+    secrets: inherit
+
+  notify:
+    uses: Geode-solutions/actions/.github/workflows/end-cd.yml@master
+    needs: [release-linux, release-linux-python, release-windows, release-windows-python]
+    secrets: inherit

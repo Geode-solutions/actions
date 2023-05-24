@@ -39,7 +39,6 @@ jobs:
         repository: ${{ inputs.repos }}
         file: '-${{ matrix.config.system }}-private.tar.gz'
         token: ${{ secrets.TOKEN }}
-        version: ${{ inputs.branch }}
     - name: Libraries
       id: libraries
       run: |
@@ -91,7 +90,6 @@ jobs:
         repository: ${{ inputs.repos }}
         file: '-win64-private.zip'
         token: ${{ secrets.TOKEN }}
-        version: ${{ inputs.branch }}
     - uses: TheMrMilchmann/setup-msvc-dev@v2
       with:
         arch: x64

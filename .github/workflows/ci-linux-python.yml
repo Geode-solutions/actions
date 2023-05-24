@@ -43,7 +43,6 @@ jobs:
         repository: ${{ inputs.repos }}
         file: '-rhel-private.tar.gz'
         token: ${{ secrets.TOKEN }}
-        version: ${{ inputs.branch }}
     - name: Libraries
       id: libraries
       run: |

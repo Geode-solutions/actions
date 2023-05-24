@@ -9,11 +9,9 @@ const tar = require('tar');
 
 try {
   const repos = core.getInput('repository');
-  console.log("toto", github)
   if (repos.length) {
     let results = [];
     const file = core.getInput('file', { required: true });
-    const version = core.getInput('version');
     const token = core.getInput('token');
     const octokit = new Octokit({ auth: token });
     repos.split(';').forEach(owner_repo => {
@@ -31,7 +29,7 @@ try {
         console.log('Looking for repository:', repo);
         const outputFile = repo.concat(file);
 
-        const query = version === 'master' ?
+        const query = github.ref === 'refs/heads/master' ?
           octokit.repos.getLatestRelease({ owner, repo }).then(release => release.data.id) :
           octokit.repos.listReleases({ owner, repo }).then(releases => releases.data[0].id);
         query.then(release_id => {

@@ -37,7 +37,6 @@ jobs:
         repository: ${{ inputs.repos }}
         file: '-${{ matrix.config.system }}-private.zip'
         token: ${{ secrets.TOKEN }}
-        version: ${{ inputs.branch }}
     - name: Libraries
       id: libraries
       run: |

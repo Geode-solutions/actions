@@ -42,7 +42,6 @@ jobs:
         repository: ${{ inputs.repos }}
         file: '-win64-private.zip'
         token: ${{ secrets.TOKEN }}
-        version: ${{ inputs.branch }}
     - name: Libraries
       id: libraries
       run: |

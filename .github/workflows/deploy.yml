@@ -47,7 +47,7 @@ jobs:
 
   deploy-repository:
     needs: semantic-release
-    if: ${{ needs.semantic-release.outputs.new_release }} == 'true'
+    if: needs.semantic-release.outputs.new_release == 'true'
     uses: Geode-solutions/actions/.github/workflows/deploy-repository.yml@master
     with:
       name: ${{ inputs.name }}

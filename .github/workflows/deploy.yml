@@ -12,6 +12,10 @@ on:
       repo:
         type: string
         default: ${{ github.repository }}
+    outputs:
+      new_release:
+        description: "Whether a new release was published"
+        value: ${{ jobs.semantic-release.outputs.new_release }}
     secrets:
       TOKEN:
         required: true

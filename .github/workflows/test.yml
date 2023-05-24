@@ -20,7 +20,7 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/prepare.yml@master
     secrets: inherit
 
-  test:
+  test-repository:
     needs: prepare
     uses: Geode-solutions/actions/.github/workflows/test-repository.yml@master
     with:
@@ -30,7 +30,7 @@ jobs:
     secrets: inherit
 
   trigger-deploy:
-    needs: test
+    needs: test-repository
     uses: Geode-solutions/actions/.github/workflows/trigger-deploy.yml@master
     secrets: inherit
   

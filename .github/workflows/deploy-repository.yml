@@ -69,6 +69,6 @@ jobs:
     secrets: inherit
 
   notify:
-    uses: Geode-solutions/actions/.github/workflows/end-cd.yml@master
+    uses: Geode-solutions/actions/.github/workflows/deploy-notify.yml@master
     needs: [release-linux, release-linux-python, release-windows, release-windows-python]
     secrets: inherit

@@ -7,7 +7,7 @@ on:
         required: true
 
 jobs:
-  run:
+  public-release:
     runs-on: ubuntu-latest
     steps:
       - uses: Geode-solutions/actions/public-release@master

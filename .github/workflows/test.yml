@@ -16,7 +16,12 @@ on:
         required: true
 
 jobs:
+  prepare:
+    uses: Geode-solutions/actions/.github/workflows/prepare.yml@master
+    secrets: inherit
+
   test:
+    needs: prepare
     uses: Geode-solutions/actions/.github/workflows/test-repository.yml@master
     with:
       name: ${{ inputs.name }}
@@ -25,6 +30,7 @@ jobs:
     secrets: inherit
 
   trigger-deploy:
+    needs: test
     uses: Geode-solutions/actions/.github/workflows/trigger-deploy.yml@master
     secrets: inherit
   

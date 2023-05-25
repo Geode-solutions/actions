@@ -12,10 +12,6 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     steps:
-    - name: Cancel Previous Runs
-      uses: styfle/cancel-workflow-action@main
-      with:
-        access_token: ${{ secrets.TOKEN }}
     - uses: actions/checkout@v3
       with:
         token: ${{ secrets.TOKEN }}

@@ -75,7 +75,7 @@ jobs:
           if [ "$counter" -eq "5" ]; then exit 1; fi
         done
       env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
     - name: Doc
       if: matrix.config.doc
       run: curl -s https://raw.githubusercontent.com/Geode-solutions/actions/master/doc/doc.sh | bash -s -- ${GITHUB_WORKSPACE}/build/${{ inputs.directory }}
@@ -88,5 +88,4 @@ jobs:
         status: failure
         fields: repo,message,commit,author,action,eventName,ref,workflow
       env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 

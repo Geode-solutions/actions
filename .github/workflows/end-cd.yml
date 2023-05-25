@@ -1,8 +1,6 @@
 on: 
   workflow_call:
     secrets:
-      TOKEN:
-        required: true
       SLACK_WEBHOOK_URL:
         required: true
 
@@ -16,5 +14,4 @@ jobs:
         status: success
         fields: repo,ref
       env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 

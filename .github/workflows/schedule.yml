@@ -26,6 +26,7 @@ jobs:
         - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel", lib: "lib64"}
     steps:
     - uses: actions/checkout@v3
+      with:
         ref: ${{ inputs.branch }}
     - uses: actions/cache/restore@v3
       with:
@@ -68,13 +69,13 @@ jobs:
         status: failure
         fields: repo,message,commit,author,action,eventName,ref,workflow
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
 
   windows:  
     runs-on: windows-2019
     steps:
     - uses: actions/checkout@v3
+      with:
         ref: ${{ inputs.branch }}
     - uses: actions/cache/restore@v3
       with:
@@ -133,6 +134,5 @@ jobs:
         status: failure
         fields: repo,message,commit,author,action,eventName,ref,workflow
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
       

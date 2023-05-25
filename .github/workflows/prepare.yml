@@ -24,8 +24,8 @@ jobs:
         sed -i -E 's/==(.+)\.(.+)\.(.+)/==\1\.*,>=\1\.\2\.\3/' ${{ inputs.directory }}/requirements.txt
     - name: "Get config files"
       run: |
-        curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.clang-format\?ref\=master > .clang-format
-        curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.releaserc\?ref\=master > .releaserc
+        curl -H "Accept: application/vnd.github.VERSION.raw" https://api.github.com/repos/Geode-solutions/actions/contents/.clang-format\?ref\=master > .clang-format
+        curl -H "Accept: application/vnd.github.VERSION.raw" https://api.github.com/repos/Geode-solutions/actions/contents/.releaserc\?ref\=master > .releaserc
     - uses: DoozyX/clang-format-lint-action@master
       with:
         extensions: 'h,cpp'

@@ -36,7 +36,7 @@ jobs:
       uses: cycjimmy/semantic-release-action@v3
       id: semantic
       env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   deploy-repository:

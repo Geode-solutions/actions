@@ -20,5 +20,4 @@ jobs:
           status: failure
           fields: repo,message,commit,author,action,eventName,ref,workflow
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 

@@ -4,9 +4,6 @@ on:
       branch:
         type: string
         default: "master"
-    secrets:
-      TOKEN:
-        required: true
 
 jobs:     
   release:

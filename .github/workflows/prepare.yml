@@ -4,9 +4,6 @@ on:
       directory:
         type: string
         default: "bindings/python"
-    secrets:
-      TOKEN:
-        required: true
 
 jobs:
   prepare:

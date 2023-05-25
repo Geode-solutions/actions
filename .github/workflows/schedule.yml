@@ -26,8 +26,6 @@ jobs:
         - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel", lib: "lib64"}
     steps:
     - uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.TOKEN }}
         ref: ${{ inputs.branch }}
     - uses: actions/cache/restore@v3
       with:
@@ -77,8 +75,6 @@ jobs:
     runs-on: windows-2019
     steps:
     - uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.TOKEN }}
         ref: ${{ inputs.branch }}
     - uses: actions/cache/restore@v3
       with:

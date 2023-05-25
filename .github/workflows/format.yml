@@ -13,8 +13,6 @@ jobs:
       with:
         access_token: ${{ secrets.TOKEN }}
     - uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.TOKEN }}
     - name: "Get file config"
       run: |
         curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.clang-format\?ref\=master > .clang-format

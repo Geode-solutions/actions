@@ -30,8 +30,6 @@ jobs:
         - {python: "3.11", tag: "cp311-cp311"}
     steps:
     - uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.TOKEN }}
     - uses: actions/cache/restore@v3
       with:
         path: build/third_party

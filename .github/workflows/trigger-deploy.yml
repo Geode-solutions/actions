@@ -16,6 +16,8 @@ jobs:
       id: semantic
       with:
         dry_run: true
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
     
   trigger:
     runs-on: ubuntu-latest

@@ -16,7 +16,7 @@ on:
         required: true
 
 jobs:
-  linux-pyhon:
+  linux-python:
     runs-on: ubuntu-latest
     container: "ghcr.io/geode-solutions/centos:master"
     strategy:

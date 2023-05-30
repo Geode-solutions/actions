@@ -4,10 +4,16 @@ on:
       directory:
         type: string
         default: "bindings/python"
+    outputs:
+      changes_detected:
+        description: "commit has been done"
+        value: ${{ jobs.prepare.outputs.changes_detected }}
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
+    outputs:
+      changes_detected: ${{ steps.commit.outputs.changes_detected }}
     steps:
     - uses: actions/checkout@v3
       with:
@@ -34,6 +40,3 @@ jobs:
       id: commit
       with:
         commit_message: Apply prepare changes
-    - name: "Run if changes have been detected"
-      if: steps.commit.outputs.changes_detected == 'true'
-      run: exit 1

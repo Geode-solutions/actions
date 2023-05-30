@@ -54,7 +54,7 @@ jobs:
         choco install openssl -r --no-progress
         $requirements = "bindings/python/requirements.txt"
         if(test-path -Path $requirements -PathType Leaf) {
-          pip install --pre -r $requirements
+          pip install -r $requirements
         }
         if(!(test-path build)) { 
           mkdir build

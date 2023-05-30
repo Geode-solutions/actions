@@ -48,7 +48,7 @@ jobs:
         export PATH=/opt/python/${{ matrix.config.tag }}/bin:$PATH
         requirements="bindings/python/requirements.txt"
         if [ -f "$requirements" ]; then 
-          pip install --pre -r $requirements
+          pip install -r $requirements
         fi
         mkdir -p build
         cd build

@@ -44,7 +44,7 @@ jobs:
       run: |
         mkdir -p build
         cd build
-        cmake --debug-find -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+        cmake --trace -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
         cmake --build . -t third_party
         cd ${{ inputs.directory }}
         cmake --build . -t essential

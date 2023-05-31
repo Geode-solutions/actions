@@ -50,6 +50,14 @@ jobs:
         arch: x64
     - name: Compile & Test
       run: |
+        $old_paths = "${{ steps.repos.outputs.path }}"
+        echo $old_paths
+        Foreach($old_path in $old_paths.split(";")){
+          if(Test-Path -Path $old_paths/lib) {
+            echo "========= $old_paths/lib"
+            dir $old_paths/lib
+          }
+        }
         pip install wheel
         choco install openssl -r --no-progress
         $requirements = "bindings/python/requirements.txt"

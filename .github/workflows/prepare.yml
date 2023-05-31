@@ -8,6 +8,9 @@ on:
       changes_detected:
         description: "commit has been done"
         value: ${{ jobs.prepare.outputs.changes_detected }}
+    secrets:
+      TOKEN: 
+        required: true
 
 jobs:
   prepare:

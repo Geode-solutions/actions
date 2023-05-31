@@ -53,7 +53,7 @@ jobs:
         $old_paths = "${{ steps.repos.outputs.path }}"
         echo $old_paths
         Foreach($old_path in $old_paths.split(";")){
-          echo "========= $old_paths\lib"
+          dir $old_path
           dir $old_path\lib
         }
         pip install wheel

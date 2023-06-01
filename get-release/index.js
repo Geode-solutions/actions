@@ -4,7 +4,7 @@ const { Octokit } = require('@octokit/rest');
 const fs = require('fs');
 const path = require('path');
 const request = require('request');
-const zlib = require('zlib');
+const unzipper = require('unzipper');
 const tar = require('tar');
 
 try {
@@ -55,7 +55,8 @@ try {
                   if (extension == 'zip') {
                     console.log('Unzipping', asset.name);
                     fs.createReadStream(outputFile)
-                      .pipe(zlib.createUnzip())
+                      .pipe(unzipper.Extract(
+                        { path: process.env.GITHUB_WORKSPACE }))
                       .on('close', function () {
                         let extract_name = asset.name.slice(0, -4);
                         if (extract_name.endsWith('-private')) {

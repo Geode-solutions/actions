@@ -53,8 +53,10 @@ jobs:
         $old_paths = "${{ steps.repos.outputs.path }}"
         echo $old_paths
         Foreach($old_path in $old_paths.split(";")){
-          dir $old_path
-          dir $old_path\lib
+          if(Test-Path -Path $old_path) {
+            dir $old_path
+            dir $old_path\lib
+          }
         }
         pip install wheel
         choco install openssl -r --no-progress

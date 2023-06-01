@@ -14,7 +14,6 @@
     "@actions/github": "^5.1.1",
     "@octokit/rest": "^19.0.11",
     "request": "^2.88.2",
-    "tar": "^6.1.15",
-    "unzipper": "^0.10.14"
+    "tar": "^6.1.15"
   }
 }

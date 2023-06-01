@@ -6,6 +6,7 @@ const path = require('path');
 const request = require('request');
 const unzipper = require('unzipper');
 const tar = require('tar');
+const AdmZip = require("adm-zip");
 
 try {
   const repos = core.getInput('repository');
@@ -54,21 +55,23 @@ try {
                   console.log('Extension:', extension);
                   if (extension == 'zip') {
                     console.log('Unzipping', asset.name);
-                    fs.createReadStream(outputFile)
-                      .pipe(unzipper.Extract(
-                        { path: process.env.GITHUB_WORKSPACE }))
-                      .on('close', function () {
-                        let extract_name = asset.name.slice(0, -4);
-                        if (extract_name.endsWith('-private')) {
-                          extract_name = extract_name.slice(0, -8);
-                        }
-                        console.log('Unzip to:', extract_name);
-                        const result = path.join(
-                          process.env.GITHUB_WORKSPACE, extract_name);
-                        console.log('Result:', result);
-                        fs.unlinkSync(outputFile);
-                        resolve(result);
-                      });
+                    const zip = new AdmZip(outputFile);
+                    zip.extractAllTo(process.env.GITHUB_WORKSPACE)
+                    // fs.createReadStream(outputFile)
+                    //   .pipe(unzipper.Extract(
+                    //     { path: process.env.GITHUB_WORKSPACE }))
+                    //   .on('close', function () {
+                    let extract_name = asset.name.slice(0, -4);
+                    if (extract_name.endsWith('-private')) {
+                      extract_name = extract_name.slice(0, -8);
+                    }
+                    console.log('Unzip to:', extract_name);
+                    const result = path.join(
+                      process.env.GITHUB_WORKSPACE, extract_name);
+                    console.log('Result:', result);
+                    // fs.unlinkSync(outputFile);
+                    resolve(result);
+                    //   });
                   } else if (extension == 'gz') {
                     console.log('Untaring', asset.name);
                     fs.createReadStream(outputFile)

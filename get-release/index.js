@@ -4,7 +4,6 @@ const { Octokit } = require('@octokit/rest');
 const fs = require('fs');
 const path = require('path');
 const request = require('request');
-const unzipper = require('unzipper');
 const tar = require('tar');
 const AdmZip = require("adm-zip");
 
@@ -32,7 +31,10 @@ try {
 
         const query = github.ref === 'refs/heads/master' ?
           octokit.repos.getLatestRelease({ owner, repo }).then(release => release.data.id) :
-          octokit.repos.listReleases({ owner, repo }).then(releases => releases.data[0].id);
+          octokit.repos.listReleases({ owner, repo }).then(releases => {
+            console.log("data", releases.data[0]);
+            return releases.data[0].id
+          });
         query.then(release_id => {
           octokit.repos.listReleaseAssets({ owner, repo, release_id })
             .then(assets => {
@@ -57,10 +59,6 @@ try {
                     console.log('Unzipping', asset.name);
                     const zip = new AdmZip(outputFile);
                     zip.extractAllTo(process.env.GITHUB_WORKSPACE)
-                    // fs.createReadStream(outputFile)
-                    //   .pipe(unzipper.Extract(
-                    //     { path: process.env.GITHUB_WORKSPACE }))
-                    //   .on('close', function () {
                     let extract_name = asset.name.slice(0, -4);
                     if (extract_name.endsWith('-private')) {
                       extract_name = extract_name.slice(0, -8);
@@ -69,9 +67,7 @@ try {
                     const result = path.join(
                       process.env.GITHUB_WORKSPACE, extract_name);
                     console.log('Result:', result);
-                    // fs.unlinkSync(outputFile);
                     resolve(result);
-                    //   });
                   } else if (extension == 'gz') {
                     console.log('Untaring', asset.name);
                     fs.createReadStream(outputFile)

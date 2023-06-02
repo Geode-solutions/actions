@@ -16,6 +16,9 @@ on:
       new_release:
         description: "Whether a new release was published"
         value: ${{ jobs.semantic-release.outputs.new_release }}
+      new_version:
+        description: "New release number"
+        value: ${{ jobs.semantic-release.outputs.new_version }}
     secrets:
       TOKEN:
         required: true

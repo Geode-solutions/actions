@@ -11,7 +11,10 @@ on:
         type: string
       repo:
         type: string
-        default: ${{ github.repository }}
+        default: ${{ github.repository }} 
+      extra:
+        type: string
+
     secrets:
       TOKEN:
         required: true
@@ -53,7 +56,7 @@ jobs:
         mkdir -p build
         cd build
         version="${GITHUB_REF##*/*/v}"
-        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
+        cmake ${{inputs.extra}} -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
         cmake --build . -j 2
         cd ${{ inputs.directory }}
         cpack -D CPACK_COMPONENTS_ALL="public;private" .

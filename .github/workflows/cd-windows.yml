@@ -15,6 +15,8 @@ on:
       config:
         type: string
         default: "Release"
+      extra:
+        type: string
     secrets:
       TOKEN:
         required: true
@@ -53,7 +55,7 @@ jobs:
         if(!(test-path build)) { mkdir build }
         cd build
         $version = ${env:GITHUB_REF} -replace 'refs\/tags\/v', ''
-        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.config }} -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
+        cmake ${{inputs.extra}} -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.config }} -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=$version -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
         cmake --build .
         cd ${{ inputs.directory }}
         cpack -D CPACK_COMPONENTS_ALL="public;private"

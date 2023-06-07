@@ -21,12 +21,11 @@ concurrency:
 
 jobs:
   prepare:
-    if: github.ref_name != 'next'
     uses: Geode-solutions/actions/.github/workflows/prepare.yml@master
     secrets: inherit
 
   test-repository:
-    if: github.ref_name == 'next' || needs.prepare.outputs.changes_detected != 'true'
+    if: needs.prepare.outputs.changes_detected != 'true'
     needs: prepare
     uses: Geode-solutions/actions/.github/workflows/test-repository.yml@master
     with:

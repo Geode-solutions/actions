@@ -21,6 +21,7 @@ concurrency:
 
 jobs:
   prepare:
+    if: github.ref_name != 'next'
     uses: Geode-solutions/actions/.github/workflows/prepare.yml@master
     secrets: inherit
 

@@ -61,7 +61,7 @@ jobs:
       env:
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
     - name: Notify slack
-      if: failure() && github.ref == 'refs/heads/master'
+      if: failure() && github.ref == 'refs/heads/next'
       uses: 8398a7/action-slack@v3
       with:
         status: failure

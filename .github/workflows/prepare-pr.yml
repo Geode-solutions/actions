@@ -37,7 +37,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+          cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
           cmake --build . -t third_party
       - uses: Geode-solutions/clang-tidy-review@master
         with:

@@ -1,0 +1,45 @@
+on:
+  workflow_call:
+    inputs:
+      # name:
+      #   type: string
+      #   required: true
+      directory:
+        type: string
+        default: "."
+      repos:
+        type: string
+    secrets:
+      TOKEN:
+        required: true
+
+jobs:         
+  prepare:
+    uses: Geode-solutions/actions/.github/workflows/prepare.yml@master
+    secrets: inherit
+  
+  check:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache/restore@v3
+        with:
+          path: build/third_party
+          key: ${{ runner.os }}-ubuntu-${{ hashFiles('cmake/Configure**.cmake') }}
+      - uses: Geode-solutions/actions/get-release@master
+        id: repos
+        with:
+          repository: ${{ inputs.repos }}
+          file: '-ubuntu-private.tar.gz'
+          token: ${{ secrets.TOKEN }}
+      - name: Compile
+        run: |
+          mkdir -p build
+          cd build
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+          cmake --build . -t third_party
+      - uses: Geode-solutions/clang-tidy-review@master
+        with:
+          token: ${{ secrets.TOKEN }}
+          build_dir: build/${{ inputs.directory }}

@@ -20,13 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  prepare:
-    uses: Geode-solutions/actions/.github/workflows/prepare.yml@master
-    secrets: inherit
-
   test-repository:
-    if: needs.prepare.outputs.changes_detected != 'true'
-    needs: prepare
     uses: Geode-solutions/actions/.github/workflows/test-repository.yml@master
     with:
       name: ${{ inputs.name }}

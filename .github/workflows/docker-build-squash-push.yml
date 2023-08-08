@@ -26,11 +26,11 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.TOKEN }}
-        
-    - name: Build Docker image
-      run: | 
-        if(${{ secrets.LICENSE_TOKEN }}) { docker build -t $IMAGE --build-arg TOKEN=${{ secrets.LICENSE_TOKEN }} . }
-        if(!(${{ secrets.LICENSE_TOKEN }})) { docker build -t $IMAGE . }
+    - name: Build docker image with TOKEN
+      if: '${{secrets.LICENSE_TOKEN}}''
+      run: docker build -t $IMAGE --build-arg TOKEN=${{ secrets.LICENSE_TOKEN }} .
+    - name: Build docker image
+      run: docker build -t $IMAGE .
     - name: Squash Docker image
       run: |
         pip install docker-squash

@@ -40,6 +40,9 @@ jobs:
           cd build
           cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
           cmake --build . -t third_party
+          ls
+          echo "directoory"
+          ls ${{ inputs.directory }}
       - uses: ZedThree/clang-tidy-review@master
         with:
           base_dir: ${{ env.base_dir }}

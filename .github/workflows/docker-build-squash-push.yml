@@ -13,6 +13,8 @@ on:
     secrets:
       TOKEN:
         required: true
+      TEST_TOKEN:
+        required: true
 
 jobs:
   build:

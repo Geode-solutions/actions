@@ -7,14 +7,11 @@ on:
       tag:
         type: string
         required: true
-      args:
-        type: string
-        required: false
     secrets:
       TOKEN:
         required: true
-      TEST_TOKEN:
-        required: true
+      LICENSE_TOKEN:
+        required: false
 
 jobs:
   build:
@@ -31,7 +28,9 @@ jobs:
         password: ${{ secrets.TOKEN }}
         
     - name: Build Docker image
-      run: docker build -t $IMAGE --build-arg TOKEN=${{ secrets.TEST_TOKEN }} .
+      run: | 
+        if(LICENSE_TOKEN) {docker build -t $IMAGE --build-arg TOKEN=${{ secrets.LICENSE_TOKEN }} .}
+        if(!(LICENSE_TOKEN)) {docker build -t $IMAGE .}
     - name: Squash Docker image
       run: |
         pip install docker-squash

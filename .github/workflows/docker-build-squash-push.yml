@@ -29,7 +29,7 @@ jobs:
         password: ${{ secrets.TOKEN }}
         
     - name: Build Docker image
-      run: docker build -t $IMAGE ${{ inputs.args }} .
+      run: docker build -t $IMAGE --build-arg TOKEN=${{ secrets.TEST_TOKEN }} .
     - name: Squash Docker image
       run: |
         pip install docker-squash

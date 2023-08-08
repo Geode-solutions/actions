@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     env: 
       IMAGE: ghcr.io/geode-solutions/${{inputs.image_name}}:${{inputs.tag}}
+      LICENSE_TOKEN: ${{ secrets.LICENSE_TOKEN }}
     steps:
     - uses: actions/checkout@v3
     - name: GithubPackages Login
@@ -26,11 +27,15 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.TOKEN }}
-    - name: Build docker image with TOKEN
-      if: '${{secrets.LICENSE_TOKEN}}''
-      run: docker build -t $IMAGE --build-arg TOKEN=${{ secrets.LICENSE_TOKEN }} .
-    - name: Build docker image
+    
+    - name: Build Docker image
+      if: ${{ env.LICENSE_TOKEN == '' }}
       run: docker build -t $IMAGE .
+    
+    - name: Build Docker image
+      if: ${{ env.LICENSE_TOKEN != '' }}
+      run: docker build -t $IMAGE --build-arg TOKEN=${{ secrets.LICENSE_TOKEN }} .
+      
     - name: Squash Docker image
       run: |
         pip install docker-squash

@@ -29,8 +29,8 @@ jobs:
         
     - name: Build Docker image
       run: | 
-        if(LICENSE_TOKEN) {docker build -t $IMAGE --build-arg TOKEN=${{ secrets.LICENSE_TOKEN }} .}
-        if(!(LICENSE_TOKEN)) {docker build -t $IMAGE .}
+        if(${{ secrets.LICENSE_TOKEN }}) {docker build -t $IMAGE --build-arg TOKEN=${{ secrets.LICENSE_TOKEN }} .}
+        if(!(${{ secrets.LICENSE_TOKEN }})) {docker build -t $IMAGE .}
     - name: Squash Docker image
       run: |
         pip install docker-squash

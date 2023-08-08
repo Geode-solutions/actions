@@ -35,10 +35,12 @@ jobs:
           token: ${{ secrets.TOKEN }}
       - name: Compile
         run: |
+          echo "base_dir=$(pwd)" >> $GITHUB_ENV
           mkdir -p build
           cd build
           cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
           cmake --build . -t third_party
       - uses: ZedThree/clang-tidy-review@master
         with:
+          base_dir: ${{ env.base_dir }}
           build_dir: build/${{ inputs.directory }}

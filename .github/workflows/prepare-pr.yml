@@ -41,5 +41,4 @@ jobs:
           cmake --build . -t third_party
       - uses: Geode-solutions/clang-tidy-review@master
         with:
-          token: ${{ secrets.TOKEN }}
           build_dir: build/${{ inputs.directory }}

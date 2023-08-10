@@ -13,6 +13,10 @@ on:
       TOKEN:
         required: true
 
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:         
   prepare:
     uses: Geode-solutions/actions/.github/workflows/prepare.yml@master

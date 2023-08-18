@@ -48,8 +48,7 @@ jobs:
           build_dir: build/${{ inputs.directory }}
       - name: Sanitizers
         run: |
-          pwd
-          cd ${{ inputs.directory }}
+          cd build/${{ inputs.directory }}
           cmake -DUSE_SANITIZER_ADDRESS=ON -DUSE_SANITIZER_LEAK=ON -DUSE_SANITIZER_UNDEFINED_BEHAVIOR=ON .
           cmake --build . -j 2
           ctest --output-on-failure -j 2

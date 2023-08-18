@@ -48,3 +48,5 @@ CheckOptions:
     value: CamelCase 
   - key: readability-function-cognitive-complexity.Threshold
     value: 10
+  - key: readability-function-size.ParameterThreshold
+    value: 4

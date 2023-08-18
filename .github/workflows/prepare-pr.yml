@@ -22,7 +22,7 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/prepare.yml@master
     secrets: inherit
   
-  check:
+  tidy:
     needs: prepare
     runs-on: ubuntu-latest
     steps:
@@ -43,12 +43,33 @@ jobs:
           cd build
           cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
           cmake --build . -t third_party -j 2
-      - uses: ZedThree/clang-tidy-review@master
+      - name: Tidy
+        uses: ZedThree/clang-tidy-review@master
         with:
           build_dir: build/${{ inputs.directory }}
+
+  sanitizers:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache/restore@v3
+        with:
+          path: build/third_party
+          key: ${{ runner.os }}-ubuntu-${{ hashFiles('cmake/Configure**.cmake') }}
+      - uses: Geode-solutions/actions/get-release@master
+        id: repos
+        with:
+          repository: ${{ inputs.repos }}
+          file: '-ubuntu-private.tar.gz'
+          token: ${{ secrets.TOKEN }}
       - name: Sanitizers
         run: |
-          cd build/${{ inputs.directory }}
+          mkdir -p build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+          cmake --build . -t third_party -j 2
+          cd ${{ inputs.directory }}
           cmake -DUSE_SANITIZER_ADDRESS=ON -DUSE_SANITIZER_LEAK=ON -DUSE_SANITIZER_UNDEFINED_BEHAVIOR=ON .
           cmake --build . -j 2
           ctest -V -j 2

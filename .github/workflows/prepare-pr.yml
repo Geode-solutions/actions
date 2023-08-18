@@ -37,7 +37,7 @@ jobs:
           repository: ${{ inputs.repos }}
           file: '-ubuntu-private.tar.gz'
           token: ${{ secrets.TOKEN }}
-      - name: Convfigure
+      - name: Configure
         run: |
           mkdir -p build
           cd build
@@ -52,3 +52,5 @@ jobs:
           cmake -DUSE_SANITIZER_ADDRESS=ON -DUSE_SANITIZER_LEAK=ON -DUSE_SANITIZER_UNDEFINED_BEHAVIOR=ON .
           cmake --build . -j 2
           ctest --output-on-failure -j 2
+        env:
+          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

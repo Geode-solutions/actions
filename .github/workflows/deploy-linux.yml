@@ -81,6 +81,17 @@ jobs:
       run: curl -s https://raw.githubusercontent.com/Geode-solutions/actions/master/doc/doc.sh | bash -s -- ${GITHUB_WORKSPACE}/build/${{ inputs.directory }}
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
+    - name: Set base_directory
+      if: matrix.config.doc
+      run: |
+        pwd
+        echo "base_directory=$(pwd)" >> $GITHUB_ENV
+    - name: Doc
+      if: matrix.config.doc
+      uses: Geode-solutions/actions/doc@master
+      with:
+        base_directory: ${{ env.base_directory }}
+        token: ${{ secrets.TOKEN }}
     - name: Notify slack
       if: failure()
       uses: 8398a7/action-slack@v3

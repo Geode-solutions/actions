@@ -87,6 +87,12 @@ def process_directory(directory):
         if len(file.readlines()) < 3:
             os.remove(f)
             continue
+
+    for filename in os.listdir(directory):
+        f = os.path.join(directory, filename)
+        if os.path.isdir(f):
+            process_directory(f)
+            continue
         rewrite_file(directory, f)
 
 

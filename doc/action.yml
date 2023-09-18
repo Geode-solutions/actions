@@ -1,0 +1,10 @@
+name: 'Generate doc'
+description: 'Create documentation using clang-doc'
+inputs:
+  directory: 
+    required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.directory }}

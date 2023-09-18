@@ -2,6 +2,7 @@
 
 directory=$1
 base_directory=$2
+token=$3
 repo_name=${GITHUB_REPOSITORY##*/}
 repo_name="${repo_name%_private}"
 repo_name="${repo_name,,}"
@@ -28,5 +29,5 @@ if [ "$changes" -ne "0" ]; then
     git checkout master
     git add --all
     git commit -m "Update $repo_name documentation"
-    git push https://BotellaA:$GITHUB_TOKEN@github.com/Geode-solutions/docs2
+    git push https://BotellaA:$token@github.com/Geode-solutions/docs2
 fi

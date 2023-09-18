@@ -6,6 +6,8 @@ inputs:
     default: '.'
   base_directory:
     required: true
+  token:
+    required: true
 
 runs:
   using: 'docker'
@@ -13,3 +15,4 @@ runs:
   args:
     - ${{ inputs.directory }}
     - ${{ inputs.base_directory }}
+    - ${{ inputs.token }}

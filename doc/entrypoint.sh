@@ -1,17 +1,18 @@
-#!/bin/sh -l
+#!/bin/bash
 
 directory=$1
 base_directory=$2
+repo_name=${GITHUB_REPOSITORY##*/}
+repo_name="${repo_name%_private}"
+repo_name="${repo_name,,}"
+docs_path="/docs"
+
 cd build/$directory
 sed -i -E "s~$base_directory~/github/workspace~g" compile_commands.json
 clang-doc-18  --output=doc --doxygen --public --format=md --executor=all-TUs compile_commands.json
 cd doc/geode
 python3 /style.py .
 
-docs_path="/docs"
-repo_name=${GITHUB_REPOSITORY##*/}
-repo_name="${repo_name%_private}"
-repo_name="${repo_name,,}"
 git clone https://github.com/Geode-solutions/docs $docs_path
 doc_folder=$docs_path/references/$repo_name
 rm -rf $doc_folder

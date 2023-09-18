@@ -1,7 +1,7 @@
 #!/bin/sh -l
 
-directory = $1
-base_directory = $2
+directory=$1
+base_directory=$2
 pwd
 echo "base=$base_directory"
 cd build/$directory

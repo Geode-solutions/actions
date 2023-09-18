@@ -11,6 +11,7 @@ python3 /style.py .
 docs_path="/docs"
 repo_name=${GITHUB_REPOSITORY##*/}
 repo_name="${repo_name%_private}"
+repo_name="${repo_name,,}"
 git clone https://github.com/Geode-solutions/docs $docs_path
 doc_folder=$docs_path/references/$repo_name
 rm -rf $doc_folder

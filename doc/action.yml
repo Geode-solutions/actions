@@ -3,8 +3,7 @@ description: 'Create documentation using clang-doc'
 inputs:
   directory: 
     required: true
+    default: '.'
 runs:
   using: 'docker'
   image: 'Dockerfile'
-  args:
-    - ${{ inputs.directory }}

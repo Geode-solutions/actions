@@ -90,6 +90,7 @@ jobs:
       if: matrix.config.doc
       uses: Geode-solutions/actions/doc@master
       with:
+        directory: ${{ inputs.directory }} 
         base_directory: ${{ env.base_directory }}
         token: ${{ secrets.TOKEN }}
     - name: Notify slack

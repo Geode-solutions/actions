@@ -4,6 +4,9 @@ inputs:
   directory: 
     required: true
     default: '.'
+  base_directory:
+    required: true
+
 runs:
   using: 'docker'
   image: 'Dockerfile'

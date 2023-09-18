@@ -39,6 +39,10 @@ def sort(stream, output, directory):
             output.write("```cpp\n")
             output.write(stripped[1:-2])
             output.write("\n```\n")
+        elif stripped[:7] == "public ":
+            output.write("```cpp\n")
+            output.write(line)
+            output.write("```\n")
         elif stripped[0] == "#" and "<" in stripped and ">" in stripped:
             output.write(stripped.split("<", 1)[0])
             output.write("\n")

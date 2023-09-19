@@ -14,7 +14,7 @@ clang-doc-18  --output=doc --doxygen --public --format=md --executor=all-TUs com
 cd doc/geode
 python3 /style.py .
 
-git clone https://github.com/Geode-solutions/docs2 $docs_path
+git clone https://github.com/Geode-solutions/docs $docs_path
 cd $docs_path
 git checkout master
 git pull 
@@ -29,5 +29,5 @@ if [ "$changes" -ne "0" ]; then
     git config user.name $GITHUB_ACTOR    
     git add --all
     git commit -m "Update $repo_name documentation"
-    git push https://$token@github.com/Geode-solutions/docs2 master
+    git push https://$token@github.com/Geode-solutions/docs master
 fi

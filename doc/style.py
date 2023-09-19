@@ -74,11 +74,11 @@ def rewrite_file(directory, filename):
         output.write(result)
 
 
-def process_directory(directory):
+def clean_directory(directory):
     for filename in os.listdir(directory):
         f = os.path.join(directory, filename)
         if os.path.isdir(f):
-            process_directory(f)
+            clean_directory(f)
             continue
         if filename == "Impl.md":
             os.remove(f)
@@ -88,13 +88,18 @@ def process_directory(directory):
             os.remove(f)
             continue
 
+
+def process_directory(directory):
     for filename in os.listdir(directory):
         f = os.path.join(directory, filename)
-        if os.path.isfile(f):
-            rewrite_file(directory, f)
+        if os.path.isdir(f):
+            process_directory(f)
+            continue
+        rewrite_file(directory, f)
 
 
 if __name__ == "__main__":
     args = sys.argv[1:]
     print(args)
+    clean_directory(args[0])
     process_directory(args[0])

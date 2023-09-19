@@ -90,10 +90,8 @@ def process_directory(directory):
 
     for filename in os.listdir(directory):
         f = os.path.join(directory, filename)
-        if os.path.isdir(f):
-            process_directory(f)
-            continue
-        rewrite_file(directory, f)
+        if os.path.isfile(f):
+            rewrite_file(directory, f)
 
 
 if __name__ == "__main__":

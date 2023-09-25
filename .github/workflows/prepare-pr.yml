@@ -44,7 +44,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
           cmake --build . -t third_party -j 2
       - name: Tidy
-        uses: ZedThree/clang-tidy-review@master
+        uses: Geode-solutions/clang-tidy-review@master
         with:
           build_dir: build/${{ inputs.directory }}
 

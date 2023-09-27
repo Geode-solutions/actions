@@ -12,7 +12,7 @@ LIST_MARKERS = ("* ", "- ", "+ ")
 
 def bake_bucket(output, bucket, directory):
     for item in sorted(bucket):
-        filename = item[item.find("(") + 1: item.find(")")]
+        filename = item[item.find("(") + 1 : item.find(")")]
         file = os.path.join(directory, filename)
         if os.path.exists(file):
             output.write(item)
@@ -30,19 +30,19 @@ def sort(stream, output, directory):
                 buckets.clear()
             output.write(line)
             continue
-
+        stripped = stripped.replace("_Bool", "bool")
         if stripped[:2] in LIST_MARKERS:
             buckets.add(line)
-        elif stripped[:11] == "*Defined at":
-            continue
+        # elif stripped[:11] == "*Defined at":
+        #     continue
         elif stripped[0] == "*" and stripped[-2] == "*":
             output.write("```cpp\n")
             output.write(stripped[1:-2])
             output.write("\n```\n")
         elif stripped[:7] == "public " or stripped[:10] == "protected ":
             output.write("```cpp\n")
-            output.write(line)
-            output.write("```\n")
+            output.write(stripped)
+            output.write("\n```\n")
         elif stripped[0] == "#" and "<" in stripped and ">" in stripped:
             output.write(stripped.split("<", 1)[0])
             output.write("\n")

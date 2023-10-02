@@ -10,7 +10,8 @@ Checks: >
   -llvm-header-guard,
   -misc-no-recursion,
   -modernize-use-trailing-return-type,
-  -readability-redundant-access-specifiers
+  -readability-redundant-access-specifiers,
+  -readability-convert-member-functions-to-static
 
 CheckOptions:
   - key:    misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic

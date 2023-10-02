@@ -57,6 +57,7 @@ CheckOptions:
     value:  '
             utility;
             cstddef;
+            bitsery/ext/.*;
             math.h;
             geode/.*_export\.h;
             geode/.*/common\.h;

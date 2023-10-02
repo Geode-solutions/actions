@@ -41,6 +41,8 @@ CheckOptions:
     value: lower_case
   - key: readability-identifier-naming.GlobalConstantCase
     value: UPPER_CASE
+  - key: readability-identifier-naming.GlobalConstantIgnoredRegexp
+    value: dimension
   - key: readability-identifier-naming.GlobalFunctionCase
     value: lower_case
   - key: readability-identifier-naming.MemberConstantCase

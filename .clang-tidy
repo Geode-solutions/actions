@@ -57,9 +57,6 @@ CheckOptions:
     value: 4
   - key: misc-include-cleaner.IgnoreHeaders
     value:  '
-            math.h;
-            utility;
-            cstddef;
             geode/.*_export\.h;
             geode/.*/common\.h;
             geode/basic/types\.h;

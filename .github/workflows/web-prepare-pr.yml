@@ -10,6 +10,6 @@ concurrency:
 
 jobs:         
   prepare:
-    uses: Geode-solutions/actions/.github/workflows/web/prepare.yml@master
+    uses: Geode-solutions/actions/.github/workflows/web-prepare.yml@master
     secrets: inherit
   

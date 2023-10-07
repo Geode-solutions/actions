@@ -25,7 +25,7 @@ jobs:
         - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu", lib: "lib"}
         - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel", lib: "lib64"}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
         ref: ${{ inputs.branch }}
     - uses: actions/cache/restore@v3
       with:
@@ -74,7 +74,7 @@ jobs:
   windows:  
     runs-on: windows-2019
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
         ref: ${{ inputs.branch }}
     - uses: actions/cache/restore@v3
       with:

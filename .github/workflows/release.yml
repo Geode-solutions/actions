@@ -20,7 +20,7 @@ jobs:
       new_release: ${{ steps.semantic.outputs.new_release_published }}
       new_version: ${{ steps.semantic.outputs.new_release_version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           token: ${{ secrets.TOKEN }}
       - name: Semantic Release

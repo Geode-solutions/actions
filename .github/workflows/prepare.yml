@@ -18,7 +18,7 @@ jobs:
     outputs:
       changes_detected: ${{ steps.commit.outputs.changes_detected }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           token: ${{ secrets.TOKEN }}
       - name: "pip-compile"

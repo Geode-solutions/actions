@@ -33,7 +33,7 @@ jobs:
               lib: "lib64",
             }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           ref: ${{ inputs.branch }}
       - uses: actions/cache/restore@v3
@@ -87,7 +87,7 @@ jobs:
         config:
           - { python: "3.11", tag: "cp311-cp311" }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           ref: ${{ inputs.branch }}
       - uses: actions/cache/restore@v3
@@ -132,7 +132,7 @@ jobs:
   windows:
     runs-on: windows-2019
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           ref: ${{ inputs.branch }}
       - uses: actions/cache/restore@v3

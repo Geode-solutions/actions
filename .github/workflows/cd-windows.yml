@@ -32,7 +32,7 @@ jobs:
           - { system: "win64", shared: "ON" }
           - { system: "win64-static", shared: "OFF" }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           repository: ${{ inputs.repo }}
           token: ${{ secrets.TOKEN }}

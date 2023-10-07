@@ -57,7 +57,7 @@ jobs:
               shared: "OFF",
             }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           repository: ${{ inputs.repo }}
       - uses: actions/cache/restore@v3

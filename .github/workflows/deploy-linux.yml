@@ -1,4 +1,4 @@
-on: 
+on:
   workflow_call:
     inputs:
       name:
@@ -28,76 +28,100 @@ jobs:
     strategy:
       matrix:
         config:
-        - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu", doc: true, lib: "lib", shared: "ON"}
-        - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel", doc: false, lib: "lib64", shared: "ON"}
-        - {container: "ghcr.io/geode-solutions/ubuntu:master", system: "ubuntu-static", doc: false, lib: "lib", shared: "OFF"}
-        - {container: "ghcr.io/geode-solutions/centos:master", system: "rhel-static", doc: false, lib: "lib64", shared: "OFF"}
+          - {
+              container: "ghcr.io/geode-solutions/ubuntu:master",
+              system: "ubuntu",
+              doc: true,
+              lib: "lib",
+              shared: "ON",
+            }
+          - {
+              container: "ghcr.io/geode-solutions/centos:master",
+              system: "rhel",
+              doc: false,
+              lib: "lib64",
+              shared: "ON",
+            }
+          - {
+              container: "ghcr.io/geode-solutions/ubuntu:master",
+              system: "ubuntu-static",
+              doc: false,
+              lib: "lib",
+              shared: "OFF",
+            }
+          - {
+              container: "ghcr.io/geode-solutions/centos:master",
+              system: "rhel-static",
+              doc: false,
+              lib: "lib64",
+              shared: "OFF",
+            }
     steps:
-    - uses: actions/checkout@v3
-      with:
-        repository: ${{ inputs.repo }}
-    - uses: actions/cache/restore@v3
-      with:
-        path: build/third_party
-        key: ${{ runner.os }}-${{ matrix.config.system }}-${{ hashFiles('cmake/Configure**.cmake') }}
-    - uses: Geode-solutions/actions/get-release@master
-      id: repos
-      with:
-        repository: ${{ inputs.repos }}
-        file: '-${{ matrix.config.system }}-private.tar.gz'
-        token: ${{ secrets.TOKEN }}
-    - name: Libraries
-      id: libraries
-      run: |
-        new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/${{ matrix.config.lib }}\:/g')
-        echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
-    - name: Generate package
-      run: |
-        mkdir -p build
-        cd build
-        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=${{ inputs.version }} -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
-        cmake --build . -j 2
-        cd ${{ inputs.directory }}
-        cpack -D CPACK_COMPONENTS_ALL="public;private" .
-        for i in *.tar.gz; do mv $i $(echo $i | sed 's/\.tar\.gz/\-private\.tar\.gz/g'); done
-        cmake --build . --target package
-    - name: Upload
-      run: |
-        git config --global --add safe.directory $GITHUB_WORKSPACE
-        files="build/${{ inputs.directory }}/*.tar.gz"
-        echo v${{ inputs.version }}
-        for file in $files
-        do
-          echo $file
-          counter=0
-          for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY v${{ inputs.version }} $file && break || counter=$[$counter +1] && sleep 30; done
-          echo $counter
-          if [ "$counter" -eq "5" ]; then exit 1; fi
-        done
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-    - name: Doc
-      if: matrix.config.doc
-      run: curl -s https://raw.githubusercontent.com/Geode-solutions/actions/master/doc/doc.sh | bash -s -- ${GITHUB_WORKSPACE}/build/${{ inputs.directory }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
-    - name: Set base_directory
-      if: matrix.config.doc
-      run: |
-        pwd
-        echo "base_directory=$(pwd)" >> $GITHUB_ENV
-    - name: Doc
-      if: matrix.config.doc
-      uses: Geode-solutions/actions/doc@master
-      with:
-        directory: ${{ inputs.directory }} 
-        base_directory: ${{ env.base_directory }}
-        token: ${{ secrets.TOKEN }}
-    - name: Notify slack
-      if: failure()
-      uses: 8398a7/action-slack@v3
-      with:
-        status: failure
-        fields: repo,message,commit,author,action,eventName,ref,workflow
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repo }}
+      - uses: actions/cache/restore@v3
+        with:
+          path: build/third_party
+          key: ${{ runner.os }}-${{ matrix.config.system }}-${{ hashFiles('cmake/Configure**.cmake') }}
+      - uses: Geode-solutions/actions/get-release@master
+        id: repos
+        with:
+          repository: ${{ inputs.repos }}
+          file: "-${{ matrix.config.system }}-private.tar.gz"
+          token: ${{ secrets.TOKEN }}
+      - name: Libraries
+        id: libraries
+        run: |
+          new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/${{ matrix.config.lib }}\:/g')
+          echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
+      - name: Generate package
+        run: |
+          mkdir -p build
+          cd build
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=${{ inputs.version }} -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
+          cmake --build . -j 2
+          cd ${{ inputs.directory }}
+          cpack -D CPACK_COMPONENTS_ALL="public;private" .
+          for i in *.tar.gz; do mv $i $(echo $i | sed 's/\.tar\.gz/\-private\.tar\.gz/g'); done
+          cmake --build . --target package
+      - name: Upload
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          files="build/${{ inputs.directory }}/*.tar.gz"
+          echo v${{ inputs.version }}
+          for file in $files
+          do
+            echo $file
+            counter=0
+            for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY v${{ inputs.version }} $file && break || counter=$[$counter +1] && sleep 30; done
+            echo $counter
+            if [ "$counter" -eq "5" ]; then exit 1; fi
+          done
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Doc
+        if: matrix.config.doc
+        run: curl -s https://raw.githubusercontent.com/Geode-solutions/actions/master/doc/doc.sh | bash -s -- ${GITHUB_WORKSPACE}/build/${{ inputs.directory }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      - name: Set base_directory
+        if: matrix.config.doc
+        run: |
+          pwd
+          echo "base_directory=$(pwd)" >> $GITHUB_ENV
+      - name: Doc
+        if: matrix.config.doc
+        uses: Geode-solutions/actions/doc@master
+        with:
+          directory: ${{ inputs.directory }}
+          base_directory: ${{ env.base_directory }}
+          token: ${{ secrets.TOKEN }}
+      - name: Notify slack
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

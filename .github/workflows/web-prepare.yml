@@ -1,11 +1,11 @@
-on: 
+on:
   workflow_call:
     outputs:
       changes_detected:
         description: "commit has been done"
         value: ${{ jobs.prepare.outputs.changes_detected }}
     secrets:
-      TOKEN: 
+      TOKEN:
         required: true
 
 jobs:
@@ -14,15 +14,16 @@ jobs:
     outputs:
       changes_detected: ${{ steps.commit.outputs.changes_detected }}
     steps:
-    - uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.TOKEN }}
-    - name: "Get config files"
-      run: |
-        curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.prettierrc\?ref\=master > .prettierrc
-    - name: Prettier
-      run: npx prettier --write .
-    - uses: stefanzweifel/git-auto-commit-action@v4
-      id: commit
-      with:
-        commit_message: Apply prepare changes
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.TOKEN }}
+      - name: "Get config files"
+        run: |
+          curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.prettierrc\?ref\=master > .prettierrc
+          curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.eslintrc.cjs\?ref\=master > .eslintrc
+      - name: Prettier
+        run: npx prettier --write .
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        id: commit
+        with:
+          commit_message: Apply prepare changes

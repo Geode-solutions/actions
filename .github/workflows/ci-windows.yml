@@ -1,4 +1,4 @@
-on: 
+on:
   workflow_call:
     inputs:
       directory:
@@ -18,75 +18,74 @@ jobs:
     strategy:
       matrix:
         config:
-        - {system: "win64", shared: "ON"}
-        - {system: "win64-static", shared: "OFF"}
+          - { system: "win64", shared: "ON" }
+          - { system: "win64-static", shared: "OFF" }
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/cache@v3
-      with:
-        path: build/third_party
-        key: ${{ runner.os }}-${{ matrix.config.system }}-${{ hashFiles('cmake/Configure**.cmake') }}
-    - uses: Geode-solutions/actions/get-release@master
-      id: repos
-      with:
-        repository: ${{ inputs.repos }}
-        file: '-${{ matrix.config.system }}-private.zip'
-        token: ${{ secrets.TOKEN }}
-    - name: Libraries
-      id: libraries
-      run: |
-        $old_path = "${{ steps.repos.outputs.path }}"
-        $bin_path = $old_path.replace(";", "\bin;")
-        echo "bin=$bin_path" >> $env:GITHUB_OUTPUT
-        $share_path = $old_path.replace(";", "\share;")
-        echo "share=$share_path" >> $env:GITHUB_OUTPUT
-    - uses: TheMrMilchmann/setup-msvc-dev@v2
-      with:
-        arch: x64
-    - name: Compile & Test
-      run: |
-        choco install openssl -r --no-progress
-        if(!$?) { exit 1 }
-        if(!(test-path build)) { mkdir build }
-        cd build
-        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
-        cmake --build . -t third_party
-        cd ${{ inputs.directory }}
-        $paths = "${{ steps.libraries.outputs.bin }}"
-        echo $paths
-        Foreach($path in $paths.split(";")){
-          if(Test-Path -Path $path) {
-            Copy-Item -Path $path\* -Destination bin
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v3
+        with:
+          path: build/third_party
+          key: ${{ runner.os }}-${{ matrix.config.system }}-${{ hashFiles('cmake/Configure**.cmake') }}
+      - uses: Geode-solutions/actions/get-release@master
+        id: repos
+        with:
+          repository: ${{ inputs.repos }}
+          file: "-${{ matrix.config.system }}-private.zip"
+          token: ${{ secrets.TOKEN }}
+      - name: Libraries
+        id: libraries
+        run: |
+          $old_path = "${{ steps.repos.outputs.path }}"
+          $bin_path = $old_path.replace(";", "\bin;")
+          echo "bin=$bin_path" >> $env:GITHUB_OUTPUT
+          $share_path = $old_path.replace(";", "\share;")
+          echo "share=$share_path" >> $env:GITHUB_OUTPUT
+      - uses: TheMrMilchmann/setup-msvc-dev@v2
+        with:
+          arch: x64
+      - name: Compile & Test
+        run: |
+          choco install openssl -r --no-progress
+          if(!$?) { exit 1 }
+          if(!(test-path build)) { mkdir build }
+          cd build
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+          cmake --build . -t third_party
+          cd ${{ inputs.directory }}
+          $paths = "${{ steps.libraries.outputs.bin }}"
+          echo $paths
+          Foreach($path in $paths.split(";")){
+            if(Test-Path -Path $path) {
+              Copy-Item -Path $path\* -Destination bin
+            }
           }
-        }
-        if(!(test-path share)) { 
-          mkdir share
-        }
-        $shares = "${{ steps.libraries.outputs.share }}"
-        echo $shares
-        Foreach($share in $shares.split(";")){
-          if(Test-Path -Path $share) {
-            Copy-Item -Path $share\* -Destination share -Recurse
+          if(!(test-path share)) { 
+            mkdir share
           }
-        }
-        if( "${{ matrix.config.shared }}" -eq "ON" ) {
-          cmake --build . -j 2
-          cmake --build . -t install
-          ctest --output-on-failure -j 2
-        }else{
-          cmake --build . -t essential -j 2
-          cmake --build . -t install
-          ctest --output-on-failure -j 2 -L essential
-        }
-      env:
-        GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
-    - name: Notify slack
-      if: failure() && github.ref == 'refs/heads/master'
-      uses: 8398a7/action-slack@v3
-      with:
-        status: failure
-        fields: repo,message,commit,author,action,eventName,ref,workflow
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
-      
+          $shares = "${{ steps.libraries.outputs.share }}"
+          echo $shares
+          Foreach($share in $shares.split(";")){
+            if(Test-Path -Path $share) {
+              Copy-Item -Path $share\* -Destination share -Recurse
+            }
+          }
+          if( "${{ matrix.config.shared }}" -eq "ON" ) {
+            cmake --build . -j 2
+            cmake --build . -t install
+            ctest --output-on-failure -j 2
+          }else{
+            cmake --build . -t essential -j 2
+            cmake --build . -t install
+            ctest --output-on-failure -j 2 -L essential
+          }
+        env:
+          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+      - name: Notify slack
+        if: failure() && github.ref == 'refs/heads/master'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

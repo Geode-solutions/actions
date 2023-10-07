@@ -17,16 +17,16 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
-jobs:         
+jobs:
   prepare:
     uses: Geode-solutions/actions/.github/workflows/prepare.yml@master
     secrets: inherit
-  
+
   tidy:
     needs: prepare
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/cache/restore@v3
         with:
           path: build/third_party
@@ -35,7 +35,7 @@ jobs:
         id: repos
         with:
           repository: ${{ inputs.repos }}
-          file: '-ubuntu-private.tar.gz'
+          file: "-ubuntu-private.tar.gz"
           token: ${{ secrets.TOKEN }}
       - name: Configure
         run: |
@@ -52,7 +52,7 @@ jobs:
     needs: prepare
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/cache/restore@v3
         with:
           path: build/third_party
@@ -61,7 +61,7 @@ jobs:
         id: repos
         with:
           repository: ${{ inputs.repos }}
-          file: '-ubuntu-private.tar.gz'
+          file: "-ubuntu-private.tar.gz"
           token: ${{ secrets.TOKEN }}
       - name: Sanitizers
         run: |

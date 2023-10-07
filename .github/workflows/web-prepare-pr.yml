@@ -8,8 +8,16 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
-jobs:         
+jobs:
   prepare:
     uses: Geode-solutions/actions/.github/workflows/web-prepare.yml@master
     secrets: inherit
-  
+
+  eslint:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Eslint and plugins
+        run: npm install -g eslint eslint-plugin-vue eslint-plugin-vuetify eslint-plugin-nuxt
+      - uses: reviewdog/action-eslint@v1

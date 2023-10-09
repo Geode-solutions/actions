@@ -19,5 +19,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install Eslint and plugins
-        run: npm install eslint eslint-plugin-vue@latest eslint-plugin-vuetify eslint-plugin-nuxt --save-dev
+        run: npm install eslint eslint-plugin-vue@latest eslint-plugin-vuetify @nuxt/eslint-config --save-dev
       - uses: reviewdog/action-eslint@v1

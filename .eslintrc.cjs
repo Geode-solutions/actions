@@ -11,4 +11,4 @@ module.exports = {
         "plugin:vuetify/recommended",
         "plugin:@nuxt/eslint-config",
     ],
-};
+}

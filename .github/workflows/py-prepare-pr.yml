@@ -12,3 +12,14 @@ jobs:
   prepare:
     uses: Geode-solutions/actions/.github/workflows/py-prepare.yml@master
     secrets: inherit
+
+  pylint:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dciborow/action-pylint@main
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          glob_pattern: "**/*.py"

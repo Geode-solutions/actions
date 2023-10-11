@@ -1,0 +1,27 @@
+on:
+  workflow_call:
+    outputs:
+      changes_detected:
+        description: "commit has been done"
+        value: ${{ jobs.prepare.outputs.changes_detected }}
+    secrets:
+      TOKEN:
+        required: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      changes_detected: ${{ steps.commit.outputs.changes_detected }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.TOKEN }}
+      - name: Black
+        run: |
+          pip install black
+          black .
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        id: commit
+        with:
+          commit_message: Apply prepare changes

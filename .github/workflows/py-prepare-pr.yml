@@ -1,0 +1,14 @@
+on:
+  workflow_call:
+    secrets:
+      TOKEN:
+        required: true
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    uses: Geode-solutions/actions/.github/workflows/py-prepare.yml@master
+    secrets: inherit

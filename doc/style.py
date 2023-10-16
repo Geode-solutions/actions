@@ -33,8 +33,8 @@ def sort(stream, output, directory):
         stripped = stripped.replace("_Bool", "bool")
         if stripped[:2] in LIST_MARKERS:
             buckets.add(line)
-        # elif stripped[:11] == "*Defined at":
-        #     continue
+        elif stripped[:11] == "*Defined at":
+            continue
         elif stripped[0] == "*" and stripped[-2] == "*":
             output.write("```cpp\n")
             output.write(stripped[1:-2])

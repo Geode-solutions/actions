@@ -21,6 +21,21 @@ def bake_bucket(output, bucket, directory):
 def sort(stream, output, directory):
     buckets = set()
 
+    output.write("<script setup>\n")
+    output.write("import {useRoute} from 'vitepress'\n")
+    output.write("const {path} = useRoute()\n")
+    output.write("const tokens = path.split('/')\n")
+    output.write("const words = tokens[2].split('-');\n")
+    output.write("for (let i = 0; i < words.length; i++) {\n")
+    output.write(
+        "    words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);\n"
+    )
+    output.write("    words[i] = words[i].replace('geode', 'Geode')\n")
+    output.write("}\n")
+    output.write("const name = words.join('-');\n")
+    output.write("</script>\n")
+    output.write("# Project {{ name }}\n\n")
+
     for line in stream:
         stripped = line.lstrip()
 

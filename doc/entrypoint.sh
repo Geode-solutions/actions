@@ -10,7 +10,8 @@ docs_path="/docs"
 
 cd build/$directory
 sed -i -E "s~$base_directory~/github/workspace~g" compile_commands.json
-clang-doc-18  --output=doc --doxygen --public --format=md --executor=all-TUs compile_commands.json
+jq 'map(select(.file | test("/private/"; "i") | not))' compile_commands.json > public_compile_commands.json
+clang-doc-18  --output=doc --doxygen --public --format=md --executor=all-TUs public_compile_commands.json
 cd doc/geode
 python3 /style.py .
 

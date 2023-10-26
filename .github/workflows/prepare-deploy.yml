@@ -23,5 +23,4 @@ jobs:
     needs: semantic-release
     if: needs.semantic-release.outputs.new_release == 'true'
     uses: Geode-solutions/actions/.github/workflows/prepare.yml@master
-    secrets:
-      TOKEN: ${{ github.token }}
+    secrets: inherit 

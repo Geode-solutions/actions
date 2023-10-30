@@ -20,8 +20,6 @@ concurrency:
 jobs:
   prepare:
     uses: Geode-solutions/actions/.github/workflows/prepare.yml@master
-    with:
-      pip-compile: "--pre"
     secrets: inherit
 
   tidy:

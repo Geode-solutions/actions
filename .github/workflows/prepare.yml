@@ -4,6 +4,9 @@ on:
       directory:
         type: string
         default: "bindings/python"
+      pip-compile:
+        type: string
+        default: ""
     outputs:
       changes_detected:
         description: "commit has been done"
@@ -28,7 +31,7 @@ jobs:
             exit 0
           fi
           pip install pip-tools
-          pip-compile --pre --upgrade $file
+          pip-compile ${{ inputs.pip-compile }} --upgrade $file
           sed -i -E 's/==(.+)\.(.+)\.(.+)/==\1\.*,>=\1\.\2\.\3/' ${{ inputs.directory }}/requirements.txt
       - name: "Get config files"
         run: |

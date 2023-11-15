@@ -31,28 +31,24 @@ jobs:
           - {
               container: "ghcr.io/geode-solutions/ubuntu:master",
               system: "ubuntu",
-              doc: true,
               lib: "lib",
               shared: "ON",
             }
           - {
               container: "ghcr.io/geode-solutions/centos:master",
               system: "rhel",
-              doc: false,
               lib: "lib64",
               shared: "ON",
             }
           - {
               container: "ghcr.io/geode-solutions/ubuntu:master",
               system: "ubuntu-static",
-              doc: false,
               lib: "lib",
               shared: "OFF",
             }
           - {
               container: "ghcr.io/geode-solutions/centos:master",
               system: "rhel-static",
-              doc: false,
               lib: "lib64",
               shared: "OFF",
             }
@@ -100,18 +96,13 @@ jobs:
           done
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - name: Doc
-        if: matrix.config.doc
-        run: curl -s https://raw.githubusercontent.com/Geode-solutions/actions/master/doc/doc.sh | bash -s -- ${GITHUB_WORKSPACE}/build/${{ inputs.directory }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
       - name: Set base_directory
         if: matrix.config.doc
         run: |
           pwd
           echo "base_directory=$(pwd)" >> $GITHUB_ENV
       - name: Doc
-        if: matrix.config.doc
+        if: matrix.config.system == 'ubuntu' && github.ref == 'ref/head/master'
         uses: Geode-solutions/actions/doc@master
         with:
           directory: ${{ inputs.directory }}

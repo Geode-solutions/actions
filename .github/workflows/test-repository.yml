@@ -17,14 +17,14 @@ on:
 
 jobs:
   test-linux:
-    uses: Geode-solutions/actions/.github/workflows/test-linux.yml@master
+    uses: Geode-solutions/actions/.github/workflows/cpp-test-linux.yml@master
     with:
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
     secrets: inherit
 
   test-linux-python:
-    uses: Geode-solutions/actions/.github/workflows/test-linux-python.yml@master
+    uses: Geode-solutions/actions/.github/workflows/cpp-test-linux-python.yml@master
     with:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}

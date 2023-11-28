@@ -27,7 +27,7 @@ on:
 jobs:
   linux-python:
     runs-on: ubuntu-latest
-    container: "ghcr.io/geode-solutions/centos:master"
+    container: "ghcr.io/geode-solutions/rhel:master"
     strategy:
       matrix:
         python: ["3.8", "3.9", "3.10", "3.11"]

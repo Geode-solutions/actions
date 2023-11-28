@@ -23,15 +23,15 @@ on:
 jobs:
   linux-python:
     runs-on: ubuntu-latest
-    container: "ghcr.io/geode-solutions/centos:master"
+    container: "ghcr.io/geode-solutions/rhel:master"
     strategy:
       matrix:
-        config:
-          - { python: "3.8", tag: "cp38-cp38" }
-          - { python: "3.9", tag: "cp39-cp39" }
-          - { python: "3.10", tag: "cp310-cp310" }
-          - { python: "3.11", tag: "cp311-cp311" }
+        python: ["3.8", "3.9", "3.10", "3.11"]
     steps:
+      - name: Get info
+        id: info
+        run: |
+          echo "tag=cp${{ matrix.python }}-cp${{ matrix.python }}" | sed 's/\.//g' >> $GITHUB_OUTPUT
       - uses: actions/checkout@v3
       - uses: actions/cache/restore@v3
         with:
@@ -50,10 +50,10 @@ jobs:
           echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
       - name: Compile
         run: |
-          export PATH=/opt/python/${{ matrix.config.tag }}/bin:$PATH
+          export PATH=/opt/python/${{ steps.info.outputs.tag  }}/bin:$PATH
           mkdir -p build
           cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.config.python }} -DWHEEL_VERSION:STRING=${{ inputs.version }} -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF ..
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} -DWHEEL_VERSION:STRING=${{ inputs.version }} -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF ..
           cmake --build . -j 2
           cd ${{ inputs.directory }}
           cmake --build . --target wheel --config Release

@@ -24,58 +24,49 @@ on:
 jobs:
   linux:
     runs-on: ubuntu-latest
-    container: ${{ matrix.config.container }}
+    container: ghcr.io/geode-solutions/${{ matrix.system }}:master
     strategy:
       matrix:
-        config:
-          - {
-              container: "ghcr.io/geode-solutions/ubuntu:master",
-              system: "ubuntu",
-              lib: "lib",
-              shared: "ON",
-            }
-          - {
-              container: "ghcr.io/geode-solutions/centos:master",
-              system: "rhel",
-              lib: "lib64",
-              shared: "ON",
-            }
-          - {
-              container: "ghcr.io/geode-solutions/ubuntu:master",
-              system: "ubuntu-static",
-              lib: "lib",
-              shared: "OFF",
-            }
-          - {
-              container: "ghcr.io/geode-solutions/centos:master",
-              system: "rhel-static",
-              lib: "lib64",
-              shared: "OFF",
-            }
+        system: ["ubuntu", "rhel"]
+        shared: ["ON", "OFF"]
     steps:
+      - name: Get info
+        id: info
+        run: |
+          if [ "${{ matrix.shared }}" = "ON" ]; then
+            echo "name=${{ matrix.system }}" >> $GITHUB_OUTPUT
+          else
+            echo "name=${{ matrix.system }}-static" >> $GITHUB_OUTPUT
+          fi
+
+          if [ "${{ matrix.system }}" = "rhel" ]; then
+            echo "lib=lib64" >> $GITHUB_OUTPUT
+          else
+            echo "lib=lib" >> $GITHUB_OUTPUT
+          fi
       - uses: actions/checkout@v3
         with:
           repository: ${{ inputs.repo }}
       - uses: actions/cache/restore@v3
         with:
           path: build/third_party
-          key: ${{ runner.os }}-${{ matrix.config.system }}-${{ hashFiles('cmake/Configure**.cmake') }}
+          key: ${{ runner.os }}-${{ steps.info.outputs.name }}-${{ hashFiles('cmake/Configure**.cmake') }}
       - uses: Geode-solutions/actions/get-release@master
         id: repos
         with:
           repository: ${{ inputs.repos }}
-          file: "-${{ matrix.config.system }}-private.tar.gz"
+          file: "-${{ steps.info.outputs.name }}-private.tar.gz"
           token: ${{ secrets.TOKEN }}
       - name: Libraries
         id: libraries
         run: |
-          new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/${{ matrix.config.lib }}\:/g')
+          new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/${{ steps.info.outputs.lib }}\:/g')
           echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
       - name: Generate package
         run: |
           mkdir -p build
           cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=${{ inputs.version }} -DCPACK_SYSTEM_NAME:STRING=${{ matrix.config.system }} ..
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=${{ matrix.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=${{ inputs.version }} -DCPACK_SYSTEM_NAME:STRING=${{ steps.info.outputs.name }} ..
           cmake --build . -j 2
           cd ${{ inputs.directory }}
           cpack -D CPACK_COMPONENTS_ALL="public;private" .
@@ -97,12 +88,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Set base_directory
-        if: matrix.config.doc
+        if: matrix.shared == 'ON' && matrix.system == 'ubuntu'
         run: |
           pwd
           echo "base_directory=$(pwd)" >> $GITHUB_ENV
       - name: Doc
-        if: matrix.config.system == 'ubuntu' && github.ref == 'ref/head/master'
+        if: matrix.shared == 'ON' && matrix.system == 'ubuntu' && github.ref == 'ref/head/master'
         uses: Geode-solutions/actions/doc@master
         with:
           directory: ${{ inputs.directory }}

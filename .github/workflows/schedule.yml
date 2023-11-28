@@ -28,7 +28,7 @@ jobs:
               lib: "lib",
             }
           - {
-              container: "ghcr.io/geode-solutions/centos:master",
+              container: "ghcr.io/geode-solutions/rhel:master",
               system: "rhel",
               lib: "lib64",
             }
@@ -81,7 +81,7 @@ jobs:
 
   linux-python:
     runs-on: ubuntu-latest
-    container: "ghcr.io/geode-solutions/centos:master"
+    container: "ghcr.io/geode-solutions/rhel:master"
     strategy:
       matrix:
         config:

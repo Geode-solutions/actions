@@ -22,5 +22,5 @@ jobs:
   prepare:
     needs: semantic-release
     if: needs.semantic-release.outputs.new_release == 'true'
-    uses: Geode-solutions/actions/.github/workflows/prepare.yml@master
-    secrets: inherit 
+    uses: Geode-solutions/actions/.github/workflows/cpp-prepare.yml@master
+    secrets: inherit

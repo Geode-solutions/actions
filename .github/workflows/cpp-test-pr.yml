@@ -1,9 +1,9 @@
 on:
   workflow_call:
     inputs:
-      # name:
-      #   type: string
-      #   required: true
+      name:
+        type: string
+        required: true
       directory:
         type: string
         default: "."
@@ -50,6 +50,7 @@ jobs:
 
   sanitizers:
     needs: prepare
+    if: !github.event.pull_request.draft
     runs-on: ghcr.io/geode-solutions/ubuntu:master
     steps:
       - uses: actions/checkout@v3
@@ -75,3 +76,13 @@ jobs:
           ctest --output-on-failure -j 2
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+
+  test-repository:
+    needs: prepare
+    uses: Geode-solutions/actions/.github/workflows/cpp-test-repository.yml@master
+    with:
+      name: ${{ inputs.name }}
+      directory: ${{ inputs.directory }}
+      repos: ${{ inputs.repos }}
+      light: ${{ github.event.pull_request.draft }}
+    secrets: inherit

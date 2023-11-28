@@ -32,14 +32,14 @@ jobs:
     secrets: inherit
 
   test-windows:
-    uses: Geode-solutions/actions/.github/workflows/test-windows.yml@master
+    uses: Geode-solutions/actions/.github/workflows/cpp-test-windows.yml@master
     with:
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
     secrets: inherit
 
   test-windows-python:
-    uses: Geode-solutions/actions/.github/workflows/test-windows-python.yml@master
+    uses: Geode-solutions/actions/.github/workflows/cpp-test-windows-python.yml@master
     with:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}

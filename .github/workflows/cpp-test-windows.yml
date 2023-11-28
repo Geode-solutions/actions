@@ -6,6 +6,9 @@ on:
         default: "."
       repos:
         type: string
+      light:
+        type: boolean
+        default: false
     secrets:
       TOKEN:
         required: true
@@ -17,20 +20,27 @@ jobs:
     runs-on: windows-2019
     strategy:
       matrix:
-        config:
-          - { system: "win64", shared: "ON" }
-          - { system: "win64-static", shared: "OFF" }
+        shared: ["ON", "OFF"]
     steps:
+      - name: Get info
+        id: info
+        run: |
+          if( "${{ matrix.shared }}" -eq "ON" ) {
+            echo "name=win64" >> $env:GITHUB_OUTPUT
+          }
+          else {
+            echo "name=win64-static" >> $env:GITHUB_OUTPUT
+          }
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
           path: build/third_party
-          key: ${{ runner.os }}-${{ matrix.config.system }}-${{ hashFiles('cmake/Configure**.cmake') }}
+          key: ${{ runner.os }}-${{ steps.info.outputs.name }}-${{ hashFiles('cmake/Configure**.cmake') }}
       - uses: Geode-solutions/actions/get-release@master
         id: repos
         with:
           repository: ${{ inputs.repos }}
-          file: "-${{ matrix.config.system }}-private.zip"
+          file: "-${{ steps.info.outputs.name }}-private.zip"
           token: ${{ secrets.TOKEN }}
       - name: Libraries
         id: libraries
@@ -49,7 +59,7 @@ jobs:
           if(!$?) { exit 1 }
           if(!(test-path build)) { mkdir build }
           cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS:BOOL=${{ matrix.config.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS:BOOL=${{ matrix.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
           cmake --build . -t third_party
           cd ${{ inputs.directory }}
           $paths = "${{ steps.libraries.outputs.bin }}"
@@ -69,14 +79,14 @@ jobs:
               Copy-Item -Path $share\* -Destination share -Recurse
             }
           }
-          if( "${{ matrix.config.shared }}" -eq "ON" ) {
+          if( "${{ matrix.shared }}" -eq "ON" ) {
             cmake --build . -j 2
             cmake --build . -t install
-            ctest --output-on-failure -j 2
+            ctest --output-on-failure --no-tests=error -j 2
           }else{
             cmake --build . -t essential -j 2
             cmake --build . -t install
-            ctest --output-on-failure -j 2 -L essential
+            ctest --output-on-failure --no-tests=error -j 2 -L essential
           }
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

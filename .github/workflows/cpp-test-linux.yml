@@ -65,7 +65,6 @@ jobs:
           cd ${{ inputs.directory }}
           cmake --build . -t essential
           cmake --build . -t install
-          ctest --output-on-failure -j 2 -L essential
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
       - name: Test
@@ -76,10 +75,10 @@ jobs:
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
           if [ "${{ matrix.shared }}" = "ON" ]; then 
             cmake --build .
-            ctest --output-on-failure -j 2
+            ctest --output-on-failure --no-tests=error -j 2
           else
             cmake --build . -t essential
-            ctest --output-on-failure -j 2 -L essential
+            ctest --output-on-failure --no-tests=error -j 2 -L essential
           fi
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

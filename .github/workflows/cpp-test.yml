@@ -1,0 +1,35 @@
+on:
+  workflow_call:
+    inputs:
+      name:
+        type: string
+        required: true
+      directory:
+        type: string
+        default: "."
+      repos:
+        type: string
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-repository:
+    uses: Geode-solutions/actions/.github/workflows/cpp-test-repository.yml@master
+    with:
+      name: ${{ inputs.name }}
+      directory: ${{ inputs.directory }}
+      repos: ${{ inputs.repos }}
+      light: true
+    secrets: inherit
+
+  trigger-deploy:
+    needs: test-repository
+    uses: Geode-solutions/actions/.github/workflows/trigger-deploy.yml@master
+    secrets: inherit

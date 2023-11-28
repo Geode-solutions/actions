@@ -1,0 +1,54 @@
+on:
+  workflow_call:
+    inputs:
+      name:
+        type: string
+        required: true
+      directory:
+        type: string
+        default: "."
+      repos:
+        type: string
+      light:
+        type: boolean
+        default: false
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  test-linux:
+    uses: Geode-solutions/actions/.github/workflows/cpp-test-linux.yml@master
+    with:
+      directory: ${{ inputs.directory }}
+      repos: ${{ inputs.repos }}
+      light: ${{ inputs.light }}
+    secrets: inherit
+
+  test-linux-python:
+    uses: Geode-solutions/actions/.github/workflows/cpp-test-linux-python.yml@master
+    with:
+      name: ${{ inputs.name }}
+      directory: ${{ inputs.directory }}
+      repos: ${{ inputs.repos }}
+      light: ${{ inputs.light }}
+    secrets: inherit
+
+  test-windows:
+    uses: Geode-solutions/actions/.github/workflows/cpp-test-windows.yml@master
+    with:
+      directory: ${{ inputs.directory }}
+      repos: ${{ inputs.repos }}
+      light: ${{ inputs.light }}
+    secrets: inherit
+
+  test-windows-python:
+    uses: Geode-solutions/actions/.github/workflows/cpp-test-windows-python.yml@master
+    with:
+      name: ${{ inputs.name }}
+      directory: ${{ inputs.directory }}
+      repos: ${{ inputs.repos }}
+      light: ${{ inputs.light }}
+    secrets: inherit

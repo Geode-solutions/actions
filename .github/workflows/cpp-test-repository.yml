@@ -17,7 +17,7 @@ on:
         default: "Debug"
       branch:
         type: string
-        default: ${{ github.ref_name }}
+        default: ${{ github.ref }}
     secrets:
       TOKEN:
         required: true

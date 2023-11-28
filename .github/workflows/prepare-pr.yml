@@ -50,7 +50,8 @@ jobs:
 
   sanitizers:
     needs: prepare
-    runs-on: ghcr.io/geode-solutions/ubuntu:master
+    runs-on: ubuntu-latest
+    container: ghcr.io/geode-solutions/ubuntu:master
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache/restore@v3

@@ -20,18 +20,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  cancel-if-PR:
+  skip:
     runs-on: ubuntu-latest
+    outputs:
+      pr_found: ${{ steps.PR.outputs.pr_found }}
     steps:
       - uses: actions/checkout@v3
       - uses: 8BitJonny/gh-get-current-pr@2.2.0
         id: PR
-      - name: cancelling
-        if: steps.PR.outputs.pr_found == 'true'
-        uses: andymckay/cancel-action@0.3
 
   test-repository:
-    needs: cancel-if-PR
+    needs: skip
+    if: needs.skip.outputs.pr_found == 'false'
     uses: Geode-solutions/actions/.github/workflows/cpp-test-repository.yml@master
     with:
       name: ${{ inputs.name }}

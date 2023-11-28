@@ -1,4 +1,4 @@
-on: 
+on:
   workflow_call:
     secrets:
       TOKEN:
@@ -20,4 +20,4 @@ jobs:
           status: failure
           fields: repo,message,commit,author,action,eventName,ref,workflow
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

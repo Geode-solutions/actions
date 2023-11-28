@@ -1,0 +1,26 @@
+on:
+  workflow_call:
+    secrets:
+      TOKEN:
+        required: true
+
+jobs:
+  semantic-release:
+    runs-on: ubuntu-latest
+    outputs:
+      new_release: ${{ steps.semantic.outputs.new_release_published }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v3
+        id: semantic
+        with:
+          dry_run: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+  prepare:
+    needs: semantic-release
+    if: needs.semantic-release.outputs.new_release == 'true'
+    uses: Geode-solutions/actions/.github/workflows/cpp-prepare.yml@master
+    secrets: inherit

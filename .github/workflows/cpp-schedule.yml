@@ -1,0 +1,31 @@
+on:
+  workflow_call:
+    inputs:
+      name:
+        type: string
+        required: true
+      directory:
+        type: string
+        default: "."
+      repos:
+        type: string
+      branch:
+        type: string
+        default: "master"
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  test-repository:
+    uses: Geode-solutions/actions/.github/workflows/cpp-test-repository.yml@master
+    with:
+      name: ${{ inputs.name }}
+      directory: ${{ inputs.directory }}
+      repos: ${{ inputs.repos }}
+      light: true
+      type: "Release"
+      branch: ${{ inputs.branch }}
+    secrets: inherit

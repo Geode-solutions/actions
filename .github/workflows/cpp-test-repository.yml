@@ -12,6 +12,12 @@ on:
       light:
         type: boolean
         default: false
+      type:
+        type: string
+        default: "Debug"
+      branch:
+        type: string
+        default: ${{ github.ref_name }}
     secrets:
       TOKEN:
         required: true
@@ -25,6 +31,8 @@ jobs:
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
       light: ${{ inputs.light }}
+      type: ${{ inputs.type }}
+      branch: ${{ inputs.branch }}
     secrets: inherit
 
   test-linux-python:
@@ -34,6 +42,8 @@ jobs:
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
       light: ${{ inputs.light }}
+      type: ${{ inputs.type }}
+      branch: ${{ inputs.branch }}
     secrets: inherit
 
   test-windows:
@@ -42,6 +52,8 @@ jobs:
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
       light: ${{ inputs.light }}
+      type: ${{ inputs.type }}
+      branch: ${{ inputs.branch }}
     secrets: inherit
 
   test-windows-python:
@@ -51,4 +63,6 @@ jobs:
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
       light: ${{ inputs.light }}
+      type: ${{ inputs.type }}
+      branch: ${{ inputs.branch }}
     secrets: inherit

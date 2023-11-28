@@ -26,7 +26,7 @@ jobs:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
-      light: true
+      light: ${{ github.ref_name }} != 'next'
     secrets: inherit
 
   trigger-deploy:

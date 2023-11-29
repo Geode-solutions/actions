@@ -1,11 +1,11 @@
-const core = require("@actions/core")
-const github = require("@actions/github")
-const { Octokit } = require("@octokit/rest")
-const fs = require("fs")
-const path = require("path")
-const request = require("request")
-const tar = require("tar")
-const AdmZip = require("adm-zip")
+import core from "@actions/core"
+import github from "@actions/github"
+import { Octokit } from "@octokit/rest"
+import fs from "fs"
+import path from "path"
+import request from "request"
+import tar from "tar"
+import AdmZip from "adm-zip"
 
 const main = async () => {
   try {

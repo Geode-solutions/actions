@@ -88,12 +88,25 @@ jobs:
       light: ${{ github.event.pull_request.draft }}
     secrets: inherit
 
-  trigger-deploy:
+  release:
+    runs-on: ubuntu-latest
     needs: test-repository
     if: github.event.pull_request.draft == false
-    uses: Geode-solutions/actions/.github/workflows/cpp-deploy-branch.yml@master
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create Release
+        id: release
+        run: gh release create ${{ github.ref }} --prerelease --repo ${{ github.repository }} --title ${{ github.ref }} --target ${{ github.ref }}
+
+  deploy-repository:
+    needs: release
+    uses: Geode-solutions/actions/.github/workflows/cpp-deploy-repository.yml@master
     with:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
+      version: ${{ github.ref }}
+      prefix-release: ""
+      upload-pypi: false
+      upload-gh: true
     secrets: inherit

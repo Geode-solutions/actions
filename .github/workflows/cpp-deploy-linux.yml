@@ -15,6 +15,9 @@ on:
       version:
         type: string
         required: true
+      extra:
+        type: string
+        default: ""
     secrets:
       TOKEN:
         required: true
@@ -66,7 +69,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=${{ matrix.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=${{ inputs.version }} -DCPACK_SYSTEM_NAME:STRING=${{ steps.info.outputs.name }} ..
+          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=${{ matrix.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=${{ inputs.version }} -DCPACK_SYSTEM_NAME:STRING=${{ steps.info.outputs.name }} ..
           cmake --build . -j 2
           cd ${{ inputs.directory }}
           cpack -D CPACK_COMPONENTS_ALL="public;private" .

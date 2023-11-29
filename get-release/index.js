@@ -29,15 +29,20 @@ const main = async () => {
         let promise = new Promise(function (resolve) {
           console.log("Looking for repository:", repo)
           const outputFile = repo.concat(file)
-          console.log(github)
-          console.log(github.context.payload.pull_request)
           const query =
             github.ref === "refs/heads/master"
               ? octokit.repos
                   .getLatestRelease({ owner, repo })
                   .then((release) => release.data.id)
               : octokit.repos.listReleases({ owner, repo }).then((releases) => {
-                  console.log(releases.data)
+                  if (github.context.payload.pull_request) {
+                    const release = releases.data.find(
+                      (r) => r.name === github.context.payload.pull_request.base.ref
+                    )
+                    if (release) {
+                      return release.id
+                    }
+                  }
                   return releases.data[0].id
                 })
           query.then((release_id) => {

@@ -18,9 +18,6 @@ on:
       upload-pypi:
         type: boolean
         default: true
-      upload-gh:
-        type: boolean
-        default: false
     secrets:
       TOKEN:
         required: true
@@ -70,7 +67,6 @@ jobs:
           pip install twine
           twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --skip-existing --verbose build/${{ inputs.directory }}/wheel/dist/*.whl
       - name: Upload GH
-        if: inputs.upload-gh
         run: |
           Get-ChildItem -Path "build/${{ inputs.directory }}/wheel/dist" -Filter *.whl | Foreach-Object { gh release upload --clobber --repo ${env:GITHUB_REPOSITORY} ${{ inputs.release }} $_.FullName }
         env:

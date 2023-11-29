@@ -128,5 +128,4 @@ jobs:
       version: "0.0.0"
       release: ${{ github.head_ref }}-tag
       upload-pypi: false
-      upload-gh: true
     secrets: inherit

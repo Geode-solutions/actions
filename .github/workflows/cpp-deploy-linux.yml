@@ -18,6 +18,9 @@ on:
       extra:
         type: string
         default: ""
+      prefix-release:
+        type: string
+        default: "v"
     secrets:
       TOKEN:
         required: true
@@ -79,22 +82,17 @@ jobs:
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
           files="build/${{ inputs.directory }}/*.tar.gz"
-          echo v${{ inputs.version }}
           for file in $files
           do
             echo $file
             counter=0
-            for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY v${{ inputs.version }} $file && break || counter=$[$counter +1] && sleep 30; done
+            for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY ${{ inputs.prefix-release }}${{ inputs.version }} $file && break || counter=$[$counter +1] && sleep 30; done
             echo $counter
             if [ "$counter" -eq "5" ]; then exit 1; fi
           done
+          echo "base_directory=$(pwd)" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - name: Set base_directory
-        if: matrix.shared == 'ON' && matrix.system == 'ubuntu'
-        run: |
-          pwd
-          echo "base_directory=$(pwd)" >> $GITHUB_ENV
       - name: Doc
         if: matrix.shared == 'ON' && matrix.system == 'ubuntu' && github.ref == 'ref/head/master'
         uses: Geode-solutions/actions/doc@master

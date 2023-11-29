@@ -12,6 +12,12 @@ on:
       version:
         type: string
         required: true
+      upload-pypi:
+        type: boolean
+        default: true
+      upload-gh:
+        type: boolean
+        default: false
     secrets:
       TOKEN:
         required: true
@@ -60,6 +66,7 @@ jobs:
           cd wheel/dist
           rename linux manylinux2014 *.whl
       - name: PyPI
+        if: inputs.upload-pypi
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           skip-existing: true
@@ -67,6 +74,19 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
           packages-dir: "build/${{ inputs.directory }}/wheel/dist"
+      - name: Upload GH
+        if: inputs.upload-gh
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          files="build/${{ inputs.directory }}/wheel/dist/*.whl"
+          for file in $files
+          do
+            echo $file
+            counter=0
+            for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY ${{ inputs.version }} $file && break || counter=$[$counter +1] && sleep 30; done
+            echo $counter
+            if [ "$counter" -eq "5" ]; then exit 1; fi
+          done
       - name: Notify slack
         if: failure()
         uses: 8398a7/action-slack@v3

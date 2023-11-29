@@ -15,6 +15,15 @@ on:
       version:
         type: string
         required: true
+      prefix-release:
+        type: string
+        default: "v"
+      upload-pypi:
+        type: boolean
+        default: true
+      upload-gh:
+        type: boolean
+        default: false
     secrets:
       TOKEN:
         required: true
@@ -32,6 +41,7 @@ jobs:
       repo: ${{ inputs.repo }}
       repos: ${{ inputs.repos }}
       version: ${{ inputs.version }}
+      prefix-release: ${{ inputs.prefix-release }}
     secrets: inherit
 
   release-linux-python:
@@ -41,6 +51,8 @@ jobs:
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
       version: ${{ inputs.version }}
+      upload-pypi: ${{ inputs.upload-pypi }}
+      upload-gh: ${{ inputs.upload-gh }}
     secrets: inherit
 
   release-windows:
@@ -51,6 +63,7 @@ jobs:
       repo: ${{ inputs.repo }}
       repos: ${{ inputs.repos }}
       version: ${{ inputs.version }}
+      prefix-release: ${{ inputs.prefix-release }}
     secrets: inherit
 
   release-windows-python:
@@ -60,6 +73,8 @@ jobs:
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
       version: ${{ inputs.version }}
+      upload-pypi: ${{ inputs.upload-pypi }}
+      upload-gh: ${{ inputs.upload-gh }}
     secrets: inherit
 
   public-release:

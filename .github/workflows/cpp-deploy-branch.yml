@@ -1,0 +1,38 @@
+on:
+  workflow_call:
+    inputs:
+      name:
+        type: string
+        required: true
+      directory:
+        type: string
+        default: "."
+      repos:
+        type: string
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create Release
+        id: release
+        run: gh release create ${{ github.ref }} --prerelease --repo ${{ inputs.repo }} --title ${{ github.ref }} --target ${{ github.ref }}
+
+  deploy-repository:
+    needs: release
+    uses: Geode-solutions/actions/.github/workflows/cpp-deploy-repository.yml@master
+    with:
+      name: ${{ inputs.name }}
+      directory: ${{ inputs.directory }}
+      repos: ${{ inputs.repos }}
+      version: ${{ github.ref }}
+      prefix-release: ""
+      upload-pypi: false
+      upload-gh: true
+    secrets: inherit

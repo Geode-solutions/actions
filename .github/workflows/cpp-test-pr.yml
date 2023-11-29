@@ -87,3 +87,13 @@ jobs:
       repos: ${{ inputs.repos }}
       light: ${{ github.event.pull_request.draft }}
     secrets: inherit
+
+  trigger-deploy:
+    needs: test-repository
+    if: github.event.pull_request.draft == false
+    uses: Geode-solutions/actions/.github/workflows/cpp-deploy-branch.yml@master
+    with:
+      name: ${{ inputs.name }}
+      directory: ${{ inputs.directory }}
+      repos: ${{ inputs.repos }}
+    secrets: inherit

@@ -110,8 +110,8 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: ${{ github.head_ref }}-tag,
-              name: ${{ github.head_ref }}
-              prerelease: true
+              name: ${{ github.head_ref }},
+              prerelease: true,
               target_commitish: ${{ github.head_ref }}
             })
         env:

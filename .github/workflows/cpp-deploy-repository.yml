@@ -51,6 +51,7 @@ jobs:
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
       version: ${{ inputs.version }}
+      release: ${{ inputs.release }}
       upload-pypi: ${{ inputs.upload-pypi }}
       upload-gh: ${{ inputs.upload-gh }}
     secrets: inherit
@@ -73,6 +74,7 @@ jobs:
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
       version: ${{ inputs.version }}
+      release: ${{ inputs.release }}
       upload-pypi: ${{ inputs.upload-pypi }}
       upload-gh: ${{ inputs.upload-gh }}
     secrets: inherit

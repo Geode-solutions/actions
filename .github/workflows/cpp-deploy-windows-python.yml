@@ -12,6 +12,9 @@ on:
       version:
         type: string
         required: true
+      release:
+        type: string
+        default: v${{ inputs.version }}
       upload-pypi:
         type: boolean
         default: true
@@ -69,7 +72,7 @@ jobs:
       - name: Upload GH
         if: inputs.upload-gh
         run: |
-          Get-ChildItem -Path "build/${{ inputs.directory }}/wheel/dist" -Filter *.whl | Foreach-Object { gh release upload --clobber --repo ${env:GITHUB_REPOSITORY} ${{ inputs.version }} $_.FullName }
+          Get-ChildItem -Path "build/${{ inputs.directory }}/wheel/dist" -Filter *.whl | Foreach-Object { gh release upload --clobber --repo ${env:GITHUB_REPOSITORY} ${{ inputs.release }} $_.FullName }
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Notify slack

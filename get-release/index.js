@@ -29,8 +29,7 @@ const main = async () => {
         let promise = new Promise(function (resolve) {
           console.log("Looking for repository:", repo)
           const outputFile = repo.concat(file)
-          console.log(github.ref)
-          console.log(github.head_ref)
+          console.log(github)
           const query =
             github.ref === "refs/heads/master"
               ? octokit.repos

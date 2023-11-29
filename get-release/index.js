@@ -30,6 +30,7 @@ const main = async () => {
           console.log("Looking for repository:", repo)
           const outputFile = repo.concat(file)
           console.log(github)
+          console.log(github.context.payload.pull_request)
           const query =
             github.ref === "refs/heads/master"
               ? octokit.repos

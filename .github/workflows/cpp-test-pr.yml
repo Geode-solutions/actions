@@ -94,7 +94,7 @@ jobs:
     if: github.event.pull_request.draft == false
     steps:
       - name: Create Release
-        run: gh release create ${{ github.head_ref }} --prerelease --repo ${{ github.repository }} --title ${{ github.head_ref }} --target ${{ github.head_ref }}
+        run: gh release create ${{ github.head_ref }}-tag --prerelease --repo ${{ github.repository }} --title ${{ github.head_ref }} --target ${{ github.head_ref }}
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -106,7 +106,7 @@ jobs:
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
       version: "0.0.0"
-      release: ${{ github.head_ref }}
+      release: ${{ github.head_ref }}-tag
       upload-pypi: false
       upload-gh: true
     secrets: inherit

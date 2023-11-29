@@ -105,8 +105,8 @@ jobs:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
-      version: ${{ github.ref }}
-      prefix-release: ""
+      version: "0.0.0"
+      release: ${{ github.head_ref }}
       upload-pypi: false
       upload-gh: true
     secrets: inherit

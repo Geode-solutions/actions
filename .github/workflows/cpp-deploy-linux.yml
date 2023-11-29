@@ -15,12 +15,12 @@ on:
       version:
         type: string
         required: true
+      release:
+        type: string
+        default: v${{ inputs.version }}
       extra:
         type: string
         default: ""
-      prefix-release:
-        type: string
-        default: "v"
     secrets:
       TOKEN:
         required: true
@@ -86,7 +86,7 @@ jobs:
           do
             echo $file
             counter=0
-            for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY ${{ inputs.prefix-release }}${{ inputs.version }} $file && break || counter=$[$counter +1] && sleep 30; done
+            for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY ${{ inputs.release }} $file && break || counter=$[$counter +1] && sleep 30; done
             echo $counter
             if [ "$counter" -eq "5" ]; then exit 1; fi
           done

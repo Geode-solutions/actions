@@ -18,12 +18,12 @@ on:
       version:
         type: string
         required: true
+      release:
+        type: string
+        default: v${{ inputs.version }}
       extra:
         type: string
         default: ""
-      prefix-release:
-        type: string
-        default: "v"
     secrets:
       TOKEN:
         required: true
@@ -68,7 +68,7 @@ jobs:
           if(!$?) { exit 1 }
           if(!(test-path build)) { mkdir build }
           cd build
-          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=${{ inputs.config }} -DBUILD_SHARED_LIBS:BOOL=${{ matrix.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=${{ inputs.version }} -DCPACK_SYSTEM_NAME:STRING=${{ matrix.system }} ..
+          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=${{ inputs.config }} -DBUILD_SHARED_LIBS:BOOL=${{ matrix.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=${{ inputs.version }} -DCPACK_SYSTEM_NAME:STRING=${{ steps.info.outputs.name }} ..
           cmake --build .
           cd ${{ inputs.directory }}
           cpack -D CPACK_COMPONENTS_ALL="public;private"
@@ -77,7 +77,7 @@ jobs:
           Remove-Item -Recurse -Force _CPack_Packages
       - name: Upload
         run: |
-          Get-ChildItem -Path "build/${{ inputs.directory }}" -Filter *.zip | Foreach-Object { gh release upload --clobber --repo ${env:GITHUB_REPOSITORY} ${{ inputs.prefix-release }}${{ inputs.version }} $_.FullName }
+          Get-ChildItem -Path "build/${{ inputs.directory }}" -Filter *.zip | Foreach-Object { gh release upload --clobber --repo ${env:GITHUB_REPOSITORY} ${{ inputs.release }} $_.FullName }
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Notify slack

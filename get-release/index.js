@@ -59,7 +59,18 @@ const main = async () => {
                 const asset = assets.data.find((asset) =>
                   asset.name.includes(file)
                 )
-                console.log("Asset:", asset)
+                console.log(
+                  "Asset:",
+                  asset,
+                  asset == undefined,
+                  asset === undefined,
+                  asset == "undefined",
+                  asset === "undefined",
+                  typeof asset == undefined,
+                  typeof asset === undefined,
+                  typeof asset == "undefined",
+                  typeof asset === "undefined"
+                )
                 if (typeof asset === undefined) {
                   resolve("")
                 }

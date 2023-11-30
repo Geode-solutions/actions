@@ -60,7 +60,7 @@ const main = async () => {
                   asset.name.includes(file)
                 )
                 console.log("Asset:", asset)
-                if (asset === undefined) {
+                if (asset == undefined) {
                   resolve("")
                 }
                 console.log("Asset name:", asset.name)

@@ -37,7 +37,8 @@ const main = async () => {
               : octokit.repos.listReleases({ owner, repo }).then((releases) => {
                   if (github.context.payload.pull_request) {
                     const release = releases.data.find(
-                      (r) => r.name === github.context.payload.pull_request.base.ref
+                      (r) =>
+                        r.name === github.context.payload.pull_request.base.ref
                     )
                     if (release) {
                       return release.id
@@ -104,6 +105,13 @@ const main = async () => {
                           fs.unlinkSync(outputFile)
                           resolve(result)
                         })
+                    } else if (extension == "whl") {
+                      console.log("Skipping", asset.name)
+                      const result = path.join(
+                        process.env.GITHUB_WORKSPACE,
+                        asset.name
+                      )
+                      resolve(result)
                     }
                   })
               })

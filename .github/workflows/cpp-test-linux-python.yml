@@ -53,6 +53,12 @@ jobs:
           repository: ${{ inputs.repos }}
           file: "-rhel-private.tar.gz"
           token: ${{ secrets.TOKEN }}
+      - uses: Geode-solutions/actions/get-release@master
+        id: wheels
+        with:
+          repository: ${{ inputs.repos }}
+          file: "${{ steps.info.outputs.tag }}-manilinux2014_x86_64.whl"
+          token: ${{ secrets.TOKEN }}
       - name: Libraries
         id: libraries
         run: |

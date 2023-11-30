@@ -59,6 +59,7 @@ const main = async () => {
                 const asset = assets.data.find((asset) =>
                   asset.name.includes(file)
                 )
+                console.log("Asset:", asset)
                 if (!asset) {
                   resolve("")
                 }

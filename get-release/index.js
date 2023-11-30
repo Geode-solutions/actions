@@ -60,7 +60,7 @@ const main = async () => {
                   asset.name.includes(file)
                 )
                 console.log("Asset:", asset)
-                if (!Object.hasOwn(asset, "name")) {
+                if (asset === undefined) {
                   resolve("")
                 }
                 console.log("Asset name:", asset.name)

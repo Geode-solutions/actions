@@ -43,6 +43,12 @@ const main = async () => {
                       return release.id
                     }
                   }
+                  const release = releases.data.find(
+                    (r) => r.name.startsWith("v") && r.name.includes("-rc.")
+                  )
+                  if (release) {
+                    return release.id
+                  }
                   return releases.data[0].id
                 })
           query.then((release_id) => {

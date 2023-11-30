@@ -137,7 +137,11 @@ const main = async () => {
       })
       Promise.all(results).then((outputs) => {
         let result = ""
-        outputs.forEach((output) => (result += output + ";"))
+        outputs.forEach((output) => {
+          if (output !== undefined) {
+            result += output + ";"
+          }
+        })
         core.setOutput("path", result)
         console.log("Final result:", result)
       })

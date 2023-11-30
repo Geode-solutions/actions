@@ -59,6 +59,9 @@ const main = async () => {
                 const asset = assets.data.find((asset) =>
                   asset.name.includes(file)
                 )
+                if (!asset) {
+                  resolve("")
+                }
                 console.log("Asset name:", asset.name)
                 request({
                   url: asset.url,

@@ -59,18 +59,6 @@ const main = async () => {
                 const asset = assets.data.find((asset) =>
                   asset.name.includes(file)
                 )
-                console.log(
-                  "Asset:",
-                  asset,
-                  asset == undefined,
-                  asset === undefined,
-                  asset == "undefined",
-                  asset === "undefined",
-                  typeof asset == undefined,
-                  typeof asset === undefined,
-                  typeof asset == "undefined",
-                  typeof asset === "undefined"
-                )
                 if (asset === undefined) {
                   resolve()
                   return
@@ -122,10 +110,10 @@ const main = async () => {
                           resolve(result)
                         })
                     } else if (extension == "whl") {
-                      console.log("Skipping", asset.name)
+                      console.log("Skipping", outputFile)
                       const result = path.join(
                         process.env.GITHUB_WORKSPACE,
-                        asset.name
+                        outputFile
                       )
                       resolve(result)
                     }

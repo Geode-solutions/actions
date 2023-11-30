@@ -57,7 +57,7 @@ jobs:
         id: wheels
         with:
           repository: ${{ inputs.repos }}
-          file: "${{ steps.info.outputs.tag }}-manylinux2014_x86_64.whl"
+          file: "-${{ steps.info.outputs.tag }}-manylinux2014_x86_64.whl"
           token: ${{ secrets.TOKEN }}
       - name: Libraries
         id: libraries

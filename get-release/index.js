@@ -28,7 +28,6 @@ const main = async () => {
         }
         let promise = new Promise(function (resolve) {
           console.log("Looking for repository:", repo)
-          const outputFile = repo.concat(file)
           const query =
             github.ref === "refs/heads/master"
               ? octokit.repos
@@ -73,12 +72,12 @@ const main = async () => {
                     "User-Agent": "",
                   },
                 })
-                  .pipe(fs.createWriteStream(outputFile))
+                  .pipe(fs.createWriteStream(asset.name))
                   .on("finish", function () {
-                    const extension = outputFile.split(".").pop()
+                    const extension = asset.name.split(".").pop()
                     if (extension == "zip") {
                       console.log("Unzipping", asset.name)
-                      const zip = new AdmZip(outputFile)
+                      const zip = new AdmZip(asset.name)
                       zip.extractAllTo(process.env.GITHUB_WORKSPACE)
                       let extract_name = asset.name.slice(0, -4)
                       if (extract_name.endsWith("-private")) {
@@ -93,7 +92,7 @@ const main = async () => {
                       resolve(result)
                     } else if (extension == "gz") {
                       console.log("Untaring", asset.name)
-                      fs.createReadStream(outputFile)
+                      fs.createReadStream(asset.name)
                         .pipe(tar.x())
                         .on("close", function () {
                           let extract_name = asset.name.slice(0, -7)
@@ -106,14 +105,14 @@ const main = async () => {
                             extract_name
                           )
                           console.log("Result:", result)
-                          fs.unlinkSync(outputFile)
+                          fs.unlinkSync(asset.name)
                           resolve(result)
                         })
                     } else if (extension == "whl") {
-                      console.log("Skipping", outputFile)
+                      console.log("Skipping", asset.name)
                       const result = path.join(
                         process.env.GITHUB_WORKSPACE,
-                        outputFile
+                        asset.name
                       )
                       resolve(result)
                     }

@@ -52,4 +52,5 @@ jobs:
       repo: ${{ inputs.repo }}
       repos: ${{ inputs.repos }}
       version: ${{ needs.semantic-release.outputs.new_version }}
+      release: v${{ needs.semantic-release.outputs.new_version }}
     secrets: inherit

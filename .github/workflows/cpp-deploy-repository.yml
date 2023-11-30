@@ -17,7 +17,7 @@ on:
         required: true
       release:
         type: string
-        default: v${{ inputs.version }}
+        required: true
       upload-pypi:
         type: boolean
         default: true

@@ -72,9 +72,8 @@ const main = async () => {
                   typeof asset === "undefined"
                 )
                 if (asset === undefined) {
-                  console.log("avant resolve")
-                  resolve("")
-                  console.log("apres resolve")
+                  resolve()
+                  return
                 }
                 console.log("Asset name:", asset.name)
                 request({

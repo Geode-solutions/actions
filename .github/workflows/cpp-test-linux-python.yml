@@ -61,6 +61,7 @@ jobs:
         run: |
           new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/lib64\:/g')
           echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
+          echo "PATH=/opt/python/${{ steps.info.outputs.tag }}/bin:$PATH" >> $GITHUB_ENV
       - uses: Geode-solutions/actions/get-release@master
         if: ${{ !inputs.wheels_from_pypi }}
         id: wheels

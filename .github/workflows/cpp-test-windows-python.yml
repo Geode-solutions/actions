@@ -82,6 +82,7 @@ jobs:
           $wheels ="${{ steps.wheels.outputs.path }}"
           $wheels = $wheels.replace(";", " ")
           echo $wheels
+          dir
           pip install --no-deps $wheels
       - name: Wheels from Pypi
         if: ${{ inputs.wheels_from_pypi }}

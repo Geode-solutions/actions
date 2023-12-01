@@ -129,6 +129,7 @@ const main = async () => {
             result += output + ";"
           }
         })
+        result = result.slice(0, -1)
         core.setOutput("path", result)
         console.log("Final result:", result)
       })

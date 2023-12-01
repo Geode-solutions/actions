@@ -62,20 +62,20 @@ jobs:
           new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/lib64\:/g')
           echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
       - uses: Geode-solutions/actions/get-release@master
-        if: !inputs.wheels_from_pypi
+        if: ${{ !inputs.wheels_from_pypi }}
         id: wheels
         with:
           repository: ${{ inputs.repos }}
           file: "-${{ steps.info.outputs.tag }}-manylinux2014_x86_64.whl"
           token: ${{ secrets.TOKEN }}
       - name: Wheels from Github
-        if: !inputs.wheels_from_pypi
+        if: ${{ !inputs.wheels_from_pypi }}
         run: |
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
           echo $wheels
           pip install --no-deps $wheels
       - name: Wheels from Pypi
-        if: inputs.wheels_from_pypi
+        if: ${{ inputs.wheels_from_pypi }}
         run: |
           requirements="bindings/python/requirements.txt"
           if [ -f "$requirements" ]; then 

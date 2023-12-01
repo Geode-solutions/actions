@@ -80,10 +80,9 @@ jobs:
         if: ${{ !inputs.wheels_from_pypi }}
         run: |
           $wheels ="${{ steps.wheels.outputs.path }}"
-          $wheels = $wheels.replace(";", " ")
-          echo $wheels
-          dir
-          pip install --no-deps $wheels
+          Foreach($wheel in $wheels.split(";")){
+            pip install --no-deps $wheel
+          }
       - name: Wheels from Pypi
         if: ${{ inputs.wheels_from_pypi }}
         run: |

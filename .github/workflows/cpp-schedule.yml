@@ -28,4 +28,5 @@ jobs:
       light: true
       type: "Release"
       branch: ${{ inputs.branch }}
+      wheels_from_pypi: true
     secrets: inherit

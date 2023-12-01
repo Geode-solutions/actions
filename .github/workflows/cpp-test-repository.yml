@@ -18,6 +18,9 @@ on:
       branch:
         type: string
         default: ${{ github.ref }}
+      wheels_from_pypi:
+        type: boolean
+        default: false
     secrets:
       TOKEN:
         required: true
@@ -44,6 +47,7 @@ jobs:
       light: ${{ inputs.light }}
       type: ${{ inputs.type }}
       branch: ${{ inputs.branch }}
+      wheels_from_pypi: ${{ inputs.wheels_from_pypi }}
     secrets: inherit
 
   test-windows:
@@ -65,4 +69,5 @@ jobs:
       light: ${{ inputs.light }}
       type: ${{ inputs.type }}
       branch: ${{ inputs.branch }}
+      wheels_from_pypi: ${{ inputs.wheels_from_pypi }}
     secrets: inherit

@@ -79,8 +79,8 @@ jobs:
       - name: Wheels from Github
         if: ${{ !inputs.wheels_from_pypi }}
         run: |
-          wheels ="${{ steps.wheels.outputs.path }}"
-          wheels = $wheels.replace(";", " ")
+          $wheels ="${{ steps.wheels.outputs.path }}"
+          $wheels = $wheels.replace(";", " ")
           echo $wheels
           pip install --no-deps $wheels
       - name: Wheels from Pypi

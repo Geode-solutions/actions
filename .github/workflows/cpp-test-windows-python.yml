@@ -80,8 +80,10 @@ jobs:
         if: ${{ !inputs.wheels_from_pypi }}
         run: |
           $wheels ="${{ steps.wheels.outputs.path }}"
-          Foreach($wheel in $wheels.split(";")){
-            pip install --no-deps $wheel
+          if(test-path -Path $requirements -PathType Leaf) {
+            Foreach($wheel in $wheels.split(";")){
+              pip install --no-deps $wheel
+            }
           }
       - name: Wheels from Pypi
         if: ${{ inputs.wheels_from_pypi }}

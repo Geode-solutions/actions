@@ -80,6 +80,7 @@ jobs:
         if: ${{ !inputs.wheels_from_pypi }}
         run: |
           $wheels ="${{ steps.wheels.outputs.path }}"
+          $requirements = "bindings/python/requirements.txt"
           if(test-path -Path $requirements -PathType Leaf) {
             Foreach($wheel in $wheels.split(";")){
               pip install --no-deps $wheel

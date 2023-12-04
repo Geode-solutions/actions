@@ -14,6 +14,7 @@ const main = async () => {
       let results = []
       const file = core.getInput("file", { required: true })
       const token = core.getInput("token")
+      const skip_master = core.getInput("skip-master")
       const octokit = new Octokit({ auth: token })
       repos.split(";").forEach((owner_repo) => {
         if (!owner_repo.length) {
@@ -28,8 +29,9 @@ const main = async () => {
         }
         let promise = new Promise(function (resolve) {
           console.log("Looking for repository:", repo)
+          console.log(github)
           const query =
-            github.ref === "refs/heads/master"
+            !skip_master && github.ref === "refs/heads/master"
               ? octokit.repos
                   .getLatestRelease({ owner, repo })
                   .then((release) => release.data.id)

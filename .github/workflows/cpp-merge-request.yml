@@ -16,10 +16,11 @@ jobs:
         with:
           github-token: ${{ secrets.TOKEN }}
           script: |
+            echo $$GITHUB_REF_NAME
             github.rest.actions.createWorkflowDispatch({
               owner: 'Geode-solutions',
               repo: 'Versions',
               workflow_id: 'cpp-merge-request.yml',
               ref: 'master',
-              inputs: { branch: '$GITHUB_REF_NAME' }
+              inputs: { branch: $GITHUB_REF_NAME }
             })

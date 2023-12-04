@@ -18,6 +18,9 @@ on:
       upload-pypi:
         type: boolean
         default: true
+      branch:
+        type: string
+        default: ${{ github.ref }}
     secrets:
       TOKEN:
         required: true
@@ -49,6 +52,7 @@ jobs:
           repository: ${{ inputs.repos }}
           file: "-rhel-private.tar.gz"
           token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
       - name: Libraries
         id: libraries
         run: |

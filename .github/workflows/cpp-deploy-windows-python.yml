@@ -18,6 +18,9 @@ on:
       upload-pypi:
         type: boolean
         default: true
+      branch:
+        type: string
+        default: ${{ github.ref }}
     secrets:
       TOKEN:
         required: true
@@ -48,6 +51,7 @@ jobs:
           repository: ${{ inputs.repos }}
           file: "win64-private.zip"
           token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
       - uses: TheMrMilchmann/setup-msvc-dev@v2
         with:
           arch: x64

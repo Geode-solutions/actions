@@ -37,6 +37,7 @@ jobs:
           repository: ${{ inputs.repos }}
           file: "-ubuntu-private.tar.gz"
           token: ${{ secrets.TOKEN }}
+          branch: ${{ github.event.pull_request.head.ref }}
       - name: Configure
         run: |
           mkdir -p build
@@ -65,6 +66,7 @@ jobs:
           repository: ${{ inputs.repos }}
           file: "-ubuntu-private.tar.gz"
           token: ${{ secrets.TOKEN }}
+          branch: ${{ github.event.pull_request.head.ref }}
       - name: Libraries
         id: libraries
         run: |

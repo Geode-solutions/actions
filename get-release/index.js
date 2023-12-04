@@ -35,12 +35,11 @@ const main = async () => {
                   .getLatestRelease({ owner, repo })
                   .then((release) => release.data.id)
               : octokit.repos.listReleases({ owner, repo }).then((releases) => {
-                console.log("PR:", github.context.payload.pull_request)
                   if (github.context.payload.pull_request) {
-                    console.log("PR ref:", github.context.payload.pull_request.base.ref)
+                    console.log("PR ref:", github.context.payload.pull_request.head.ref)
                     const release = releases.data.find(
                       (r) =>{console.log(r)
-                       return r.name === github.context.payload.pull_request.base.ref}
+                       return r.name === github.context.payload.pull_request.head.ref}
                     )
                     if (release) {
                       console.log("PR Release:", release)

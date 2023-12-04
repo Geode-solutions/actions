@@ -91,6 +91,7 @@ jobs:
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
       light: ${{ github.event.pull_request.draft }}
+      branch: ${{ github.event.pull_request.head.ref }}
     secrets: inherit
 
   release:

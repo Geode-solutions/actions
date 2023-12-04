@@ -69,6 +69,7 @@ jobs:
           repository: ${{ inputs.repos }}
           file: "-${{ steps.info.outputs.tag }}-manylinux2014_x86_64.whl"
           token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
       - name: Wheels from Github
         if: ${{ !inputs.wheels_from_pypi }}
         run: |

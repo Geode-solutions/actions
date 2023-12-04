@@ -50,6 +50,7 @@ jobs:
           repository: ${{ inputs.repos }}
           file: "-${{ steps.info.outputs.name }}-private.zip"
           token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
       - name: Libraries
         id: libraries
         run: |

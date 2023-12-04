@@ -10,10 +10,10 @@ inputs:
   token:
     description: "Github token"
     required: true
-  skip-master:
-    description: "skip the master branch"
+  branch:
+    description: "branch name"
     required: false
-    default: false
+    default: "master"
 outputs:
   path:
     description: "path of the extracted asset"

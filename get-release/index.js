@@ -14,7 +14,7 @@ const main = async () => {
       let results = []
       const file = core.getInput("file", { required: true })
       const token = core.getInput("token")
-      const skip_master = core.getInput("skip-master")
+      const branch = core.getInput("branch")
       const octokit = new Octokit({ auth: token })
       repos.split(";").forEach((owner_repo) => {
         if (!owner_repo.length) {
@@ -30,37 +30,34 @@ const main = async () => {
         let promise = new Promise(function (resolve) {
           console.log("Looking for repository:", repo)
           console.log(github)
-          const query =
-            !skip_master && github.ref === "refs/heads/master"
-              ? octokit.repos
-                  .getLatestRelease({ owner, repo })
-                  .then((release) => release.data.id)
-              : octokit.repos.listReleases({ owner, repo }).then((releases) => {
-                  if (github.context.payload.pull_request) {
-                    const release = releases.data.find(
-                      (r) =>
-                        r.name === github.context.payload.pull_request.head.ref
-                    )
-                    if (release) {
-                      return release.id
-                    }
-                  }
-                  if (github.ref_name) {
-                    const release = releases.data.find(
-                      (r) => r.name === github.ref_name
-                    )
-                    if (release) {
-                      return release.id
-                    }
-                  }
+          const query = github.ref.includes(branch)
+            ? octokit.repos
+                .getLatestRelease({ owner, repo })
+                .then((release) => release.data.id)
+            : octokit.repos.listReleases({ owner, repo }).then((releases) => {
+                if (github.context.payload.pull_request) {
                   const release = releases.data.find(
-                    (r) => r.name.startsWith("v") && r.name.includes("-rc.")
+                    (r) =>
+                      r.name === github.context.payload.pull_request.head.ref
                   )
                   if (release) {
                     return release.id
                   }
-                  return releases.data[0].id
-                })
+                }
+                const branch_release = releases.data.find(
+                  (r) => r.name === branch
+                )
+                if (branch_release) {
+                  return branch_release.id
+                }
+                const release = releases.data.find(
+                  (r) => r.name.startsWith("v") && r.name.includes("-rc.")
+                )
+                if (release) {
+                  return release.id
+                }
+                return releases.data[0].id
+              })
           query.then((release_id) => {
             octokit.repos
               .listReleaseAssets({ owner, repo, release_id })

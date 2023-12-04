@@ -29,7 +29,6 @@ const main = async () => {
         }
         let promise = new Promise(function (resolve) {
           console.log("Looking for repository:", repo)
-          console.log(github.context)
           const query = github.context.ref.includes(branch)
             ? octokit.repos
                 .getLatestRelease({ owner, repo })

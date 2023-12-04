@@ -16,7 +16,7 @@ jobs:
         with:
           github-token: ${{ secrets.TOKEN }}
           script: |
-            echo $$GITHUB_REF_NAME
+            echo $GITHUB_REF_NAME
             github.rest.actions.createWorkflowDispatch({
               owner: 'Geode-solutions',
               repo: 'Versions',

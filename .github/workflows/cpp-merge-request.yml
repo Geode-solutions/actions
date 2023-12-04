@@ -5,7 +5,17 @@ on:
         required: true
 
 jobs:
-  release:
+  request:
     runs-on: ubuntu-latest
     steps:
-      - run: echo $GITHUB_REF $GITHUB_REF_NAME
+      - uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN }}
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: 'Geode-solutions',
+              repo: 'Versions',
+              workflow_id: 'cpp-merge-request.yml',
+              ref: 'master',
+              inputs: { branch: '$GITHUB_REF_NAME' }
+            })

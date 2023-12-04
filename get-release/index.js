@@ -28,7 +28,6 @@ const main = async () => {
         }
         let promise = new Promise(function (resolve) {
           console.log("Looking for repository:", repo)
-          console.log(github.ref)
           const query =
             github.ref === "refs/heads/master"
               ? octokit.repos
@@ -36,13 +35,11 @@ const main = async () => {
                   .then((release) => release.data.id)
               : octokit.repos.listReleases({ owner, repo }).then((releases) => {
                   if (github.context.payload.pull_request) {
-                    console.log("PR ref:", github.context.payload.pull_request.head.ref)
                     const release = releases.data.find(
                       (r) =>{console.log(r)
                        return r.name === github.context.payload.pull_request.head.ref}
                     )
                     if (release) {
-                      console.log("PR Release:", release)
                       return release.id
                     }
                   }
@@ -50,10 +47,8 @@ const main = async () => {
                     (r) => r.name.startsWith("v") && r.name.includes("-rc.")
                   )
                   if (release) {
-                    console.log("pre Release:", release)
                     return release.id
                   }
-                  console.log("last Release:", release)
                   return releases.data[0].id
                 })
           query.then((release_id) => {

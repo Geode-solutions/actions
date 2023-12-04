@@ -36,8 +36,16 @@ const main = async () => {
               : octokit.repos.listReleases({ owner, repo }).then((releases) => {
                   if (github.context.payload.pull_request) {
                     const release = releases.data.find(
-                      (r) =>{console.log(r)
-                       return r.name === github.context.payload.pull_request.head.ref}
+                      (r) =>
+                        r.name === github.context.payload.pull_request.head.ref
+                    )
+                    if (release) {
+                      return release.id
+                    }
+                  }
+                  if (github.ref_name) {
+                    const release = releases.data.find(
+                      (r) => r.name === github.ref_name
                     )
                     if (release) {
                       return release.id

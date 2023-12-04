@@ -8,6 +8,10 @@ jobs:
   request:
     runs-on: ubuntu-latest
     steps:
+      - run: |
+          if [[ "$GITHUB_REF_NAME" == "master" || "$GITHUB_REF_NAME" == "next" ]]; then 
+            exit 1
+          fi
       - uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN }}

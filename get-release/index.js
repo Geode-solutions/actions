@@ -29,7 +29,6 @@ const main = async () => {
         }
         let promise = new Promise(function (resolve) {
           console.log("Looking for repository:", repo)
-          console.log(github.context.ref, branch, github.context.ref.includes(branch));
           const query = branch.includes("master")
             ? octokit.repos
                 .getLatestRelease({ owner, repo })
@@ -45,8 +44,7 @@ const main = async () => {
                   }
                 }
                 const branch_release = releases.data.find(
-                  (r) => {console.log(r.name)
-                    return r.name === branch}
+                  (r) =>  r.name === branch
                 )
                 if (branch_release) {
                   return branch_release.id

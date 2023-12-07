@@ -30,3 +30,17 @@ jobs:
       branch: ${{ inputs.branch }}
       wheels_from_pypi: true
     secrets: inherit
+
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ always() && needs.test-repository.result == 'failure' }}
+    needs: test-repository
+    steps:
+      - name: Notify slack
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

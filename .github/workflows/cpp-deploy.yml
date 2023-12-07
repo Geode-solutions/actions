@@ -54,3 +54,17 @@ jobs:
       version: ${{ needs.semantic-release.outputs.new_version }}
       release: v${{ needs.semantic-release.outputs.new_version }}
     secrets: inherit
+
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ always() && needs.deploy-repository.result == 'failure' }}
+    needs: deploy-repository
+    steps:
+      - name: Notify slack
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

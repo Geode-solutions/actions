@@ -111,7 +111,6 @@ const main = async () => {
                             extract_name
                           )
                           console.log("Result:", result)
-                          fs.unlinkSync(asset.name)
                           resolve(result)
                         })
                     } else if (extension == "whl") {

@@ -61,7 +61,6 @@ jobs:
     needs: deploy-repository
     steps:
       - name: Notify slack
-        if: failure()
         uses: 8398a7/action-slack@v3
         with:
           status: failure

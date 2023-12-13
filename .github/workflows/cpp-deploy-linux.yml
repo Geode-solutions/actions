@@ -105,11 +105,3 @@ jobs:
           directory: ${{ inputs.directory }}
           base_directory: ${{ env.base_directory }}
           token: ${{ secrets.TOKEN }}
-      # - name: Notify slack
-      #   if: failure()
-      #   uses: 8398a7/action-slack@v3
-      #   with:
-      #     status: failure
-      #     fields: repo,message,commit,author,action,eventName,ref,workflow
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

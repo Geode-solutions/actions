@@ -132,11 +132,3 @@ jobs:
           cmake --build . --target test-wheel
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
-      # - name: Notify slack
-      #   if: failure() && github.ref == 'refs/heads/next'
-      #   uses: 8398a7/action-slack@v3
-      #   with:
-      #     status: failure
-      #     fields: repo,message,commit,author,action,eventName,ref,workflow
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

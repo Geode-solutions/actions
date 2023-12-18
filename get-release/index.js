@@ -113,15 +113,13 @@ const main = async () => {
             octokit.repos
               .listReleaseAssets({ owner, repo, release_id })
               .then(async (assets) => {
-                console.log("assets",file)
                 const filtered_assets = assets.data.filter(
                   (asset) => asset.name.includes(file)
                 )
                 let results = []
-                console.log("filtered_assets",filtered_assets)
-                for(const filtered_asset in filtered_assets) {
-                  console.log("Asset name:", filtered_asset)
-                  const result = await download_asset(filtered_asset, token)
+                for(let i = 0; i <filtered_assets.length; i++){
+                  console.log("Asset name:", filtered_assets[i])
+                  const result = await download_asset( filtered_assets[i], token)
                   console.log("Asset name2:", result)
                   results.push(result)
                 }

@@ -64,7 +64,7 @@ const main = async () => {
                 const filtered_assets = assets.data.filter(
                   (asset) => !asset.name.includes(file)
                 )
-                results = []
+                let results = []
                 filtered_assets.forEach((asset) => {
                   console.log("Asset name:", asset.name)
                   request({

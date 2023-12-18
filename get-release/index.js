@@ -118,12 +118,10 @@ const main = async () => {
                 )
                 let results = []
                 for(let i = 0; i <filtered_assets.length; i++){
-                  console.log("Asset name:", filtered_assets[i])
+                  console.log("Asset name:", filtered_assets[i].name)
                   const result = await download_asset( filtered_assets[i], token)
-                  console.log("Asset name2:", result)
                   results.push(result)
                 }
-                console.log("Asset name3")
                 resolve(results)
               })
           })
@@ -132,7 +130,6 @@ const main = async () => {
       })
       Promise.all(promises).then((outputs) => {
         let result = ""
-        console.log("Outputs:", outputs)
         outputs.forEach((output) => {
           console.log("Output:", output)
           output.forEach((file) => {

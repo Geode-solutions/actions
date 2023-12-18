@@ -113,6 +113,7 @@ const main = async () => {
             octokit.repos
               .listReleaseAssets({ owner, repo, release_id })
               .then(async (assets) => {
+                console.log("assets",file)
                 const filtered_assets = assets.data.filter(
                   (asset) => !asset.name.includes(file)
                 )

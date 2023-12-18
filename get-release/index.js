@@ -115,7 +115,7 @@ const main = async () => {
               .then(async (assets) => {
                 console.log("assets",file)
                 const filtered_assets = assets.data.filter(
-                  (asset) => !asset.name.includes(file)
+                  (asset) => asset.name.includes(file)
                 )
                 let results = []
                 console.log("filtered_assets",filtered_assets)

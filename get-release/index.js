@@ -120,8 +120,10 @@ const main = async () => {
                 filtered_assets.forEach(async (asset) => {
                   console.log("Asset name:", asset.name)
                   const result = await download_asset(asset, token)
+                  console.log("Asset name2:", result)
                   results.push(result)
                 })
+                console.log("Asset name3")
                 resolve(results)
               })
           })

@@ -117,8 +117,9 @@ const main = async () => {
                   (asset) => !asset.name.includes(file)
                 )
                 let results = []
+                console.log("filtered_assets",filtered_assets)
                 for(const filtered_asset in filtered_assets) {
-                  console.log("Asset name:", filtered_asset.name)
+                  console.log("Asset name:", filtered_asset)
                   const result = await download_asset(filtered_asset, token)
                   console.log("Asset name2:", result)
                   results.push(result)

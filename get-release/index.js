@@ -11,7 +11,7 @@ const main = async () => {
   try {
     const repos = core.getInput("repository")
     if (repos.length) {
-      let results = []
+      let promises = []
       const file = core.getInput("file", { required: true })
       const token = core.getInput("token")
       const branch = core.getInput("branch")
@@ -44,7 +44,7 @@ const main = async () => {
                   }
                 }
                 const branch_release = releases.data.find(
-                  (r) =>  r.name === branch
+                  (r) => r.name === branch
                 )
                 if (branch_release) {
                   return branch_release.id
@@ -61,78 +61,78 @@ const main = async () => {
             octokit.repos
               .listReleaseAssets({ owner, repo, release_id })
               .then((assets) => {
-                const asset = assets.data.find((asset) =>
-                  asset.name.includes(file)
+                const filtered_assets = assets.data.filter(
+                  (asset) => !asset.name.includes(file)
                 )
-                if (asset === undefined) {
-                  resolve()
-                  return
-                }
-                console.log("Asset name:", asset.name)
-                request({
-                  url: asset.url,
-                  method: "GET",
-                  headers: {
-                    accept: "application/octet-stream",
-                    Authorization: "Bearer " + token,
-                    "User-Agent": "",
-                  },
-                })
-                  .pipe(fs.createWriteStream(asset.name))
-                  .on("finish", function () {
-                    const extension = asset.name.split(".").pop()
-                    if (extension == "zip") {
-                      console.log("Unzipping", asset.name)
-                      const zip = new AdmZip(asset.name)
-                      zip.extractAllTo(process.env.GITHUB_WORKSPACE)
-                      let extract_name = asset.name.slice(0, -4)
-                      if (extract_name.endsWith("-private")) {
-                        extract_name = extract_name.slice(0, -8)
-                      }
-                      console.log("Unzip to:", extract_name)
-                      const result = path.join(
-                        process.env.GITHUB_WORKSPACE,
-                        extract_name
-                      )
-                      console.log("Result:", result)
-                      resolve(result)
-                    } else if (extension == "gz") {
-                      console.log("Untaring", asset.name)
-                      fs.createReadStream(asset.name)
-                        .pipe(tar.x())
-                        .on("close", function () {
-                          let extract_name = asset.name.slice(0, -7)
-                          if (extract_name.endsWith("-private")) {
-                            extract_name = extract_name.slice(0, -8)
-                          }
-                          console.log("Untar to:", extract_name)
-                          const result = path.join(
-                            process.env.GITHUB_WORKSPACE,
-                            extract_name
-                          )
-                          console.log("Result:", result)
-                          resolve(result)
-                        })
-                    } else if (extension == "whl") {
-                      console.log("Skipping", asset.name)
-                      const result = path.join(
-                        process.env.GITHUB_WORKSPACE,
-                        asset.name
-                      )
-                      resolve(result)
-                    }
+                results = []
+                filtered_assets.forEach((asset) => {
+                  console.log("Asset name:", asset.name)
+                  request({
+                    url: asset.url,
+                    method: "GET",
+                    headers: {
+                      accept: "application/octet-stream",
+                      Authorization: "Bearer " + token,
+                      "User-Agent": "",
+                    },
                   })
+                    .pipe(fs.createWriteStream(asset.name))
+                    .on("finish", function () {
+                      const extension = asset.name.split(".").pop()
+                      if (extension == "zip") {
+                        console.log("Unzipping", asset.name)
+                        const zip = new AdmZip(asset.name)
+                        zip.extractAllTo(process.env.GITHUB_WORKSPACE)
+                        let extract_name = asset.name.slice(0, -4)
+                        if (extract_name.endsWith("-private")) {
+                          extract_name = extract_name.slice(0, -8)
+                        }
+                        console.log("Unzip to:", extract_name)
+                        const result = path.join(
+                          process.env.GITHUB_WORKSPACE,
+                          extract_name
+                        )
+                        console.log("Result:", result)
+                        results.push(result)
+                      } else if (extension == "gz") {
+                        console.log("Untaring", asset.name)
+                        fs.createReadStream(asset.name)
+                          .pipe(tar.x())
+                          .on("close", function () {
+                            let extract_name = asset.name.slice(0, -7)
+                            if (extract_name.endsWith("-private")) {
+                              extract_name = extract_name.slice(0, -8)
+                            }
+                            console.log("Untar to:", extract_name)
+                            const result = path.join(
+                              process.env.GITHUB_WORKSPACE,
+                              extract_name
+                            )
+                            console.log("Result:", result)
+                            results.push(result)
+                          })
+                      } else if (extension == "whl") {
+                        console.log("Skipping", asset.name)
+                        const result = path.join(
+                          process.env.GITHUB_WORKSPACE,
+                          asset.name
+                        )
+                        results.push(result)
+                      }
+                    })
+                })
+                resolve(results)
               })
           })
         })
-        results.push(promise)
+        promises.push(promise)
       })
-      Promise.all(results).then((outputs) => {
+      Promise.all(promises).then((outputs) => {
         let result = ""
         outputs.forEach((output) => {
-          if (output !== undefined) {
-            result += output + ";"
-          }
+          output.forEach((file) => {
+            result += file + ";"
+          })
         })
         result = result.slice(0, -1)
         core.setOutput("path", result)

@@ -8,7 +8,7 @@ import tar from "tar"
 import AdmZip from "adm-zip"
 
 const download_asset = async (asset, token) => {
-  const result = await new Promise((resolve) => {
+  return new Promise((resolve) => {
     request({
       url: asset.url,
       method: "GET",
@@ -57,8 +57,6 @@ const download_asset = async (asset, token) => {
         }
       })
   })
-  console.log("Result download:", result)
-  return result
 }
 
 const main = async () => {
@@ -119,9 +117,9 @@ const main = async () => {
                   (asset) => !asset.name.includes(file)
                 )
                 let results = []
-                filtered_assets.forEach((asset) => {
+                filtered_assets.forEach(async (asset) => {
                   console.log("Asset name:", asset.name)
-                  const result = download_asset(asset, token)
+                  const result = await download_asset(asset, token)
                   results.push(result)
                 })
                 resolve(results)

@@ -7,6 +7,60 @@ import request from "request"
 import tar from "tar"
 import AdmZip from "adm-zip"
 
+const download_asset = async (asset, token) => {
+  const result = await new Promise((resolve) => {
+    request({
+      url: asset.url,
+      method: "GET",
+      headers: {
+        accept: "application/octet-stream",
+        Authorization: "Bearer " + token,
+        "User-Agent": "",
+      },
+    })
+      .pipe(fs.createWriteStream(asset.name))
+      .on("finish", function () {
+        const extension = asset.name.split(".").pop()
+        if (extension == "zip") {
+          console.log("Unzipping", asset.name)
+          const zip = new AdmZip(asset.name)
+          zip.extractAllTo(process.env.GITHUB_WORKSPACE)
+          let extract_name = asset.name.slice(0, -4)
+          if (extract_name.endsWith("-private")) {
+            extract_name = extract_name.slice(0, -8)
+          }
+          console.log("Unzip to:", extract_name)
+          const result = path.join(process.env.GITHUB_WORKSPACE, extract_name)
+          console.log("Result:", result)
+          resolve(result)
+        } else if (extension == "gz") {
+          console.log("Untaring", asset.name)
+          fs.createReadStream(asset.name)
+            .pipe(tar.x())
+            .on("close", function () {
+              let extract_name = asset.name.slice(0, -7)
+              if (extract_name.endsWith("-private")) {
+                extract_name = extract_name.slice(0, -8)
+              }
+              console.log("Untar to:", extract_name)
+              const result = path.join(
+                process.env.GITHUB_WORKSPACE,
+                extract_name
+              )
+              console.log("Result:", result)
+              resolve(result)
+            })
+        } else if (extension == "whl") {
+          console.log("Skipping", asset.name)
+          const result = path.join(process.env.GITHUB_WORKSPACE, asset.name)
+          resolve(result)
+        }
+      })
+  })
+  console.log("Result download:", result)
+  return result
+}
+
 const main = async () => {
   try {
     const repos = core.getInput("repository")
@@ -67,59 +121,8 @@ const main = async () => {
                 let results = []
                 filtered_assets.forEach((asset) => {
                   console.log("Asset name:", asset.name)
-                  request({
-                    url: asset.url,
-                    method: "GET",
-                    headers: {
-                      accept: "application/octet-stream",
-                      Authorization: "Bearer " + token,
-                      "User-Agent": "",
-                    },
-                  })
-                    .pipe(fs.createWriteStream(asset.name))
-                    .on("finish", function () {
-                      const extension = asset.name.split(".").pop()
-                      if (extension == "zip") {
-                        console.log("Unzipping", asset.name)
-                        const zip = new AdmZip(asset.name)
-                        zip.extractAllTo(process.env.GITHUB_WORKSPACE)
-                        let extract_name = asset.name.slice(0, -4)
-                        if (extract_name.endsWith("-private")) {
-                          extract_name = extract_name.slice(0, -8)
-                        }
-                        console.log("Unzip to:", extract_name)
-                        const result = path.join(
-                          process.env.GITHUB_WORKSPACE,
-                          extract_name
-                        )
-                        console.log("Result:", result)
-                        results.push(result)
-                      } else if (extension == "gz") {
-                        console.log("Untaring", asset.name)
-                        fs.createReadStream(asset.name)
-                          .pipe(tar.x())
-                          .on("close", function () {
-                            let extract_name = asset.name.slice(0, -7)
-                            if (extract_name.endsWith("-private")) {
-                              extract_name = extract_name.slice(0, -8)
-                            }
-                            console.log("Untar to:", extract_name)
-                            const result = path.join(
-                              process.env.GITHUB_WORKSPACE,
-                              extract_name
-                            )
-                            console.log("Result:", result)
-                            results.push(result)
-                          })
-                      } else if (extension == "whl") {
-                        console.log("Skipping", asset.name)
-                        const result = path.join(
-                          process.env.GITHUB_WORKSPACE,
-                          asset.name
-                        )
-                        results.push(result)
-                      }
-                    })
+                  const result = download_asset(asset, token)
+                  results.push(result)
                 })
                 resolve(results)
               })
@@ -129,7 +132,9 @@ const main = async () => {
       })
       Promise.all(promises).then((outputs) => {
         let result = ""
+        console.log("Outputs:", outputs)
         outputs.forEach((output) => {
+          console.log("Output:", output)
           output.forEach((file) => {
             result += file + ";"
           })

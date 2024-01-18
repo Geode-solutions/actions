@@ -4,7 +4,7 @@ find_program(AZURE_SIGN_TOOL AzureSignTool REQUIRED)
 message(STATUS "AzureSignTool: ${AZURE_SIGN_TOOL}")
 
 execute_process(
-    COMMAND "${AZURE_SIGN_TOOL} sign"
+    COMMAND "${AZURE_SIGN_TOOL}" sign --help
     RESULT_VARIABLE SIGN_RESULT
     ECHO_OUTPUT_VARIABLE
     ECHO_ERROR_VARIABLE

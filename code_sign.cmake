@@ -11,6 +11,11 @@ set(SIGN_COMMAND "AzureSignTool sign \
 message(STATUS "Sign command: ${SIGN_COMMAND}")
 message(STATUS "Temporary install directory: ${CPACK_TEMPORARY_INSTALL_DIRECTORY}")
 
+execute_process(
+    COMMAND "AzureSignTool --help"
+    ECHO_OUTPUT_VARIABLE
+    ECHO_ERROR_VARIABLE
+)
 
 file(GLOB_RECURSE DLL_FILES "${CPACK_TEMPORARY_INSTALL_DIRECTORY}/*.dll")
 message(STATUS "DLL files: ${DLL_FILES}")

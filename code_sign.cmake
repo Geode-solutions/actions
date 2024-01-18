@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.18)
 
 set(SIGN_COMMAND "AzureSignTool sign \
 --azure-key-vault-url \"$ENV{AZURE_KEY_VAULT_URI}\" \

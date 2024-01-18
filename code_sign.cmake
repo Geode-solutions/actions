@@ -9,8 +9,22 @@ set(SIGN_COMMAND "AzureSignTool sign \
 --timestamp-rfc3161 http://timestamp.digicert.com -v \
 ")
 message(STATUS "Sign command: ${SIGN_COMMAND}")
+message(STATUS "Temporary install directory: ${CPACK_TEMPORARY_INSTALL_DIRECTORY}")
+execute_process(
+    COMMAND dir ${CPACK_TEMPORARY_INSTALL_DIRECTORY}
+    OUTPUT_VARIABLE DIR_OUTPUT
+)
+message(STATUS "Output: ${DIR_OUTPUT}")
+execute_process(
+    COMMAND dir ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/bin
+    OUTPUT_VARIABLE DIR_OUTPUT2
+)
+message(STATUS "Output/bin: ${DIR_OUTPUT2}")
+
 
 file(GLOB DLL_FILES "${CPACK_TEMPORARY_INSTALL_DIRECTORY}/bin/*.dll")
+message(STATUS "DLL files: ${DLL_FILES}")
+
 
 foreach(DLL_FILE ${DLL_FILES})
     message(STATUS "Signing ${DLL_FILE}")

@@ -10,19 +10,9 @@ set(SIGN_COMMAND "AzureSignTool sign \
 ")
 message(STATUS "Sign command: ${SIGN_COMMAND}")
 message(STATUS "Temporary install directory: ${CPACK_TEMPORARY_INSTALL_DIRECTORY}")
-execute_process(
-    COMMAND dir ${CPACK_TEMPORARY_INSTALL_DIRECTORY}
-    OUTPUT_VARIABLE DIR_OUTPUT
-)
-message(STATUS "Output: ${DIR_OUTPUT}")
-execute_process(
-    COMMAND dir ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/bin
-    OUTPUT_VARIABLE DIR_OUTPUT2
-)
-message(STATUS "Output/bin: ${DIR_OUTPUT2}")
 
 
-file(GLOB DLL_FILES "${CPACK_TEMPORARY_INSTALL_DIRECTORY}/bin/*.dll")
+file(GLOB_RECURSE DLL_FILES "${CPACK_TEMPORARY_INSTALL_DIRECTORY}/*.dll")
 message(STATUS "DLL files: ${DLL_FILES}")
 
 

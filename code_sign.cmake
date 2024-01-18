@@ -14,11 +14,18 @@ set(SIGN_COMMAND "${AZURE_SIGN_TOOL} sign \
 message(STATUS "Sign command: ${SIGN_COMMAND}")
 message(STATUS "Temporary install directory: ${CPACK_TEMPORARY_INSTALL_DIRECTORY}")
 
+execute_process(
+    COMMAND "${AZURE_SIGN_TOOL} --help"
+    RESULT_VARIABLE SIGN_RESULT
+    ECHO_OUTPUT_VARIABLE
+    ECHO_ERROR_VARIABLE
+)
+
 file(GLOB_RECURSE DLL_FILES "${CPACK_TEMPORARY_INSTALL_DIRECTORY}/*.dll")
 foreach(DLL_FILE ${DLL_FILES})
     message(STATUS "Signing ${DLL_FILE}")
     execute_process(
-        COMMAND ${SIGN_COMMAND} ${DLL_FILE}
+        COMMAND "${SIGN_COMMAND} ${DLL_FILE}"
         RESULT_VARIABLE SIGN_RESULT
         ECHO_OUTPUT_VARIABLE
         ECHO_ERROR_VARIABLE

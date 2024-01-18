@@ -11,6 +11,10 @@ set(SIGN_COMMAND "AzureSignTool sign \
 message(STATUS "Sign command: ${SIGN_COMMAND}")
 message(STATUS "Temporary install directory: ${CPACK_TEMPORARY_INSTALL_DIRECTORY}")
 
+find_program(AZURE_SIGN_TOOL AzureSignTool REQUIRED)
+
+message(STATUS "AzureSignTool: ${AZURE_SIGN_TOOL}")
+
 execute_process(
     COMMAND "AzureSignTool --help"
     ECHO_OUTPUT_VARIABLE

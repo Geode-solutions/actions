@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.18)
 find_program(AZURE_SIGN_TOOL AzureSignTool REQUIRED)
 message(STATUS "AzureSignTool: ${AZURE_SIGN_TOOL}")
 
+message(STATUS "End help")
 set(SIGN_COMMAND "${AZURE_SIGN_TOOL} sign \
 --azure-key-vault-url \"$ENV{AZURE_KEY_VAULT_URI}\" \
 --azure-key-vault-client-id \"$ENV{AZURE_CLIENT_ID}\" \

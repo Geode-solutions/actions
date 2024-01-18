@@ -3,7 +3,14 @@ cmake_minimum_required(VERSION 3.18)
 find_program(AZURE_SIGN_TOOL AzureSignTool REQUIRED)
 message(STATUS "AzureSignTool: ${AZURE_SIGN_TOOL}")
 
+execute_process(
+    COMMAND "${AZURE_SIGN_TOOL} sign"
+    RESULT_VARIABLE SIGN_RESULT
+    ECHO_OUTPUT_VARIABLE
+    ECHO_ERROR_VARIABLE
+)
 message(STATUS "End help")
+
 set(SIGN_COMMAND "${AZURE_SIGN_TOOL} sign \
 --azure-key-vault-url \"$ENV{AZURE_KEY_VAULT_URI}\" \
 --azure-key-vault-client-id \"$ENV{AZURE_CLIENT_ID}\" \
@@ -15,17 +22,6 @@ set(SIGN_COMMAND "${AZURE_SIGN_TOOL} sign \
 message(STATUS "Sign command: ${SIGN_COMMAND}")
 message(STATUS "Temporary install directory: ${CPACK_TEMPORARY_INSTALL_DIRECTORY}")
 
-execute_process(
-    COMMAND "${AZURE_SIGN_TOOL}"
-    RESULT_VARIABLE SIGN_RESULT
-    ECHO_OUTPUT_VARIABLE
-    ECHO_ERROR_VARIABLE
-    OUTPUT_VARIABLE OO
-    ERROR_VARIABLE EE
-)
-message(STATUS "Sign result: ${SIGN_RESULT}")
-message(STATUS "Sign output: ${OO}")
-message(STATUS "Sign error: ${EE}")
 
 file(GLOB_RECURSE DLL_FILES "${CPACK_TEMPORARY_INSTALL_DIRECTORY}/*.dll")
 foreach(DLL_FILE ${DLL_FILES})

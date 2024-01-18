@@ -16,11 +16,16 @@ message(STATUS "Sign command: ${SIGN_COMMAND}")
 message(STATUS "Temporary install directory: ${CPACK_TEMPORARY_INSTALL_DIRECTORY}")
 
 execute_process(
-    COMMAND "${AZURE_SIGN_TOOL} --help"
+    COMMAND "${AZURE_SIGN_TOOL}"
     RESULT_VARIABLE SIGN_RESULT
     ECHO_OUTPUT_VARIABLE
     ECHO_ERROR_VARIABLE
+    OUTPUT_VARIABLE OO
+    ERROR_VARIABLE EE
 )
+message(STATUS "Sign result: ${SIGN_RESULT}")
+message(STATUS "Sign output: ${OO}")
+message(STATUS "Sign error: ${EE}")
 
 file(GLOB_RECURSE DLL_FILES "${CPACK_TEMPORARY_INSTALL_DIRECTORY}/*.dll")
 foreach(DLL_FILE ${DLL_FILES})

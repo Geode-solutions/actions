@@ -12,6 +12,9 @@ on:
       version:
         type: string
         required: true
+      light:
+        type: boolean
+        default: false
       release:
         type: string
         required: true
@@ -36,6 +39,10 @@ jobs:
     strategy:
       matrix:
         python: ["3.8", "3.9", "3.10", "3.11"]
+        exclude:
+          - python: ${{ inputs.light && '3.8' || 'dummy' }}
+          - python: ${{ inputs.light && '3.9' || 'dummy' }}
+          - python: ${{ inputs.light && '3.10' || 'dummy' }}
     steps:
       - name: Get info
         id: info

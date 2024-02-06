@@ -15,6 +15,9 @@ on:
       version:
         type: string
         required: true
+      light:
+        type: boolean
+        default: false
       release:
         type: string
         required: true
@@ -50,6 +53,7 @@ jobs:
       version: ${{ inputs.version }}
       release: ${{ inputs.release }}
       upload-pypi: ${{ inputs.upload-pypi }}
+      light: ${{ inputs.light }}
     secrets: inherit
 
   release-windows:
@@ -72,6 +76,7 @@ jobs:
       version: ${{ inputs.version }}
       release: ${{ inputs.release }}
       upload-pypi: ${{ inputs.upload-pypi }}
+      light: ${{ inputs.light }}
     secrets: inherit
 
   public-release:

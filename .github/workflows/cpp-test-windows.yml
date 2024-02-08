@@ -93,7 +93,8 @@ jobs:
             cmake --build . -t install
             ctest --output-on-failure --no-tests=error -j 2
           }else{
-            cmake --build . -t essential -j 2 || cmake --build . -t essential -j 1
+            cmake --build . -t essential -j 2
+            if(!$?) { cmake --build . -t essential -j 1 }
             cmake --build . -t install
             ctest --output-on-failure --no-tests=error -j 2 -L essential
           }

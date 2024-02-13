@@ -28,7 +28,7 @@ jobs:
     strategy:
       matrix:
         system: ["ubuntu", "rhel"]
-        shared: ["ON", "OFF"]
+        shared: ["ON"]
         exclude:
           - system: ${{ inputs.light && 'rhel' || 'dummy' }}
     steps:

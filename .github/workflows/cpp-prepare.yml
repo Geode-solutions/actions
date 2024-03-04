@@ -30,9 +30,9 @@ jobs:
           pip install pip-tools
           echo $GITHUB_REF_NAME
           if [ $GITHUB_REF_NAME == "master" ]; then
-            pip-compile --upgrade $file
+            pip-compile -v --upgrade $file
           else
-            pip-compile --pre --upgrade $file
+            pip-compile -v --pre --upgrade $file
           fi
           sed -i -E 's/==(.+)\.(.+)\.(.+)/==\1\.*,>=\1\.\2\.\3/' ${{ inputs.directory }}/requirements.txt
       - name: "Get config files"

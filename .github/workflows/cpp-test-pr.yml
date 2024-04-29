@@ -25,6 +25,7 @@ jobs:
   tidy:
     needs: prepare
     runs-on: ubuntu-latest
+    container: ghcr.io/geode-solutions/ubuntu:master
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache/restore@v3
@@ -74,6 +75,7 @@ jobs:
           echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
       - name: Sanitizers
         run: |
+          gh api https://api.github.com/repos/Geode-solutions/actions/contents/asan_suppressions.txt -H "Accept: application/vnd.github.raw" > asan_suppressions.txt
           mkdir -p build
           cd build
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
@@ -84,6 +86,7 @@ jobs:
           ctest --output-on-failure -j 2
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          LSAN_OPTIONS: suppressions=${{ github.workspace }}/asan_suppressions.txt
 
   test-repository:
     needs: prepare

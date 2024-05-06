@@ -43,7 +43,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
           cmake --build . -t third_party -j 2
       - name: Tidy
         uses: Geode-solutions/clang-tidy-review@master
@@ -85,6 +85,7 @@ jobs:
           cmake --build . -j 2
           ctest --output-on-failure -j 2
         env:
+          GITHUB_TOKEN: ${{ secrets.token }}
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
           LSAN_OPTIONS: suppressions=${{ github.workspace }}/asan_suppressions.txt
 

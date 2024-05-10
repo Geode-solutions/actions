@@ -73,9 +73,12 @@ jobs:
         run: |
           new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/${{ steps.info.outputs.lib }}\:/g')
           echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
+          echo "BASE_DIR=`pwd`" >> $GITHUB_ENV
       - name: Sanitizers
         run: |
           gh api https://api.github.com/repos/Geode-solutions/actions/contents/asan_suppressions.txt -H "Accept: application/vnd.github.raw" > asan_suppressions.txt
+          pwd
+          ls
           mkdir -p build
           cd build
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
@@ -87,7 +90,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.token }}
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
-          LSAN_OPTIONS: suppressions=${{ github.workspace }}/asan_suppressions.txt
+          LSAN_OPTIONS: suppressions=${{ env.BASE_DIR }}/asan_suppressions.txt
 
   test-repository:
     needs: prepare

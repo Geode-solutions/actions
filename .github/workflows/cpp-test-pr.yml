@@ -77,8 +77,6 @@ jobs:
       - name: Sanitizers
         run: |
           gh api https://api.github.com/repos/Geode-solutions/actions/contents/asan_suppressions.txt -H "Accept: application/vnd.github.raw" > asan_suppressions.txt
-          pwd
-          ls
           mkdir -p build
           cd build
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..

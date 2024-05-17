@@ -80,10 +80,10 @@ jobs:
           mkdir -p build
           cd build
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
-          cmake --build . -t third_party -j 2
+          cmake --build . -t third_party
           cd ${{ inputs.directory }}
-          cmake -G "Ninja" -DUSE_SANITIZER_ADDRESS=ON -DUSE_SANITIZER_LEAK=ON -DUSE_SANITIZER_UNDEFINED_BEHAVIOR=ON .
-          cmake --build . -j 2
+          cmake -DUSE_SANITIZER_ADDRESS=ON -DUSE_SANITIZER_LEAK=ON -DUSE_SANITIZER_UNDEFINED_BEHAVIOR=ON .
+          cmake --build .
           ctest --output-on-failure -j 2
         env:
           GITHUB_TOKEN: ${{ secrets.token }}

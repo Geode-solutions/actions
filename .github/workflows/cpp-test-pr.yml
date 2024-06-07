@@ -48,7 +48,7 @@ jobs:
       - name: Tidy
         uses: ZedThree/clang-tidy-review@master
         with:
-          build_dir: build/${{ inputs.directory }}
+          build_dir: ${{ github.workspace }}/build/${{ inputs.directory }}
 
   sanitizers:
     needs: prepare

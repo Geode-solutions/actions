@@ -114,6 +114,7 @@ jobs:
         id: semantic
         with:
           dry_run: true
+          branch: ${{ github.head_ref }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
 

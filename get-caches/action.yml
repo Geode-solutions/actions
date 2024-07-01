@@ -1,0 +1,12 @@
+name: "Download GitHub caches"
+description: "Download Github caches"
+inputs:
+  keys:
+    description: 'Caches keys. You can provide a list of values separated by a ";" '
+    required: true
+  system:
+    description: "os name"
+    required: true
+runs:
+  using: "node16"
+  main: "index.js"

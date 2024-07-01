@@ -1,0 +1,153 @@
+name: Build and cache dependency
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        type: string
+        required: true
+      repository:
+        type: string
+        required: true
+      keys:
+        type: string
+        default: ""
+      shared:
+        type: string
+        default: "ON"
+      prefix-path:
+        type: string
+        default: ""
+      type:
+        type: string
+        default: "Release"
+      extra:
+        type: string
+        default: ""
+    outputs:
+      key:
+        description: "Cache key"
+        value: ${{ jobs.linux.outputs.key }}
+    secrets:
+      TOKEN:
+        required: true
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    container: ghcr.io/geode-solutions/${{ matrix.system }}:master
+    outputs:
+      key: ${{ steps.info.outputs.key }}
+    strategy:
+      matrix:
+        system: ["ubuntu", "rhel"]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: Geode-solutions/${{ inputs.repository }}
+          token: ${{ secrets.TOKEN }}
+      - name: Get info
+        run: |
+          if [ "${{ inputs.shared }}" = "ON" ]; then
+            echo "name=${{ matrix.system }}" >> $GITHUB_ENV
+          else
+            echo "name=${{ matrix.system }}-static" >> $GITHUB_ENV
+          fi
+          if [ "${{ matrix.system }}" = "rhel" ]; then
+            echo "lib=lib64" >> $GITHUB_ENV
+          else
+            echo "lib=lib" >> $GITHUB_ENV
+          fi
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Get key
+        id: info
+        run: |
+          echo "key=${{ inputs.repository }}-${{ env.sha }}" >> $GITHUB_OUTPUT
+      - name: Cache install
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: build/install
+          key: ${{ matrix.system }}-${{ steps.info.outputs.key  }}
+      - uses: Geode-solutions/actions/get-release@master
+        if: steps.cache.outputs.cache-hit != 'true'
+        id: license
+        with:
+          repository: open-license-manager
+          file: "-${{ env.name }}-private.tar.gz"
+          token: ${{ secrets.TOKEN }}
+      - name: Get dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: Geode-solutions/Geode-FEFLOW/.github/get-caches@master
+        with:
+          keys: ${{ inputs.keys }}
+          system: ${{ matrix.system }}
+      - name: Compile
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p build
+          cd build
+          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=${{ inputs.shared }} -DCMAKE_PREFIX_PATH="${{ steps.license.outputs.path }};$GITHUB_WORKSPACE/prefix" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_INSTALL_PREFIX:PATH="install" ..
+          cmake --build .
+          cmake --build . -t install
+
+  windows:
+    runs-on: windows-2019
+    outputs:
+      key: ${{ steps.info.outputs.key }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: Geode-solutions/${{ inputs.repository }}
+          token: ${{ secrets.TOKEN }}
+      - name: Get info
+        run: |
+          if( "${{ inputs.shared }}" -eq "ON" ) {
+            echo "name=win64" >> $env:GITHUB_ENV
+          }
+          else {
+            echo "name=win64-static" >> $env:GITHUB_ENV
+          }
+          echo "sha=$(git rev-parse HEAD)" >> $env:GITHUB_ENV
+      - name: Get key
+        id: info
+        run: |
+          echo "key=${{ inputs.repository }}-${{ env.sha }}" >> $env:GITHUB_OUTPUT
+      - name: Cache install
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: build/install
+          key: win64-${{ steps.info.outputs.key  }}
+      - uses: Geode-solutions/actions/get-release@master
+        if: steps.cache.outputs.cache-hit != 'true'
+        id: license
+        with:
+          repository: open-license-manager
+          file: "-${{ env.name }}-private.zip"
+          token: ${{ secrets.TOKEN }}
+      - name: Get dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: Geode-solutions/Geode-FEFLOW/.github/get-caches@master
+        with:
+          keys: ${{ inputs.keys }}
+          system: win64
+      - uses: TheMrMilchmann/setup-msvc-dev@v2
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          arch: x64
+      - name: Generate package
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          choco install --version 3.1.1 openssl -r --no-progress
+          if(!$?) { 
+            choco install --version 3.1.1 openssl -r --no-progress
+            if(!$?) { exit 1 }
+          }
+          if(!(test-path build)) { mkdir build }
+          cd build
+          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=${{ inputs.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.license.outputs.path }};${{ github.workspace }}/prefix" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_INSTALL_PREFIX:PATH="install" ..
+          cmake --build . -j 2
+          if(!$?) { cmake --build . -j 1 }
+          cmake --build . -t install

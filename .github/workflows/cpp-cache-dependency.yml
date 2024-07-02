@@ -79,7 +79,7 @@ jobs:
           token: ${{ secrets.TOKEN }}
       - name: Get dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: Geode-solutions/Geode-FEFLOW/.github/get-caches@master
+        uses: Geode-solutions/actions/get-caches@master
         with:
           keys: ${{ inputs.keys }}
           system: ${{ matrix.system }}
@@ -129,7 +129,7 @@ jobs:
           token: ${{ secrets.TOKEN }}
       - name: Get dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: Geode-solutions/Geode-FEFLOW/.github/get-caches@master
+        uses: Geode-solutions/actions/get-caches@master
         with:
           keys: ${{ inputs.keys }}
           system: win64

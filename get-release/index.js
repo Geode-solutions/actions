@@ -87,12 +87,19 @@ const main = async () => {
                 .then((release) => release.data.id)
             : octokit.repos.listReleases({ owner, repo }).then((releases) => {
                 if (github.context.payload.pull_request) {
-                  const release = releases.data.find(
+                  const head_release = releases.data.find(
                     (r) =>
                       r.name === github.context.payload.pull_request.head.ref
                   )
-                  if (release) {
-                    return release.id
+                  if (head_release) {
+                    return head_release.id
+                  }
+                  const base_release = releases.data.find(
+                    (r) =>
+                      r.name === github.context.payload.pull_request.base.ref
+                  )
+                  if (base_release) {
+                    return base_release.id
                   }
                 }
                 const branch_release = releases.data.find(
@@ -113,13 +120,13 @@ const main = async () => {
             octokit.repos
               .listReleaseAssets({ owner, repo, release_id })
               .then(async (assets) => {
-                const filtered_assets = assets.data.filter(
-                  (asset) => asset.name.includes(file)
+                const filtered_assets = assets.data.filter((asset) =>
+                  asset.name.includes(file)
                 )
                 let results = []
-                for(let i = 0; i <filtered_assets.length; i++){
+                for (let i = 0; i < filtered_assets.length; i++) {
                   console.log("Asset name:", filtered_assets[i].name)
-                  const result = await download_asset( filtered_assets[i], token)
+                  const result = await download_asset(filtered_assets[i], token)
                   results.push(result)
                 }
                 resolve(results)

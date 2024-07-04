@@ -72,8 +72,7 @@ jobs:
         run: |
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
           echo $wheels
-          requirements="bindings/python/requirements.txt"
-          if [ -f "$requirements" ]; then 
+          if [ -n "$wheels" ]; then 
             pip install --no-deps $wheels
           fi
       - name: Wheels from Pypi
@@ -85,7 +84,6 @@ jobs:
           fi
       - name: Compile
         run: |
-          export PATH=/opt/python/${{ steps.info.outputs.tag }}/bin:$PATH
           mkdir -p build
           cd build
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} ..

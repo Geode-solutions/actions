@@ -10,9 +10,9 @@ jobs:
     outputs:
       new_release: ${{ steps.semantic.outputs.new_release_published }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v3
+        uses: cycjimmy/semantic-release-action@v4
         id: semantic
         with:
           dry_run: true

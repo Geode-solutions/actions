@@ -25,7 +25,7 @@ jobs:
     outputs:
       pr_found: ${{ steps.PR.outputs.pr_found }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: 8BitJonny/gh-get-current-pr@2.2.0
         id: PR
         with:

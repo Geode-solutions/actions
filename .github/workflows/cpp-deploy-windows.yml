@@ -49,11 +49,11 @@ jobs:
           else {
             echo "name=win64-static" >> $env:GITHUB_OUTPUT
           }
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: ${{ inputs.repo }}
           token: ${{ secrets.TOKEN }}
-      - uses: actions/cache/restore@v3
+      - uses: actions/cache/restore@v4
         with:
           path: build/third_party
           key: ${{ runner.os }}-${{ steps.info.outputs.name }}-${{ hashFiles('cmake/Configure**.cmake') }}
@@ -64,7 +64,7 @@ jobs:
           file: "-${{ steps.info.outputs.name }}-private.zip"
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - uses: TheMrMilchmann/setup-msvc-dev@v2
+      - uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x64
       - name: Generate package

@@ -42,7 +42,7 @@ jobs:
       matrix:
         system: ["ubuntu", "rhel"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: Geode-solutions/${{ inputs.repository }}
           token: ${{ secrets.TOKEN }}
@@ -66,7 +66,7 @@ jobs:
           echo "key=${{ inputs.repository }}-${{ env.sha }}" >> $GITHUB_OUTPUT
       - name: Cache install
         id: cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: build/install
           key: ${{ matrix.system }}-${{ steps.info.outputs.key  }}
@@ -97,7 +97,7 @@ jobs:
     outputs:
       key: ${{ steps.info.outputs.key }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: Geode-solutions/${{ inputs.repository }}
           token: ${{ secrets.TOKEN }}
@@ -115,7 +115,7 @@ jobs:
         run: |
           echo "key=${{ inputs.repository }}-${{ env.sha }}" >> $env:GITHUB_OUTPUT
       - name: Cache install
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache
         with:
           path: build/install
@@ -133,7 +133,7 @@ jobs:
         with:
           keys: ${{ inputs.keys }}
           system: win64
-      - uses: TheMrMilchmann/setup-msvc-dev@v2
+      - uses: TheMrMilchmann/setup-msvc-dev@v3
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           arch: x64

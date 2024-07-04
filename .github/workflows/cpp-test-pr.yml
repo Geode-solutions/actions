@@ -27,8 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/geode-solutions/ubuntu:master
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache/restore@v3
+      - uses: actions/checkout@v4
+      - uses: actions/cache/restore@v4
         with:
           path: build/third_party
           key: ${{ runner.os }}-ubuntu-${{ hashFiles('cmake/Configure**.cmake') }}
@@ -56,8 +56,8 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/geode-solutions/ubuntu:master
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache/restore@v3
+      - uses: actions/checkout@v4
+      - uses: actions/cache/restore@v4
         with:
           path: build/third_party
           key: ${{ runner.os }}-ubuntu-${{ hashFiles('cmake/Configure**.cmake') }}
@@ -106,7 +106,7 @@ jobs:
     needs: [test-repository, sanitizers]
     steps:
       - name: Create Release
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const refs = await github.rest.git.listMatchingRefs({

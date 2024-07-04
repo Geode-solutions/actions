@@ -33,10 +33,10 @@ jobs:
               lib: "lib64",
             }
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
-      - uses: actions/cache/restore@v3
+      - uses: actions/cache/restore@v4
         with:
           path: build/third_party
           key: ${{ runner.os }}-${{ matrix.config.system }}-${{ hashFiles('cmake/Configure**.cmake') }}
@@ -87,10 +87,10 @@ jobs:
         config:
           - { python: "3.11", tag: "cp311-cp311" }
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
-      - uses: actions/cache/restore@v3
+      - uses: actions/cache/restore@v4
         with:
           path: build/third_party
           key: ${{ runner.os }}-rhel-${{ hashFiles('cmake/Configure**.cmake') }}
@@ -132,10 +132,10 @@ jobs:
   windows:
     runs-on: windows-2019
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
-      - uses: actions/cache/restore@v3
+      - uses: actions/cache/restore@v4
         with:
           path: build/third_party
           key: ${{ runner.os }}-win64-${{ hashFiles('cmake/Configure**.cmake') }}
@@ -145,7 +145,7 @@ jobs:
           repository: ${{ inputs.repos }}
           file: "-win64-private.zip"
           token: ${{ secrets.TOKEN }}
-      - uses: TheMrMilchmann/setup-msvc-dev@v2
+      - uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x64
       - name: Libraries

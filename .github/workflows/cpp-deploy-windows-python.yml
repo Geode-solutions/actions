@@ -43,13 +43,13 @@ jobs:
           - python: ${{ inputs.light && '3.9' || 'dummy' }}
           - python: ${{ inputs.light && '3.10' || 'dummy' }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache/restore@v3
+      - uses: actions/checkout@v4
+      - uses: actions/cache/restore@v4
         with:
           path: build/third_party
           key: ${{ runner.os }}-win64-${{ hashFiles('cmake/Configure**.cmake') }}
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
       - uses: Geode-solutions/actions/get-release@master
@@ -59,7 +59,7 @@ jobs:
           file: "win64-private.zip"
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - uses: TheMrMilchmann/setup-msvc-dev@v2
+      - uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x64
       - name: Compile

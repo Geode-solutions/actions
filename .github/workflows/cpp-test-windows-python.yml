@@ -40,15 +40,15 @@ jobs:
           $tag = "cp${{ matrix.python }}-cp${{ matrix.python }}"
           $tag = $tag.Replace(".", "")
           echo "tag=$tag" >> $env:GITHUB_OUTPUT
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
-      - uses: actions/cache/restore@v3
+      - uses: actions/cache/restore@v4
         with:
           path: build/third_party
           key: ${{ runner.os }}-win64-${{ hashFiles('cmake/Configure**.cmake') }}
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
       - uses: Geode-solutions/actions/get-release@master
@@ -91,7 +91,7 @@ jobs:
           if(test-path -Path $requirements -PathType Leaf) {
             pip install --pre -r $requirements
           }
-      - uses: TheMrMilchmann/setup-msvc-dev@v2
+      - uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x64
       - name: Compile & Test

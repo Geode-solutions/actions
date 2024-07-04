@@ -18,7 +18,7 @@ jobs:
     outputs:
       changes_detected: ${{ steps.commit.outputs.changes_detected }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.TOKEN }}
       - name: "pip-compile"
@@ -46,7 +46,7 @@ jobs:
           extensions: "h,cpp"
           clangFormatVersion: 16
           inplace: True
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - uses: stefanzweifel/git-auto-commit-action@v5
         id: commit
         with:
           commit_message: Apply prepare changes

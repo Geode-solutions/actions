@@ -37,10 +37,10 @@ jobs:
           else {
             echo "name=win64-static" >> $env:GITHUB_OUTPUT
           }
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: build/third_party
           key: ${{ runner.os }}-${{ steps.info.outputs.name }}-${{ hashFiles('cmake/Configure**.cmake') }}
@@ -59,7 +59,7 @@ jobs:
           echo "bin=$bin_path" >> $env:GITHUB_OUTPUT
           $share_path = $old_path.replace(";", "\share;")
           echo "share=$share_path" >> $env:GITHUB_OUTPUT
-      - uses: TheMrMilchmann/setup-msvc-dev@v2
+      - uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x64
       - name: Compile & Test

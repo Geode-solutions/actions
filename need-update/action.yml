@@ -1,10 +1,9 @@
-name: 'Need update dependencies'
-description: 'Need update dependencies'
-inputs: 
+name: "Need update dependencies"
+description: "Need update dependencies"
+inputs:
   token:
-    description: 'Github token'
+    description: "Github token"
     required: true
 runs:
-  using: 'node16'
-  main: 'index.js'
-
+  using: "node20"
+  main: "index.js"

@@ -1,16 +1,15 @@
-name: 'Compute Geode-solutions benchmarks'
-description: 'Compute Geode-solutions benchmarks'
+name: "Compute Geode-solutions benchmarks"
+description: "Compute Geode-solutions benchmarks"
 inputs:
   repository:
-    description: 'Repository'
+    description: "Repository"
     required: true
   directory:
-    description: 'Directory of tests'
+    description: "Directory of tests"
     required: true
   token:
-    description: 'Github token'
+    description: "Github token"
     required: true
 runs:
-  using: 'node16'
-  main: 'index.js'
-
+  using: "node20"
+  main: "index.js"

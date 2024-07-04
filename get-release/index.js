@@ -4,7 +4,7 @@ import { Octokit } from "@octokit/rest"
 import fs from "fs"
 import path from "path"
 import request from "request"
-import tar from "tar"
+import * as tar from "tar"
 import AdmZip from "adm-zip"
 
 const download_asset = async (asset, token) => {

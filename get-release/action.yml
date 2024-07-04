@@ -18,5 +18,5 @@ outputs:
   path:
     description: "path of the extracted asset"
 runs:
-  using: "node16"
+  using: "node20"
   main: "index.js"

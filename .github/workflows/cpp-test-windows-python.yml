@@ -29,7 +29,7 @@ on:
 
 jobs:
   windows-python:
-    runs-on: windows-2019
+    runs-on: windows-2022
     strategy:
       matrix:
         python: ["3.12"]

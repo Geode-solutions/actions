@@ -93,7 +93,7 @@ jobs:
           cmake --build . -t install
 
   windows:
-    runs-on: windows-2019
+    runs-on: windows-2022
     outputs:
       key: ${{ steps.info.outputs.key }}
     steps:

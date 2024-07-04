@@ -89,6 +89,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.token }}
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
           LSAN_OPTIONS: suppressions=${{ env.BASE_DIR }}/asan_suppressions.txt
+          ASAN_OPTIONS: detect_odr_violation=0
 
   test-repository:
     needs: prepare

@@ -140,9 +140,9 @@ jobs:
       - name: Generate package
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          choco install --version 3.1.1 openssl -r --no-progress
+          choco install openssl -r --no-progress
           if(!$?) { 
-            choco install --version 3.1.1 openssl -r --no-progress
+            choco install openssl -r --no-progress
             if(!$?) { exit 1 }
           }
           if(!(test-path build)) { mkdir build }

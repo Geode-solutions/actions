@@ -85,7 +85,7 @@ jobs:
     strategy:
       matrix:
         config:
-          - { python: "3.11", tag: "cp311-cp311" }
+          - { python: "3.12", tag: "cp312-cp312" }
     steps:
       - uses: actions/checkout@v4
         with:

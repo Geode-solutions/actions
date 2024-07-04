@@ -33,7 +33,7 @@ jobs:
     container: "ghcr.io/geode-solutions/rhel:master"
     strategy:
       matrix:
-        python: ["3.11"]
+        python: ["3.12"]
     steps:
       - name: Get info
         id: info

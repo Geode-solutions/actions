@@ -32,7 +32,7 @@ jobs:
     runs-on: windows-2022
     strategy:
       matrix:
-        python: ["3.12"]
+        python: ["3.11"]
     steps:
       - name: Get info
         id: info

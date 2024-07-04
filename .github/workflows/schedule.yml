@@ -158,9 +158,9 @@ jobs:
           echo "share=$share_path" >> $env:GITHUB_OUTPUT
       - name: Compile & Test
         run: |
-          choco install openssl ninja -r --no-progress
+          choco install openssl -r --no-progress
           if(!$?) { 
-            choco install openssl ninja -r --no-progress
+            choco install openssl -r --no-progress
             if(!$?) { exit 1 }
           }
           if(!(test-path build)) { mkdir build }

@@ -140,9 +140,9 @@ jobs:
       - name: Generate package
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          choco install openssl ninja -r --no-progress
+          choco install openssl -r --no-progress
           if(!$?) { 
-            choco install openssl ninja -r --no-progress
+            choco install openssl -r --no-progress
             if(!$?) { exit 1 }
           }
           if(!(test-path build)) { mkdir build }

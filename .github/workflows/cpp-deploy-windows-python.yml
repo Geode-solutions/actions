@@ -64,9 +64,9 @@ jobs:
           arch: x64
       - name: Compile
         run: |
-          choco install openssl ninja -r --no-progress
+          choco install openssl -r --no-progress
           if(!$?) { 
-            choco install openssl ninja -r --no-progress
+            choco install openssl -r --no-progress
             if(!$?) { exit 1 }
           }
           if(!(test-path build)) { mkdir build }

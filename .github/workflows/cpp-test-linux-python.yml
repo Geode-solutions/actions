@@ -64,7 +64,7 @@ jobs:
         id: wheels
         with:
           repository: ${{ inputs.repos }}
-          file: "-${{ steps.info.outputs.tag }}-manylinux2014_x86_64.whl"
+          file: "-${{ steps.info.outputs.tag }}-manylinux_2_28_x86_64.whl"
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
       - name: Wheels from Github

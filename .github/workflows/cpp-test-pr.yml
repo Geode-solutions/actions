@@ -56,10 +56,10 @@ jobs:
     container: ghcr.io/geode-solutions/ubuntu:master
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache@v4
         with:
           path: build/third_party
-          key: ${{ runner.os }}-ubuntu-${{ hashFiles('cmake/Configure**.cmake') }}
+          key: ${{ runner.os }}-clang-${{ hashFiles('cmake/Configure**.cmake') }}
       - uses: Geode-solutions/actions/get-release@master
         id: repos
         with:
@@ -81,7 +81,7 @@ jobs:
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
           cmake --build . -t third_party
           cd ${{ inputs.directory }}
-          cmake -DUSE_SANITIZER_ADDRESS=ON -DUSE_SANITIZER_LEAK=ON .
+          cmake -DUSE_SANITIZER_ADDRESS=ON -DUSE_SANITIZER_LEAK=ON -DUSE_SANITIZER_UNDEFINED_BEHAVIOR=ON .
           cmake --build .
           ctest --output-on-failure -j 2
         env:
@@ -89,6 +89,8 @@ jobs:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
           LSAN_OPTIONS: suppressions=${{ env.BASE_DIR }}/asan_suppressions.txt
           ASAN_OPTIONS: detect_odr_violation=0
+          CC: /usr/bin/clang
+          CXX: /usr/bin/clang++
 
   test-repository:
     needs: prepare

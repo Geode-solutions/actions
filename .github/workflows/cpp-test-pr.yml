@@ -105,7 +105,7 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
-    needs: [test-repository, sanitizers]
+    needs: [test-repository]
     steps:
       - name: Create Release
         uses: actions/github-script@v7

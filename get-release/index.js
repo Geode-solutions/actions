@@ -93,7 +93,12 @@ const main = async () => {
                       r.name === github.context.payload.pull_request.head.ref
                   )
                   if (head_release) {
-                    console.log("Found head release:", head_release.name)
+                    console.log(
+                      "Found head release:",
+                      head_release.name,
+                      " for ",
+                      repo
+                    )
                     return head_release.id
                   }
                   const base_release = releases.data.find(
@@ -101,7 +106,12 @@ const main = async () => {
                       r.name === github.context.payload.pull_request.base.ref
                   )
                   if (base_release) {
-                    console.log("Found base release:", base_release.name)
+                    console.log(
+                      "Found base release:",
+                      base_release.name,
+                      " for ",
+                      repo
+                    )
                     return base_release.id
                   }
                 }
@@ -109,22 +119,37 @@ const main = async () => {
                   (r) => r.name === branch
                 )
                 if (branch_release) {
-                  console.log("Found branch release:", branch_release.name)
+                  console.log(
+                    "Found branch release:",
+                    branch_release.name,
+                    " for ",
+                    repo
+                  )
                   return branch_release.id
                 }
                 const base_release = releases.data.find((r) => r.name === base)
                 if (base_release) {
-                  console.log("Found base release:", base_release.name)
+                  console.log(
+                    "Found base release:",
+                    base_release.name,
+                    " for ",
+                    repo
+                  )
                   return base_release.id
                 }
                 const release = releases.data.find(
                   (r) => r.name.startsWith("v") && r.name.includes("-rc.")
                 )
                 if (release) {
-                  console.log("Found release:", release.name)
+                  console.log("Found release:", release.name, " for ", repo)
                   return release.id
                 }
-                console.log("Found default release:", releases.data[0].name)
+                console.log(
+                  "Found default release:",
+                  releases.data[0].name,
+                  " for ",
+                  repo
+                )
                 return releases.data[0].id
               })
           query.then((release_id) => {

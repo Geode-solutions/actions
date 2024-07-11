@@ -14,6 +14,10 @@ inputs:
     description: "branch name"
     required: false
     default: "master"
+  base:
+    description: "base name"
+    required: false
+    default: ""
 outputs:
   path:
     description: "path of the extracted asset"

@@ -67,6 +67,7 @@ const main = async () => {
       const file = core.getInput("file", { required: true })
       const token = core.getInput("token")
       const branch = core.getInput("branch")
+      const base = core.getInput("base")
       const octokit = new Octokit({ auth: token })
       repos.split(";").forEach((owner_repo) => {
         if (!owner_repo.length) {
@@ -110,6 +111,11 @@ const main = async () => {
                 if (branch_release) {
                   console.log("Found branch release:", branch_release.name)
                   return branch_release.id
+                }
+                const base_release = releases.data.find((r) => r.name === base)
+                if (base_release) {
+                  console.log("Found base release:", base_release.name)
+                  return base_release.id
                 }
                 const release = releases.data.find(
                   (r) => r.name.startsWith("v") && r.name.includes("-rc.")

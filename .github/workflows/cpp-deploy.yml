@@ -30,6 +30,7 @@ on:
 jobs:
   semantic-release:
     runs-on: ubuntu-latest
+    if: github.ref_name == 'master' || github.ref_name == 'next'
     outputs:
       new_release: ${{ steps.semantic.outputs.new_release_published }}
       new_version: ${{ steps.semantic.outputs.new_release_version }}
@@ -55,10 +56,24 @@ jobs:
       release: v${{ needs.semantic-release.outputs.new_version }}
     secrets: inherit
 
+  deploy-repository-test:
+    needs: semantic-release
+    if: github.ref_name != 'master' && github.ref_name != 'next'
+    uses: Geode-solutions/actions/.github/workflows/cpp-deploy-repository.yml@master
+    with:
+      name: ${{ inputs.name }}
+      directory: ${{ inputs.directory }}
+      repos: ${{ inputs.repos }}
+      version: "0.0.0"
+      release: ${{ github.ref_name }}-tag
+      upload-pypi: false
+      light: true
+    secrets: inherit
+
   notify:
     runs-on: ubuntu-latest
-    if: ${{ always() && needs.deploy-repository.result == 'failure' }}
-    needs: deploy-repository
+    if: ${{ always() && (needs.deploy-repository.result == 'failure' || needs.deploy-repository-test.result == 'failure') }}
+    needs: [deploy-repository, deploy-repository-test]
     steps:
       - name: Notify slack
         uses: 8398a7/action-slack@v3

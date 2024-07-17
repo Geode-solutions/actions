@@ -1,7 +1,7 @@
-const core = require('@actions/core');
-const {Octokit} = require('@octokit/rest');
-const fs = require('fs');
-const request = require('request');
+import core from '@actions/core';
+import {Octokit} from '@octokit/rest';
+import fs from 'fs';
+import request from 'request';
 
 try {
   const token = core.getInput('token');

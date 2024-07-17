@@ -9,8 +9,8 @@ try {
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
   console.log("owner", owner);
   console.log("repo", repo);
-  const public = repo.slice(0, -8);
-  console.log("public", public);
+  const public_repo = repo.slice(0, -8);
+  console.log("public", public_repo);
 
   const promise = octokit.repos.getLatestRelease({owner, repo});
   promise
@@ -19,7 +19,7 @@ try {
     console.log("release name", release.name);
     octokit.repos.createRelease({
       owner, 
-      repo: public, 
+      repo: public_repo, 
       name: release.name, 
       tag_name: release.tag_name, 
       body: release.body
@@ -45,7 +45,7 @@ try {
                 .on('finish', function() {
                   octokit.repos.uploadReleaseAsset({
                     owner, 
-                    repo: public, 
+                    repo: public_repo, 
                     release_id: public_release.id,
                     name: asset.name,
                     data: fs.createReadStream(asset.name),

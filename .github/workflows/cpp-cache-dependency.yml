@@ -63,7 +63,7 @@ jobs:
       - name: Get key
         id: info
         run: |
-          echo "key=${{ inputs.repository }}-${{ env.sha }}" >> $GITHUB_OUTPUT
+          echo "key=${{ inputs.repository }}-key-${{ env.sha }}" >> $GITHUB_OUTPUT
       - name: Cache install
         id: cache
         uses: actions/cache@v4
@@ -113,7 +113,7 @@ jobs:
       - name: Get key
         id: info
         run: |
-          echo "key=${{ inputs.repository }}-${{ env.sha }}" >> $env:GITHUB_OUTPUT
+          echo "key=${{ inputs.repository }}-key-${{ env.sha }}" >> $env:GITHUB_OUTPUT
       - name: Cache install
         uses: actions/cache@v4
         id: cache

@@ -176,7 +176,7 @@ const main = async () => {
         outputs.forEach((output) => {
           console.log("Output:", output)
           output.forEach((file) => {
-            result += file.replace("\\", "/") + ";"
+            result += file.replaceAll("\\", "/") + ";"
           })
         })
         result = result.slice(0, -1)

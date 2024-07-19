@@ -88,7 +88,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=${{ inputs.shared }} -DCMAKE_PREFIX_PATH=\"${{ steps.license.outputs.path }};$GITHUB_WORKSPACE/prefix\" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_INSTALL_PREFIX:PATH="install" ..
+          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=${{ inputs.shared }} "-DCMAKE_PREFIX_PATH=${{ steps.license.outputs.path }};$GITHUB_WORKSPACE/prefix" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_INSTALL_PREFIX:PATH="install" ..
           cmake --build .
           cmake --build . -t install
 
@@ -147,7 +147,7 @@ jobs:
           }
           if(!(test-path build)) { mkdir build }
           cd build
-          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=${{ inputs.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.license.outputs.path }};${{ github.workspace }}/prefix" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_INSTALL_PREFIX:PATH="install" ..
+          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=${{ inputs.shared }} "-DCMAKE_PREFIX_PATH:PATH=${{ steps.license.outputs.path }};${{ github.workspace }}/prefix" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_INSTALL_PREFIX:PATH="install" ..
           cmake --build . -j 2
           if(!$?) { cmake --build . -j 1 }
           cmake --build . -t install

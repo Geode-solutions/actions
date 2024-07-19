@@ -46,7 +46,7 @@ jobs:
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
           cmake --build . -t third_party -j 2
       - name: Tidy
-        uses: ZedThree/clang-tidy-review@v0.19.0
+        uses: ZedThree/clang-tidy-review@v0.18.0
         with:
           build_dir: ${{ github.workspace }}/build/${{ inputs.directory }}
 

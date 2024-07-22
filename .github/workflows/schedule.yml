@@ -158,11 +158,6 @@ jobs:
           echo "share=$share_path" >> $env:GITHUB_OUTPUT
       - name: Compile & Test
         run: |
-          choco install openssl -r --no-progress
-          if(!$?) { 
-            choco install openssl -r --no-progress
-            if(!$?) { exit 1 }
-          }
           if(!(test-path build)) { mkdir build }
           cd build
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..

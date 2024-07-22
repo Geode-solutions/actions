@@ -70,11 +70,6 @@ jobs:
       - name: Generate package
         run: |
           gh api https://api.github.com/repos/Geode-solutions/actions/contents/code_sign.cmake -H "Accept: application/vnd.github.raw" > code_sign.cmake
-          choco install openssl -r --no-progress
-          if(!$?) { 
-            choco install openssl -r --no-progress
-            if(!$?) { exit 1 }
-          }
           dotnet tool install --global AzureSignTool --version 4.0.1
           if(!$?) { exit 1 }
           if(!(test-path build)) { mkdir build }

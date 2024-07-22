@@ -95,11 +95,6 @@ jobs:
           arch: x64
       - name: Compile & Test
         run: |
-          choco install openssl -r --no-progress
-          if(!$?) { 
-            choco install openssl -r --no-progress
-            if(!$?) { exit 1 }
-          }
           if(!(test-path build)) { 
             mkdir build
           }

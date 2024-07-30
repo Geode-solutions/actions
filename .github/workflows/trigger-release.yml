@@ -21,3 +21,14 @@ jobs:
           skip_dirty_check: true
           commit_message: "fix(Package): trigger new release"
           commit_options: "--allow-empty"
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN }}
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: 'Geode-solutions',
+              repo: 'Versions',
+              workflow_id: 'deploy.yml',
+              ref: 'master',
+              inputs: { branch: '${{ inputs.branch }}' }
+            })

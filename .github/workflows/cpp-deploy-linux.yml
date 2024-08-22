@@ -99,7 +99,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Doc
-        if: matrix.shared == 'ON' && matrix.system == 'ubuntu' && github.ref == 'ref/head/master'
+        if: matrix.shared == 'ON' && matrix.system == 'ubuntu' && github.ref == 'refs/heads/master'
         uses: Geode-solutions/actions/doc@master
         with:
           directory: ${{ inputs.directory }}

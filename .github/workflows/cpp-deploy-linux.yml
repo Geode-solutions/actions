@@ -101,8 +101,8 @@ jobs:
         if: matrix.shared == 'ON' && matrix.system == 'ubuntu' && github.ref == 'refs/heads/master'
         run: |
           repo_name=${GITHUB_REPOSITORY##*/}
-          repo_name="${repo_name%_private}"
-          repo_name="${repo_name,,}"
+          repo_name=${repo_name%_private}
+          repo_name=${repo_name,,}
           docs_path="/docs"
 
           cd build/${{ inputs.directory }}

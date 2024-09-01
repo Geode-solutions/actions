@@ -108,7 +108,7 @@ jobs:
 
           cd build/${{ inputs.directory }}
           jq 'map(select(.file | test("/private/"; "i") | not))' compile_commands.json > public_compile_commands.json
-          clang-19-doc  --output=doc --doxygen --public --format=md --executor=all-TUs public_compile_commands.json
+          clang-doc-19 --output=doc --doxygen --public --format=md --executor=all-TUs public_compile_commands.json
           cd doc/geode
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/doc/style.py\?ref\=master > style.py
           python3 style.py .

@@ -32,6 +32,7 @@ const download_asset = async (asset, token) => {
           console.log("Unzip to:", extract_name)
           const result = path.join(process.env.GITHUB_WORKSPACE, extract_name)
           console.log("Result:", result)
+          fs.unlinkSync(asset.name)
           resolve(result)
         } else if (extension == "gz") {
           console.log("Untaring", asset.name)
@@ -48,6 +49,7 @@ const download_asset = async (asset, token) => {
                 extract_name
               )
               console.log("Result:", result)
+              fs.unlinkSync(asset.name)
               resolve(result)
             })
         } else if (extension == "whl") {

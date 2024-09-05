@@ -41,11 +41,10 @@ jobs:
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.clang-tidy\?ref\=master > .clang-tidy
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.releaserc\?ref\=master > .releaserc
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/version.rc.in\?ref\=master > cmake/version.rc.in
-      # - uses: DoozyX/clang-format-lint-action@master
-      #   with:
-      #     extensions: "h,cpp"
-      #     clangFormatVersion: 16
-      #     inplace: True
+      - uses: DoozyX/clang-format-lint-action@master
+        with:
+          extensions: "hpp,cpp"
+          inplace: True
       - uses: stefanzweifel/git-auto-commit-action@v5
         id: commit
         with:

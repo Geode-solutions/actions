@@ -49,6 +49,7 @@ jobs:
         uses: ZedThree/clang-tidy-review@master
         with:
           build_dir: ${{ github.workspace }}/build/${{ inputs.directory }}
+          clang_tidy_version: 17
 
   # sanitizers:
   #   needs: prepare

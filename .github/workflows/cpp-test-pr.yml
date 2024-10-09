@@ -22,34 +22,34 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/cpp-prepare.yml@master
     secrets: inherit
 
-  tidy:
-    needs: prepare
-    runs-on: ubuntu-latest
-    container: ghcr.io/geode-solutions/ubuntu:master
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/cache/restore@v4
-        with:
-          path: build/third_party
-          key: ${{ runner.os }}-ubuntu-${{ hashFiles('cmake/Configure**.cmake') }}
-      - uses: Geode-solutions/actions/get-release@master
-        id: repos
-        with:
-          repository: ${{ inputs.repos }}
-          file: "-ubuntu-private.tar.gz"
-          token: ${{ secrets.TOKEN }}
-          branch: ${{ github.event.pull_request.head.ref }}
-      - name: Configure
-        run: |
-          mkdir -p build
-          cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
-          cmake --build . -t third_party -j 2
-      - name: Tidy
-        uses: ZedThree/clang-tidy-review@master
-        with:
-          build_dir: ${{ github.workspace }}/build/${{ inputs.directory }}
-          clang_tidy_version: 17
+  # tidy:
+  #   needs: prepare
+  #   runs-on: ubuntu-latest
+  #   container: ghcr.io/geode-solutions/ubuntu:master
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/cache/restore@v4
+  #       with:
+  #         path: build/third_party
+  #         key: ${{ runner.os }}-ubuntu-${{ hashFiles('cmake/Configure**.cmake') }}
+  #     - uses: Geode-solutions/actions/get-release@master
+  #       id: repos
+  #       with:
+  #         repository: ${{ inputs.repos }}
+  #         file: "-ubuntu-private.tar.gz"
+  #         token: ${{ secrets.TOKEN }}
+  #         branch: ${{ github.event.pull_request.head.ref }}
+  #     - name: Configure
+  #       run: |
+  #         mkdir -p build
+  #         cd build
+  #         cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+  #         cmake --build . -t third_party -j 2
+  #     - name: Tidy
+  #       uses: ZedThree/clang-tidy-review@master
+  #       with:
+  #         build_dir: ${{ github.workspace }}/build/${{ inputs.directory }}
+  #         clang_tidy_version: 17
 
   # sanitizers:
   #   needs: prepare

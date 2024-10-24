@@ -74,6 +74,21 @@ jobs:
           file: "-${{ steps.info.outputs.tag }}-win_amd64.whl"
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
+      - name: "pip-compile"
+        run: |
+          file=bindings/python/requirements.in
+          if [ ! -f "$file" ]; then 
+            exit 0
+          fi
+          pip install pip-tools
+          echo $GITHUB_REF_NAME
+          if [ $GITHUB_REF_NAME == "master" ]; then
+            pip-compile -v --upgrade $file
+          else
+            pip-compile -v --pre --upgrade $file
+          fi
+          sed -i -E 's/==(.+)\.(.+)\.(.+)/==\1\.*,>=\1\.\2\.\3/' bindings/python/requirements.txt
+        shell: bash
       - name: Wheels from Github
         if: ${{ !inputs.wheels_from_pypi }}
         run: |

@@ -60,6 +60,12 @@ jobs:
           file: "-rhel-private.tar.gz"
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
+      - name: Libraries
+        id: libraries
+        run: |
+          new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/lib64\:/g')
+          echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
+          echo "PATH=/opt/python/${{ steps.info.outputs.tag }}/bin:$PATH" >> $GITHUB_ENV
       - name: "pip-compile"
         run: |
           file=bindings/python/requirements.in
@@ -74,14 +80,8 @@ jobs:
             pip-compile -v --pre --upgrade $file
           fi
           sed -i -E 's/==(.+)\.(.+)\.(.+)/==\1\.*,>=\1\.\2\.\3/' bindings/python/requirements.txt
-      - name: Libraries
-        id: libraries
-        run: |
-          new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/lib64\:/g')
-          echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
       - name: Compile
         run: |
-          export PATH=/opt/python/${{ steps.info.outputs.tag  }}/bin:$PATH
           mkdir -p build
           cd build
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} -DWHEEL_VERSION:STRING=${{ inputs.version }} -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF ..

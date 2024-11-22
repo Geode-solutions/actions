@@ -43,10 +43,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
-      - uses: actions/cache/restore@v4
-        with:
-          path: build/third_party
-          key: ${{ runner.os }}-win64-${{ hashFiles('cmake/Configure**.cmake') }}
+      # - uses: actions/cache/restore@v4
+      #   with:
+      #     path: build/third_party
+      #     key: ${{ runner.os }}-win64-${{ hashFiles('cmake/Configure**.cmake') }}
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v5
         with:

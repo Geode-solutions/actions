@@ -74,8 +74,7 @@ jobs:
             exit 0
           fi
           pip install pip-tools
-          echo $GITHUB_REF_NAME
-          if [ $GITHUB_REF_NAME == "master" ]; then
+          if [ ${{ inputs.branch }} == "master" ]; then
             pip-compile -v --upgrade $file
           else
             pip-compile -v --pre --upgrade $file

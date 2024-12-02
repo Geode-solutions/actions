@@ -9,6 +9,9 @@ on:
         default: "."
       repos:
         type: string
+      python:
+        type: boolean
+        default: true
     secrets:
       TOKEN:
         required: true
@@ -41,6 +44,7 @@ jobs:
       repos: ${{ inputs.repos }}
       light: ${{ github.ref_name != 'next' }}
       branch: ${{ github.ref_name }}
+      python: ${{ inputs.python }}
     secrets: inherit
 
   trigger-deploy:

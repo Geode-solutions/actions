@@ -21,6 +21,9 @@ on:
       wheels_from_pypi:
         type: boolean
         default: false
+      python:
+        type: boolean
+        default: true
     secrets:
       TOKEN:
         required: true
@@ -39,6 +42,7 @@ jobs:
     secrets: inherit
 
   test-linux-python:
+    if: ${{ inputs.python }}
     uses: Geode-solutions/actions/.github/workflows/cpp-test-linux-python.yml@master
     with:
       name: ${{ inputs.name }}
@@ -61,6 +65,7 @@ jobs:
     secrets: inherit
 
   test-windows-python:
+    if: ${{ inputs.python }}
     uses: Geode-solutions/actions/.github/workflows/cpp-test-windows-python.yml@master
     with:
       name: ${{ inputs.name }}

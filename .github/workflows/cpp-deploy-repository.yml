@@ -91,6 +91,7 @@ jobs:
     secrets: inherit
 
   notify:
+    if: ${{ !failure() && !cancelled() }}
     uses: Geode-solutions/actions/.github/workflows/cpp-deploy-notify.yml@master
     needs:
       [

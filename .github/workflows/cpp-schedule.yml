@@ -12,6 +12,9 @@ on:
       branch:
         type: string
         default: "master"
+      python:
+        type: boolean
+        default: true
     secrets:
       TOKEN:
         required: true
@@ -29,6 +32,7 @@ jobs:
       type: "Release"
       branch: ${{ inputs.branch }}
       wheels_from_pypi: true
+      python: ${{ inputs.python }}
     secrets: inherit
 
   notify:

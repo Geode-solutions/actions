@@ -24,6 +24,9 @@ on:
       upload-pypi:
         type: boolean
         default: true
+      python:
+        type: boolean
+        default: true
     secrets:
       TOKEN:
         required: true
@@ -45,6 +48,7 @@ jobs:
     secrets: inherit
 
   release-linux-python:
+    if: ${{ inputs.python }}
     uses: Geode-solutions/actions/.github/workflows/cpp-deploy-linux-python.yml@master
     with:
       name: ${{ inputs.name }}
@@ -68,6 +72,7 @@ jobs:
     secrets: inherit
 
   release-windows-python:
+    if: ${{ inputs.python }}
     uses: Geode-solutions/actions/.github/workflows/cpp-deploy-windows-python.yml@master
     with:
       name: ${{ inputs.name }}

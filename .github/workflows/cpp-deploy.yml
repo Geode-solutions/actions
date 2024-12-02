@@ -12,6 +12,9 @@ on:
       repo:
         type: string
         default: ${{ github.repository }}
+      python:
+        type: boolean
+        default: true
     outputs:
       new_release:
         description: "Whether a new release was published"
@@ -54,6 +57,7 @@ jobs:
       repos: ${{ inputs.repos }}
       version: ${{ needs.semantic-release.outputs.new_version }}
       release: v${{ needs.semantic-release.outputs.new_version }}
+      python: ${{ inputs.python }}
     secrets: inherit
 
   deploy-repository-test:
@@ -68,6 +72,7 @@ jobs:
       release: ${{ github.ref_name }}-tag
       upload-pypi: false
       light: true
+      python: ${{ inputs.python }}
     secrets: inherit
 
   notify:

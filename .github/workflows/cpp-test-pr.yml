@@ -148,4 +148,5 @@ jobs:
       release: ${{ github.head_ref }}-tag
       upload-pypi: false
       light: true
+      python: ${{ inputs.python }}
     secrets: inherit

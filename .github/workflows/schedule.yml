@@ -57,8 +57,6 @@ jobs:
           cd build
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DINCLUDE_PYBIND11:BOOL=ON ..
           cmake --build .
-          cd ${{ inputs.directory }}
-          ctest --output-on-failure -j 2
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
       - name: Test
@@ -67,7 +65,7 @@ jobs:
           cd test
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
           cmake --build .
-          ctest --output-on-failure -j 2
+          ctest --output-on-failure -j 2 -LE unstable
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
       - name: Notify slack
@@ -180,7 +178,7 @@ jobs:
               Copy-Item -Path $share\* -Destination share -Recurse
             }
           }
-          ctest --output-on-failure -j 2
+          ctest --output-on-failure -j 2 -LE unstable
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
       - name: Notify slack

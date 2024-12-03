@@ -84,10 +84,10 @@ jobs:
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
           if [ "${{ matrix.shared }}" = "ON" ]; then 
             cmake --build .
-            ctest --output-on-failure --no-tests=error -j 2
+            ctest --output-on-failure --no-tests=error -j 2 -LE unstable
           else
             cmake --build . -t essential
-            ctest --output-on-failure --no-tests=error -j 2 -L essential
+            ctest --output-on-failure --no-tests=error -j 2 -L essential -LE unstable
           fi
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

@@ -40,10 +40,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
-      # - uses: actions/cache@v4
-      #   with:
-      #     path: build/third_party
-      #     key: ${{ runner.os }}-${{ steps.info.outputs.name }}-${{ hashFiles('cmake/Configure**.cmake') }}
+      - uses: actions/cache@v4
+        with:
+          path: build/third_party
+          key: ${{ runner.os }}-${{ steps.info.outputs.name }}-${{ hashFiles('cmake/Configure**.cmake') }}
       - uses: Geode-solutions/actions/get-release@master
         id: repos
         with:

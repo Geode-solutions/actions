@@ -88,7 +88,7 @@ const main = async () => {
             ? octokit.repos
                 .getLatestRelease({ owner, repo })
                 .then((release) => release.data.id)
-            : octokit.repos.listReleases({ owner, repo }).then((releases) => {
+            : octokit.repos.listReleases({ owner, repo, per_page: 100}).then((releases) => {
                 if (github.context.payload.pull_request) {
                   const head_release = releases.data.find(
                     (r) =>

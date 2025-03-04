@@ -103,7 +103,11 @@ jobs:
           cmake --build .
           cd ${{ inputs.directory }}
           ctest --output-on-failure -R -py- -j 2
-          cmake --build . --target wheel
-          cmake --build . --target test-wheel
+          echo "LD_LIBRARY_PATH=" >> $GITHUB_ENV
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+      - name: Compile wheel
+        run: |
+          cd build/${{ inputs.directory }}
+          cmake --build . --target wheel
+          cmake --build . --target test-wheel

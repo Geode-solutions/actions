@@ -119,7 +119,7 @@ jobs:
         uses: cycjimmy/semantic-release-action@v4
         id: semantic
         with:
-          branches: "['${{ github.ref }}']" 
+          branches: "['*']" 
           ci: false
           dry_run: true
         env:

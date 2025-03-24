@@ -114,13 +114,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.head_ref }}
           fetch-depth: 0 
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v4
         id: semantic
         with:
-          branches : ${{ github.ref_name }}
+          branches : ${{ github.head_ref }}
           ci: false
           dry_run: true
         env:

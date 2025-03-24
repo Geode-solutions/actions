@@ -122,6 +122,19 @@ jobs:
           dry_run: true
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      - name: Send message on failure
+        if: steps.semantic.outputs.new_release_published == 'false'
+        run: | 
+            const message = 'PR is not mergeable: no semantic commit message found'
+                core.setFailed(message)
+        if: failure()
+        id: slack
+        uses: slackapi/slack-github-action@v1
+        with:
+          channel-id: C0598GTCLGH
+          slack-message: "${{ inputs.branch }}: PR not mergeable: no semantic commit message found\n${{ steps.check.outputs.result }}\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
   release:
     runs-on: ubuntu-latest

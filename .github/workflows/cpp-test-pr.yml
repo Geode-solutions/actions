@@ -119,7 +119,6 @@ jobs:
         uses: cycjimmy/semantic-release-action@v4
         id: semantic
         with:
-          branch : ${{ github.head_ref }}
           ci: false
           dry_run: true
         env:

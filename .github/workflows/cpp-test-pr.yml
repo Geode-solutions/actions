@@ -108,9 +108,25 @@ jobs:
       python: ${{ inputs.python }}
     secrets: inherit
 
-  release:
+  dry-semantic-release:
     runs-on: ubuntu-latest
     needs: [test-repository]
+    outputs:
+      new_release: ${{ steps.semantic.outputs.new_release_published }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v4
+        id: semantic
+        with:
+          dry_run: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [dry-semantic-release]
+    if: needs.dry-semantic-release.outputs.new_release == 'true'
     steps:
       - name: Create Release
         uses: actions/github-script@v7

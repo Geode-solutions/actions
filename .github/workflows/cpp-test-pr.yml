@@ -161,6 +161,8 @@ jobs:
             exit 0
           else
             echo "No commits conform to the Angular convention."
+            exit 1
+          fi
 
   # dry-semantic-release:
   #   runs-on: ubuntu-latest

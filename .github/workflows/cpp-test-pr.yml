@@ -157,34 +157,12 @@ jobs:
           
           # Check if at least one valid commit was found
           if [ "$VALID_COMMIT_FOUND" = true ]; then
-            echo "At least one commit conforms to the Angular convention. Success!"
+            echo "At least one valid semantic commit message found. Success!"
             exit 0
           else
-            echo "No commits conform to the Angular convention."
+            echo "PR is not mergeable: no valid semantic commit message found."
             exit 1
           fi
-
-  # dry-semantic-release:
-  #   runs-on: ubuntu-latest
-  #   needs: prepare
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ github.ref }}
-  #     - name: Semantic Release
-  #       uses: cycjimmy/semantic-release-action@v4
-  #       id: semantic
-  #       with:
-  #         branch : ${{ github.ref_name }}
-  #         ci: false
-  #         dry_run: true
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.TOKEN }}
-  #     - name: Failed for non semantic commit
-  #       if: steps.semantic.outputs.new_release_published == 'false'
-  #       run: | 
-  #           echo "::error PR is not mergeable: no semantic commit message found"
-  #           exit 1
 
   release:
     runs-on: ubuntu-latest

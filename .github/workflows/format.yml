@@ -17,7 +17,7 @@ jobs:
         run: |
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.clang-format\?ref\=master > .clang-format
       - name: Run clang-format style check for C/C++/Protobuf programs.
-        uses: DoozyX/clang-format-lint-action@v0.18.1
+        uses: DoozyX/clang-format-lint-action@v0.18.2
         with:
           extensions: 'hpp,cpp'
           clangFormatVersion: 19

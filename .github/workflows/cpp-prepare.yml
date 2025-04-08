@@ -46,6 +46,7 @@ jobs:
         with:
           extensions: "hpp,cpp"
           inplace: True
+          clangFormatVersion: 19
       - uses: stefanzweifel/git-auto-commit-action@v5
         id: commit
         with:

@@ -32,33 +32,33 @@ jobs:
         run: |
           if [ "${{ inputs.light }}" == "true" ]; then
             cat <<EOF > matrix.json
-            {
-              "include": [
-                {
-                  "system": "ubuntu",
-                  "cc": "/usr/bin/clang",
-                  "cxx": "/usr/bin/clang++"
-                }
-              ]
-            }
-            EOF
+{
+  "include": [
+    {
+      "system": "ubuntu",
+      "cc": "/usr/bin/clang",
+      "cxx": "/usr/bin/clang++"
+    }
+  ]
+}
+EOF
           else
             cat <<EOF > matrix.json
-            {
-              "include": [
-                {
-                  "system": "rhel",
-                  "cc": "/opt/rh/gcc-toolset-12/root/usr/bin/gcc",
-                  "cxx": "/opt/rh/gcc-toolset-12/root/usr/bin/g++"
-                },
-                {
-                  "system": "ubuntu",
-                  "cc": "/usr/bin/clang",
-                  "cxx": "/usr/bin/clang++"
-                }
-              ]
-            }
-            EOF
+{
+  "include": [
+    {
+      "system": "rhel",
+      "cc": "/opt/rh/gcc-toolset-12/root/usr/bin/gcc",
+      "cxx": "/opt/rh/gcc-toolset-12/root/usr/bin/g++"
+    },
+    {
+      "system": "ubuntu",
+      "cc": "/usr/bin/clang",
+      "cxx": "/usr/bin/clang++"
+    }
+  ]
+}
+EOF
           fi
           echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
 

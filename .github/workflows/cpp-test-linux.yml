@@ -31,36 +31,12 @@ jobs:
         id: set-matrix
         run: |
           if [ "${{ inputs.light }}" == "true" ]; then
-            cat <<EOF > matrix.json
-{
-  "include": [
-    {
-      "system": "ubuntu",
-      "cc": "/usr/bin/clang",
-      "cxx": "/usr/bin/clang++"
-    }
-  ]
-}
-EOF
+            # Exclude rhel when light is true
+            echo "matrix={\"include\":[{\"system\":\"ubuntu\",\"cc\":\"/usr/bin/clang\",\"cxx\":\"/usr/bin/clang++\"}]}" >> $GITHUB_OUTPUT
           else
-            cat <<EOF > matrix.json
-{
-  "include": [
-    {
-      "system": "rhel",
-      "cc": "/opt/rh/gcc-toolset-12/root/usr/bin/gcc",
-      "cxx": "/opt/rh/gcc-toolset-12/root/usr/bin/g++"
-    },
-    {
-      "system": "ubuntu",
-      "cc": "/usr/bin/clang",
-      "cxx": "/usr/bin/clang++"
-    }
-  ]
-}
-EOF
+            # Include both rhel and ubuntu
+            echo "matrix={\"include\":[{\"system\":\"rhel\",\"cc\":\"/opt/rh/gcc-toolset-12/root/usr/bin/gcc\",\"cxx\":\"/opt/rh/gcc-toolset-12/root/usr/bin/g++\"},{\"system\":\"ubuntu\",\"cc\":\"/usr/bin/clang\",\"cxx\":\"/usr/bin/clang++\"}]}" >> $GITHUB_OUTPUT
           fi
-          echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
 
   linux:
     runs-on: ubuntu-latest

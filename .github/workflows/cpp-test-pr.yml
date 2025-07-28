@@ -54,47 +54,47 @@ jobs:
   #         build_dir: ${{ github.workspace }}/build/${{ inputs.directory }}
   #         clang_tidy_version: 17
 
-  # sanitizers:
-  #   needs: prepare
-  #   runs-on: ubuntu-latest
-  #   container: ghcr.io/geode-solutions/ubuntu:master
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/cache@v4
-  #       with:
-  #         path: build/third_party
-  #         key: ${{ runner.os }}-clang-${{ hashFiles('cmake/Configure**.cmake') }}
-  #     - uses: Geode-solutions/actions/get-release@master
-  #       id: repos
-  #       with:
-  #         repository: ${{ inputs.repos }}
-  #         file: "-ubuntu-private.tar.gz"
-  #         token: ${{ secrets.TOKEN }}
-  #         branch: ${{ github.event.pull_request.head.ref }}
-  #     - name: Libraries
-  #       id: libraries
-  #       run: |
-  #         new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/lib\:/g')
-  #         echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
-  #         echo "BASE_DIR=`pwd`" >> $GITHUB_ENV
-  #     - name: Sanitizers
-  #       run: |
-  #         gh api https://api.github.com/repos/Geode-solutions/actions/contents/asan_suppressions.txt -H "Accept: application/vnd.github.raw" > asan_suppressions.txt
-  #         mkdir -p build
-  #         cd build
-  #         cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
-  #         cmake --build . -t third_party
-  #         cd ${{ inputs.directory }}
-  #         cmake -DUSE_SANITIZER_ADDRESS=ON -DUSE_SANITIZER_LEAK=ON -DUSE_SANITIZER_UNDEFINED_BEHAVIOR=ON .
-  #         cmake --build .
-  #         ctest --output-on-failure -j 2
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.token }}
-  #         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
-  #         LSAN_OPTIONS: suppressions=${{ env.BASE_DIR }}/asan_suppressions.txt
-  #         ASAN_OPTIONS: detect_odr_violation=0
-  #         CC: /usr/bin/clang
-  #         CXX: /usr/bin/clang++
+  sanitizers:
+    needs: prepare
+    runs-on: ubuntu-latest
+    container: ghcr.io/geode-solutions/ubuntu:master
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: build/third_party
+          key: ${{ runner.os }}-sanitizer-${{ hashFiles('cmake/Configure**.cmake') }}
+      - uses: Geode-solutions/actions/get-release@master
+        id: repos
+        with:
+          repository: ${{ inputs.repos }}
+          file: "-ubuntu-private.tar.gz"
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ github.event.pull_request.head.ref }}
+      - name: Libraries
+        id: libraries
+        run: |
+          new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/lib\:/g')
+          echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
+          echo "BASE_DIR=`pwd`" >> $GITHUB_ENV
+      - name: Sanitizers
+        run: |
+          gh api https://api.github.com/repos/Geode-solutions/actions/contents/asan_suppressions.txt -H "Accept: application/vnd.github.raw" > asan_suppressions.txt
+          mkdir -p build
+          cd build
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+          cmake --build . -t third_party
+          cd ${{ inputs.directory }}
+          cmake -DUSE_SANITIZER_ADDRESS=ON -DUSE_SANITIZER_LEAK=ON -DUSE_SANITIZER_UNDEFINED_BEHAVIOR=ON .
+          cmake --build .
+          ctest --output-on-failure -j 2
+        env:
+          GITHUB_TOKEN: ${{ secrets.token }}
+          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          LSAN_OPTIONS: suppressions=${{ env.BASE_DIR }}/asan_suppressions.txt
+          ASAN_OPTIONS: detect_odr_violation=0
+          CC: /usr/bin/clang
+          CXX: /usr/bin/clang++
 
   test-repository:
     needs: prepare
@@ -122,7 +122,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18' # Use a supported Node.js version
+          node-version: "18" # Use a supported Node.js version
 
       # Install dependencies
       - name: Install dependencies
@@ -133,13 +133,13 @@ jobs:
         run: |
           # Get the commit range for the pull request
           COMMIT_RANGE="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
-          
+
           # Get the list of commit SHAs in the range
           COMMITS=$(git rev-list $COMMIT_RANGE)
-          
+
           # Flag to track if at least one commit is valid
           VALID_COMMIT_FOUND=false
-          
+
           # Loop through each commit and validate it
           for COMMIT in $COMMITS; do
             echo "Checking commit: $COMMIT"
@@ -154,7 +154,7 @@ jobs:
               cat lint_output
             fi
           done
-          
+
           # Check if at least one valid commit was found
           if [ "$VALID_COMMIT_FOUND" = true ]; then
             echo "At least one valid semantic commit message found. Success!"

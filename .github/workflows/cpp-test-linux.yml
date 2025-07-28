@@ -39,7 +39,7 @@ jobs:
       CXX: ${{ matrix.cxx }}
     steps:
       - name: Skip RHEL if light is true
-        if: ${{ matrix.system == 'rhel' && inputs.light == 'true' }}
+        if: ${{ matrix.system == 'rhel' && inputs.light == true }}
         run: echo "Skipping RHEL job because light is true" && exit 0
       - name: Get info
         id: info

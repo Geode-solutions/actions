@@ -28,19 +28,23 @@ jobs:
     strategy:
       matrix:
         system: ["ubuntu", "rhel"]
-        shared: ["ON"]
         exclude:
           - system: ${{ inputs.light && 'rhel' || 'dummy' }}
+        include:
+          - system: "ubuntu"
+            cc: "clang"
+            cxx: "clang++"
+          - system: "rhel"
+            cc: "gcc"
+            cxx: "g++"
+    env:
+      CC: /usr/bin/${{ matrix.cc }}
+      CXX: /usr/bin/${{ matrix.cxx }}
     steps:
       - name: Get info
         id: info
         run: |
-          if [ "${{ matrix.shared }}" = "ON" ]; then
-            echo "name=${{ matrix.system }}" >> $GITHUB_OUTPUT
-          else
-            echo "name=${{ matrix.system }}-static" >> $GITHUB_OUTPUT
-          fi
-
+          echo "name=${{ matrix.system }}" >> $GITHUB_OUTPUT
           if [ "${{ matrix.system }}" = "rhel" ]; then
             echo "lib=lib64" >> $GITHUB_OUTPUT
           else
@@ -69,7 +73,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=${{ matrix.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
           cmake --build . -t third_party
           cd ${{ inputs.directory }}
           cmake --build . -t essential
@@ -82,12 +86,7 @@ jobs:
           mkdir -p test
           cd test
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
-          if [ "${{ matrix.shared }}" = "ON" ]; then 
-            cmake --build .
-            ctest --output-on-failure --no-tests=error -j 2 -LE unstable
-          else
-            cmake --build . -t essential
-            ctest --output-on-failure --no-tests=error -j 2 -L essential -LE unstable
-          fi
+          cmake --build .
+          ctest --output-on-failure --no-tests=error -j 2 -LE unstable
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

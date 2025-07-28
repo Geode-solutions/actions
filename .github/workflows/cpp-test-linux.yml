@@ -27,19 +27,19 @@ jobs:
     container: ghcr.io/geode-solutions/${{ matrix.system }}:master
     strategy:
       matrix:
-        system: ["ubuntu", "rhel"]
+        system: [ubuntu, rhel]
         exclude:
           - system: ${{ inputs.light && 'rhel' || 'dummy' }}
         include:
-          - system: "ubuntu"
-            cc: "/usr/bin/clang"
-            cxx: "/usr/bin/clang++"
-          - system: "rhel"
-            cc: "/opt/rh/gcc-toolset-12/root/usr/bin/gcc"
-            cxx: "/opt/rh/gcc-toolset-12/root/usr/bin/g++"
+          - system: rhel
+            cc: /opt/rh/gcc-toolset-12/root/usr/bin/gcc
+            cxx: /opt/rh/gcc-toolset-12/root/usr/bin/g++
+          - system: ubuntu
+            cc: /usr/bin/clang
+            cxx: /usr/bin/clang++
     env:
-      CC: /usr/bin/${{ matrix.cc }}
-      CXX: /usr/bin/${{ matrix.cxx }}
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
     steps:
       - name: Get info
         id: info

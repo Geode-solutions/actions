@@ -25,11 +25,9 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     container: ghcr.io/geode-solutions/${{ matrix.system }}:master
+    if: ${{ matrix.system != 'rhel' || inputs.light == 'false' }}
     strategy:
       matrix:
-        system: [ubuntu, rhel]
-        # exclude:
-        #   - system: ${{ inputs.light && 'rhel' || 'dummy' }}
         include:
           - system: rhel
             cc: /opt/rh/gcc-toolset-12/root/usr/bin/gcc

@@ -36,18 +36,18 @@ jobs:
     container: ghcr.io/geode-solutions/${{ matrix.system }}:master
     strategy:
       matrix:
-        system: ["ubuntu", "rhel"]
-        shared: ["ON"]
+        include:
+          - system: rhel
+            cc: /opt/rh/gcc-toolset-12/root/usr/bin/gcc
+            cxx: /opt/rh/gcc-toolset-12/root/usr/bin/g++
+          - system: ubuntu
+            cc: /usr/bin/clang
+            cxx: /usr/bin/clang++
     steps:
       - name: Get info
         id: info
         run: |
-          if [ "${{ matrix.shared }}" = "ON" ]; then
-            echo "name=${{ matrix.system }}" >> $GITHUB_OUTPUT
-          else
-            echo "name=${{ matrix.system }}-static" >> $GITHUB_OUTPUT
-          fi
-
+          echo "name=${{ matrix.system }}" >> $GITHUB_OUTPUT
           if [ "${{ matrix.system }}" = "rhel" ]; then
             echo "lib=lib64" >> $GITHUB_OUTPUT
           else
@@ -77,7 +77,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=${{ matrix.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=${{ inputs.version }} -DCPACK_SYSTEM_NAME:STRING=${{ steps.info.outputs.name }} ..
+          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=${{ inputs.version }} -DCPACK_SYSTEM_NAME:STRING=${{ steps.info.outputs.name }} ..
           cmake --build . -j 2
           cd ${{ inputs.directory }}
           cpack -D CPACK_COMPONENTS_ALL="public;private" .
@@ -99,7 +99,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Doc
         shell: bash
-        if: matrix.shared == 'ON' && matrix.system == 'ubuntu' && github.ref == 'refs/heads/master'
+        if: matrix.system == 'ubuntu' && github.ref == 'refs/heads/master'
         run: |
           repo_name=${GITHUB_REPOSITORY##*/}
           repo_name=${repo_name%_private}

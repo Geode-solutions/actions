@@ -35,7 +35,7 @@ jobs:
             echo 'matrix={"include":[{"system":"ubuntu","cc":"/usr/bin/clang","cxx":"/usr/bin/clang++"}]}' >> $GITHUB_OUTPUT
           else
             # Include both rhel and ubuntu
-            echo "matrix={\"include\":[{\"system\":\"rhel\",\"cc\":\"/opt/rh/gcc-toolset-12/root/usr/bin/gcc\",\"cxx\":\"/opt/rh/gcc-toolset-12/root/usr/bin/g++\"},{\"system\":\"ubuntu\",\"cc\":\"/usr/bin/clang\",\"cxx\":\"/usr/bin/clang++\"}]}" >> $GITHUB_OUTPUT
+            echo 'matrix={"include":[{"system":"rhel","cc":"/opt/rh/gcc-toolset-12/root/usr/bin/gcc","cxx":"/opt/rh/gcc-toolset-12/root/usr/bin/g++"},{"system":"ubuntu","cc":"/usr/bin/clang","cxx":"/usr/bin/clang++"}]}' >> $GITHUB_OUTPUT
           fi
 
   linux:

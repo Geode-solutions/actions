@@ -32,11 +32,11 @@ jobs:
           - system: ${{ inputs.light && 'rhel' || 'dummy' }}
         include:
           - system: "ubuntu"
-            cc: "clang"
-            cxx: "clang++"
+            cc: "/usr/bin/clang"
+            cxx: "/usr/bin/clang++"
           - system: "rhel"
-            cc: "gcc"
-            cxx: "g++"
+            cc: "/opt/rh/gcc-toolset-12/root/usr/bin/gcc"
+            cxx: "/opt/rh/gcc-toolset-12/root/usr/bin/g++"
     env:
       CC: /usr/bin/${{ matrix.cc }}
       CXX: /usr/bin/${{ matrix.cxx }}

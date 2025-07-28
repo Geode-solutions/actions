@@ -25,7 +25,6 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     container: ghcr.io/geode-solutions/${{ matrix.system }}:master
-    if: ${{ matrix.system != 'rhel' || inputs.light == 'false' }}
     strategy:
       matrix:
         include:
@@ -42,6 +41,9 @@ jobs:
       - name: Get info
         id: info
         run: |
+          if [ "${{ matrix.system }}" == "rhel" && ${{ inputs.light }} == "true" ]; then
+            exit 0
+          fi
           echo "name=${{ matrix.system }}" >> $GITHUB_OUTPUT
           if [ "${{ matrix.system }}" = "rhel" ]; then
             echo "lib=lib64" >> $GITHUB_OUTPUT

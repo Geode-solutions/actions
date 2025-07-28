@@ -28,8 +28,8 @@ jobs:
     strategy:
       matrix:
         system: [ubuntu, rhel]
-        exclude:
-          - system: ${{ inputs.light && 'rhel' || 'dummy' }}
+        # exclude:
+        #   - system: ${{ inputs.light && 'rhel' || 'dummy' }}
         include:
           - system: rhel
             cc: /opt/rh/gcc-toolset-12/root/usr/bin/gcc

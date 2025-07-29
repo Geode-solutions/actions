@@ -43,6 +43,9 @@ jobs:
           - python: ${{ inputs.light && '3.9' || 'dummy' }}
           - python: ${{ inputs.light && '3.10' || 'dummy' }}
           - python: ${{ inputs.light && '3.11' || 'dummy' }}
+    env:
+      CC: /opt/rh/gcc-toolset-12/root/usr/bin/gcc
+      CXX: /opt/rh/gcc-toolset-12/root/usr/bin/g++
     steps:
       - name: Get info
         id: info

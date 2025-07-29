@@ -43,6 +43,9 @@ jobs:
           - system: ubuntu
             cc: /usr/bin/clang
             cxx: /usr/bin/clang++
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
     steps:
       - name: Get info
         id: info

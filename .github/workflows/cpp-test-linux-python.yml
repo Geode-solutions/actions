@@ -34,6 +34,9 @@ jobs:
     strategy:
       matrix:
         python: ["3.12"]
+    env:
+      CC: /opt/rh/gcc-toolset-12/root/usr/bin/gcc
+      CXX: /opt/rh/gcc-toolset-12/root/usr/bin/g++
     steps:
       - name: Get info
         id: info

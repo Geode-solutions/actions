@@ -6,7 +6,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@
+        with:
+          fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -18,7 +20,7 @@ jobs:
       - name: Check commit messages
         run: |
           # Get commit messages in the PR range
-          COMMITS=$(git log --pretty=%s origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
+          COMMITS=$(git log --pretty=%s origin/${{ github.base_ref }}..origin/${{ github.head_ref }} --)
           FOUND_VALID_COMMIT=false
 
           # Loop through commit messages to check if at least one is valid

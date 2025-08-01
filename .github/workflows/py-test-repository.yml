@@ -1,0 +1,48 @@
+on:
+  workflow_call:
+    inputs:
+      repos:
+        type: string
+      branch:
+        type: string
+        default: ${{ github.ref }}
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: Geode-solutions/actions/get-release@master
+        id: wheels
+        with:
+          repository: ${{ inputs.repos }}
+          file: ".whl"
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install .
+      - name: Install wheels from Github
+        run: |
+          wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
+          echo $wheels
+          if [ -n "$wheels" ]; then 
+            pip install --no-deps $wheels
+          fi
+        shell: bash
+      - name: Test
+        run: |
+          pip install pytest
+          pytest

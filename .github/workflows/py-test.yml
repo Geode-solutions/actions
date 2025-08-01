@@ -1,17 +1,8 @@
 on:
   workflow_call:
     inputs:
-      name:
-        type: string
-        required: true
-      directory:
-        type: string
-        default: "."
       repos:
         type: string
-      python:
-        type: boolean
-        default: true
     secrets:
       TOKEN:
         required: true
@@ -37,12 +28,8 @@ jobs:
   test-repository:
     needs: skip
     if: needs.skip.outputs.pr_found == 'false'
-    uses: Geode-solutions/actions/.github/workflows/cpp-test-repository.yml@master
+    uses: Geode-solutions/actions/.github/workflows/py-test-repository.yml@master
     with:
-      name: ${{ inputs.name }}
-      directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
-      light: ${{ github.ref_name != 'next' }}
       branch: ${{ github.ref_name }}
-      python: ${{ inputs.python }}
     secrets: inherit

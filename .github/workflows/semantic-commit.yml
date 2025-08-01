@@ -1,0 +1,46 @@
+on:
+  workflow_call:
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  semantic-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22"
+      - name: Install commitlint
+        run: |
+          npm install --save-dev @commitlint/cli @commitlint/config-angular
+          echo "module.exports = {extends: ['@commitlint/config-angular']}" > commitlint.config.js
+      - name: Check commit messages
+        run: |
+          # Get commit messages in the PR range
+          COMMITS=$(git log --pretty=%s origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
+          FOUND_VALID_COMMIT=false
+
+          # Loop through commit messages to check if at least one is valid
+          while IFS= read -r message; do
+            # Write message to a temporary file to use with commitlint
+            echo "$message" > temp-commit-message.txt
+            if npx commitlint --config commitlint.config.js < temp-commit-message.txt; then
+              echo "Valid Angular commit message found: $message"
+              FOUND_VALID_COMMIT=true
+              break
+            fi
+          done <<< "$COMMITS"
+
+          # Check if at least one valid commit was found
+          if [ "$FOUND_VALID_COMMIT" = true ]; then
+            echo "At least one valid semantic commit message found. Success!"
+            exit 0
+          else
+            echo "PR is not mergeable: no valid semantic commit message found."
+            exit 1
+          fi

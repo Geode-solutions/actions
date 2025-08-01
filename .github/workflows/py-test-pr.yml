@@ -1,0 +1,45 @@
+on:
+  workflow_call:
+    inputs:
+      repos:
+        type: string
+    secrets:
+      TOKEN:
+        required: true
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    uses: Geode-solutions/actions/.github/workflows/py-prepare.yml@master
+    secrets: inherit
+
+  test-repository:
+    needs: prepare
+    uses: Geode-solutions/actions/.github/workflows/py-test-repository.yml@master
+    with:
+      repos: ${{ inputs.repos }}
+      branch: ${{ github.event.pull_request.head.ref }}
+    secrets: inherit
+
+  semantic-commit:
+    needs: prepare
+    uses: Geode-solutions/actions/.github/workflows/semantic-commit.yml@master
+
+  release:
+    needs: [test-repository, semantic-commit]
+    uses: Geode-solutions/actions/.github/workflows/dev-release.yml@master
+
+  deploy-repository:
+    needs: release
+    uses: Geode-solutions/actions/.github/workflows/py-deploy-repository.yml@master
+    with:
+      version: "0.0.0"
+      release: ${{ github.head_ref }}-tag
+      upload-pypi: false
+      wheel: true
+      npm: false
+      docker: false
+    secrets: inherit

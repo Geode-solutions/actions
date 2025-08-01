@@ -109,89 +109,12 @@ jobs:
     secrets: inherit
 
   semantic-commit:
-    runs-on: ubuntu-latest
     needs: prepare
-    steps:
-      # Checkout the repository with full commit history
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Fetches all commits for the PR
-
-      # Set up Node.js
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18" # Use a supported Node.js version
-
-      # Install dependencies
-      - name: Install dependencies
-        run: npm install --save-dev @commitlint/cli @commitlint/config-angular
-
-      # Validate commits and ensure at least one conforms to Angular convention
-      - name: Validate commits with commitlint
-        run: |
-          # Get the commit range for the pull request
-          COMMIT_RANGE="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
-
-          # Get the list of commit SHAs in the range
-          COMMITS=$(git rev-list $COMMIT_RANGE)
-
-          # Flag to track if at least one commit is valid
-          VALID_COMMIT_FOUND=false
-
-          # Loop through each commit and validate it
-          for COMMIT in $COMMITS; do
-            echo "Checking commit: $COMMIT"
-            COMMIT_MSG=$(git log --format=%B -n 1 $COMMIT)
-            echo "$COMMIT_MSG" | npx commitlint --config commitlint.config.js > lint_output 2>&1 || true
-            if [ $? -eq 0 ]; then
-              echo "Commit $COMMIT is valid according to Angular convention."
-              VALID_COMMIT_FOUND=true
-              break # Optional: Stop checking once a valid commit is found
-            else
-              echo "Commit $COMMIT is invalid."
-              cat lint_output
-            fi
-          done
-
-          # Check if at least one valid commit was found
-          if [ "$VALID_COMMIT_FOUND" = true ]; then
-            echo "At least one valid semantic commit message found. Success!"
-            exit 0
-          else
-            echo "PR is not mergeable: no valid semantic commit message found."
-            exit 1
-          fi
+    uses: Geode-solutions/actions/.github/workflows/semantic-commit.yml@master
 
   release:
-    runs-on: ubuntu-latest
     needs: [test-repository, semantic-commit]
-    steps:
-      - name: Create Release
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const refs = await github.rest.git.listMatchingRefs({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: "tags/${{ github.head_ref }}-tag"
-            })
-            console.log(refs)
-            if(refs.data.length > 0) {
-              console.log("Tag already exists, skipping release")
-              return
-            }
-            github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: "${{ github.head_ref }}-tag",
-              name: "${{ github.head_ref }}",
-              prerelease: true,
-              target_commitish: "${{ github.head_ref }}"
-            })
-        env:
-          GH_TOKEN: ${{ github.token }}
+    uses: Geode-solutions/actions/.github/workflows/dev-release.yml@master
 
   deploy-repository:
     needs: release

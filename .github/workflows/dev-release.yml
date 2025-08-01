@@ -1,0 +1,35 @@
+on:
+  workflow_call:
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const refs = await github.rest.git.listMatchingRefs({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "tags/${{ github.head_ref }}-tag"
+            })
+            console.log(refs)
+            if(refs.data.length > 0) {
+              console.log("Tag already exists, skipping release")
+              return
+            }
+            github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: "${{ github.head_ref }}-tag",
+              name: "${{ github.head_ref }}",
+              prerelease: true,
+              target_commitish: "${{ github.head_ref }}"
+            })
+        env:
+          GH_TOKEN: ${{ github.token }}

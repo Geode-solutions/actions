@@ -1,0 +1,103 @@
+on:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+      release:
+        type: string
+        required: true
+      docker:
+        type: boolean
+        required: true
+      wheel:
+        type: boolean
+        required: true
+      npm:
+        type: boolean
+        required: true
+      upload-pypi:
+        type: boolean
+        default: true
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+      PYPI_TOKEN:
+        required: true
+
+jobs:
+  release-python:
+    if: ${{ inputs.wheel }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build
+        run: |
+          sed -i 's/version = "[0-9]*\.[0-9]*\.[0-9]*\(-rc\.[0-9]*\)\?"/version = "${{ inputs.version }}"/' pyproject.toml
+          python3 -m pip install --upgrade build
+          python3 -m build
+      - name: Upload GH
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          files="dist/*.whl"
+          for file in $files
+          do
+            echo $file
+            counter=0
+            for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY ${{ inputs.release }} $file && break || counter=$[$counter +1] && sleep 30; done
+            echo $counter
+            if [ "$counter" -eq "5" ]; then exit 1; fi
+          done
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload PYPI
+        if: inputs.upload-pypi
+        run: |
+          python3 -m pip install twine==6.0.1
+          python3 -m twine upload --repository pypi dist/* -u __token__ -p ${{ secrets.PYPI_TOKEN }}
+
+  release-npm:
+    if: inputs.npm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
+      - name: Setup NODE
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22"
+      - name: Upload NPM
+        run: |
+          npm i
+          npm run json
+          jq '.version="${{inputs.version}}"' package.json > temp && mv temp package.json
+          cat package.json
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  release-docker:
+    if: inputs.docker
+    uses: Geode-solutions/actions/.github/workflows/docker-build-squash-push.yml@master
+    with:
+      tag: ${{ github.ref_name }}
+    secrets:
+      TOKEN: ${{secrets.TOKEN}}
+
+  notify:
+    if: ${{ !failure() && !cancelled() }}
+    uses: Geode-solutions/actions/.github/workflows/cpp-deploy-notify.yml@master
+    needs: [release-python, release-npm, release-docker]
+    secrets: inherit

@@ -85,13 +85,13 @@ jobs:
           cmake --build .
           cd ${{ inputs.directory }}
           cmake --build . --target wheel
-      - name: PyPI
-        if: inputs.upload-pypi
-        run: |
-          pip install twine
-          twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --skip-existing --verbose build/${{ inputs.directory }}/wheel/dist/*.whl
       - name: Upload GH
         run: |
           Get-ChildItem -Path "build/${{ inputs.directory }}/wheel/dist" -Filter *.whl | Foreach-Object { gh release upload --clobber --repo ${env:GITHUB_REPOSITORY} ${{ inputs.release }} $_.FullName }
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - name: PyPI
+        if: inputs.upload-pypi
+        run: |
+          pip install twine
+          twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --skip-existing --verbose build/${{ inputs.directory }}/wheel/dist/*.whl

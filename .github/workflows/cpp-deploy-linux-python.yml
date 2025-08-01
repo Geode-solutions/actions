@@ -93,11 +93,6 @@ jobs:
           cmake --build . --target wheel --config Release
           cd wheel/dist
           rename linux manylinux_2_28 *.whl
-      - name: PyPI
-        if: inputs.upload-pypi
-        run: |
-          pip install twine
-          twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --skip-existing --verbose build/${{ inputs.directory }}/wheel/dist/*.whl
       - name: Upload GH
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
@@ -112,3 +107,8 @@ jobs:
           done
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - name: PyPI
+        if: inputs.upload-pypi
+        run: |
+          pip install twine
+          twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --skip-existing --verbose build/${{ inputs.directory }}/wheel/dist/*.whl

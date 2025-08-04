@@ -30,6 +30,14 @@ jobs:
           else
             pip-compile -v --pre --upgrade $file
           fi
+          while IFS= read -r line || [ -n "$line" ]; do
+              if [[ -z "$line" || "$line" =~ ^# || "$line" =~ == ]]; then
+                  continue
+              fi
+              package=$(echo "$line" | sed 's/[][\.*^$/]/\\&/g' | tr '[:upper:]' '[:lower:]')
+              echo "Processing package: $line - $package"
+              sed -i -E "s/^($package)==(.+)\.(.+)\.(.+)/\1==\2\.*,>=\2\.\3\.\4/" "requirements.txt"
+          done < "$file"
       - name: "Get config files"
         run: |
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.pylintrc\?ref\=master > .pylintrc

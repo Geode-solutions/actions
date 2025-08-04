@@ -17,6 +17,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.TOKEN }}
+      - name: "pip-compile"
+        run: |
+          file=requirements.in
+          if [ ! -f "$file" ]; then 
+            exit 0
+          fi
+          pip install pip-tools
+          echo $GITHUB_REF_NAME
+          if [ $GITHUB_REF_NAME == "master" ]; then
+            pip-compile -v --upgrade $file
+          else
+            pip-compile -v --pre --upgrade $file
+          fi
       - name: "Get config files"
         run: |
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.pylintrc\?ref\=master > .pylintrc
@@ -28,3 +41,14 @@ jobs:
         id: commit
         with:
           commit_message: Apply prepare changes
+
+  pylint:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dciborow/action-pylint@main
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          glob_pattern: "**/*.py"

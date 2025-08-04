@@ -6,18 +6,10 @@ on:
 
 jobs:
   semantic-release:
-    runs-on: ubuntu-latest
-    outputs:
-      new_release: ${{ steps.semantic.outputs.new_release_published }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v4
-        id: semantic
-        with:
-          dry_run: true
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+    uses: Geode-solutions/actions/.github/workflows/release.yml@master
+    with:
+      dry_run: true
+    secrets: inherit
 
   trigger:
     runs-on: ubuntu-latest

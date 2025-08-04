@@ -32,19 +32,9 @@ on:
 
 jobs:
   semantic-release:
-    runs-on: ubuntu-latest
     if: github.ref_name == 'master' || github.ref_name == 'next'
-    outputs:
-      new_release: ${{ steps.semantic.outputs.new_release_published }}
-      new_version: ${{ steps.semantic.outputs.new_release_version }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v4
-        id: semantic
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    uses: Geode-solutions/actions/.github/workflows/release.yml@master
+    secrets: inherit
 
   deploy-repository:
     needs: semantic-release

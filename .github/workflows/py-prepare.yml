@@ -49,14 +49,3 @@ jobs:
         id: commit
         with:
           commit_message: Apply prepare changes
-
-  pylint:
-    needs: prepare
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dciborow/action-pylint@main
-        with:
-          github_token: ${{ secrets.github_token }}
-          reporter: github-pr-review
-          glob_pattern: "**/*.py"

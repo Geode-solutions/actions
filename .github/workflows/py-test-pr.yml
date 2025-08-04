@@ -3,6 +3,15 @@ on:
     inputs:
       repos:
         type: string
+      docker:
+        type: boolean
+        default: false
+      wheel:
+        type: boolean
+        default: true
+      npm:
+        type: boolean
+        default: false
     secrets:
       TOKEN:
         required: true
@@ -39,7 +48,7 @@ jobs:
       version: "0.0.0"
       release: ${{ github.head_ref }}-tag
       upload-pypi: false
-      wheel: true
-      npm: false
-      docker: false
+      wheel: ${{ inputs.wheel }}
+      npm: ${{ inputs.npm }}
+      docker: ${{ inputs.docker }}
     secrets: inherit

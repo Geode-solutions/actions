@@ -1,20 +1,15 @@
 on:
   workflow_call:
     inputs:
-      name:
-        type: string
-        required: true
-      directory:
-        type: string
-        default: "."
-      repos:
-        type: string
-      repo:
-        type: string
-        default: ${{ github.repository }}
-      python:
+      docker:
+        type: boolean
+        default: false
+      wheel:
         type: boolean
         default: true
+      npm:
+        type: boolean
+        default: false
     outputs:
       new_release:
         description: "Whether a new release was published"
@@ -38,16 +33,16 @@ jobs:
   deploy-repository:
     needs: semantic-release
     if: needs.semantic-release.outputs.new_release == 'true'
-    uses: Geode-solutions/actions/.github/workflows/cpp-deploy-repository.yml@master
+    uses: Geode-solutions/actions/.github/workflows/py-deploy-repository.yml@master
     with:
-      name: ${{ inputs.name }}
-      directory: ${{ inputs.directory }}
-      repo: ${{ inputs.repo }}
-      repos: ${{ inputs.repos }}
       version: ${{ needs.semantic-release.outputs.new_version }}
       release: v${{ needs.semantic-release.outputs.new_version }}
-      python: ${{ inputs.python }}
+      upload-pypi: true
+      wheel: ${{ inputs.wheel }}
+      npm: ${{ inputs.npm }}
+      docker: ${{ inputs.docker }}
     secrets: inherit
+
 
   notify:
     runs-on: ubuntu-latest

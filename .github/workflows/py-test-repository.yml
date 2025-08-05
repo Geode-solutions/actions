@@ -33,17 +33,14 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install .
-      - name: Install wheels from Github
-        run: |
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
           echo $wheels
           if [ -n "$wheels" ]; then 
             pip install --no-deps $wheels
           fi
+          pip list
         shell: bash
       - name: Test
         run: |
           pip install pytest
-          pip list
           pytest

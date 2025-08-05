@@ -11,6 +11,9 @@ on:
       new_version:
         description: "The new version number"
         value: ${{ jobs.run.outputs.new_version }}
+      new_release_channel:
+        description: "The new release channel"
+        value: ${{ jobs.run.outputs.new_release_channel }}
     secrets:
       TOKEN:
         required: true
@@ -23,6 +26,7 @@ jobs:
     outputs:
       new_release: ${{ steps.semantic.outputs.new_release_published }}
       new_version: ${{ steps.semantic.outputs.new_release_version }}
+      new_release_channel: ${{ steps.semantic.outputs.new_release_channel }}
     steps:
       - uses: actions/checkout@v4
         with:

@@ -7,6 +7,9 @@ on:
       release:
         type: string
         required: true
+      release_channel:
+        type: string
+        required: true
       docker:
         type: boolean
         required: true
@@ -83,9 +86,9 @@ jobs:
         run: |
           npm i
           npm run json
-          jq '.version="${{inputs.version}}"' package.json > temp && mv temp package.json
+          jq '.version="${{ inputs.version }}"' package.json > temp && mv temp package.json
           cat package.json
-          npm publish
+          npm publish --tags ${{ inputs.release_channel }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

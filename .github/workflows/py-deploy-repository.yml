@@ -86,9 +86,9 @@ jobs:
         run: |
           npm i
           npm run json
-          jq '.version="${{ inputs.version }}"' package.json > temp && mv temp package.json
+          npm --no-git-tag-version version ${{ inputs.version }}
           cat package.json
-          npm publish --tags ${{ inputs.release_channel }}
+          npm publish --tag ${{ inputs.release_channel }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

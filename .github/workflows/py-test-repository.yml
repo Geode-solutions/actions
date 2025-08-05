@@ -32,8 +32,7 @@ jobs:
           branch: ${{ inputs.branch }}
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          pip install .
+          pip install .[cpu]
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
           echo $wheels
           if [ -n "$wheels" ]; then 
@@ -43,5 +42,5 @@ jobs:
         shell: bash
       - name: Test
         run: |
-          pip install pytest
+          pip install pytest pytest-xprocess
           pytest

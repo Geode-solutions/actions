@@ -41,6 +41,7 @@ jobs:
       - name: "Get config files"
         run: |
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.pylintrc\?ref\=master > .pylintrc
+          curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.releaserc\?ref\=master > .releaserc
       - name: Black
         run: |
           pip install black

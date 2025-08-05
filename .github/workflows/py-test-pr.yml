@@ -58,6 +58,7 @@ jobs:
     with:
       version: "0.0.0"
       release: ${{ github.head_ref }}-tag
+      release_channel: ${{ needs.release.outputs.new_release_channel }}
       upload-pypi: false
       wheel: ${{ inputs.wheel }}
       npm: ${{ inputs.npm }}

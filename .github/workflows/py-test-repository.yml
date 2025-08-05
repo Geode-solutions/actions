@@ -33,6 +33,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+          pip install .
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
           echo $wheels
           if [ -n "$wheels" ]; then 

@@ -32,7 +32,7 @@ jobs:
           branch: ${{ inputs.branch }}
       - name: Install dependencies
         run: |
-          pip install .[cpu]
+          pip install --extra-index-url https://wheels.vtk.org .[cpu]
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
           echo $wheels
           if [ -n "$wheels" ]; then 

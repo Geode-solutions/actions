@@ -53,6 +53,7 @@ jobs:
   semantic-commit:
     needs: prepare
     uses: Geode-solutions/actions/.github/workflows/semantic-commit.yml@master
+    secrets: inherit
 
   release:
     needs: [test-repository, semantic-commit, pylint]

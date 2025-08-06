@@ -31,9 +31,9 @@ jobs:
   #   container: ghcr.io/geode-solutions/ubuntu:master
   #   steps:
   #     - uses: actions/checkout@v4
-        # with:
-        #   fetch-depth: 0
-        #   token: ${{ secrets.TOKEN }}
+  # with:
+  #   fetch-depth: 0
+  #   token: ${{ secrets.TOKEN }}
   #     - uses: actions/cache/restore@v4
   #       with:
   #         path: build/third_party
@@ -57,7 +57,6 @@ jobs:
   #         build_dir: ${{ github.workspace }}/build/${{ inputs.directory }}
   #         clang_tidy_version: 17
 
-
   test-repository:
     needs: prepare
     uses: Geode-solutions/actions/.github/workflows/cpp-test-repository.yml@master
@@ -73,6 +72,7 @@ jobs:
   semantic-commit:
     needs: prepare
     uses: Geode-solutions/actions/.github/workflows/semantic-commit.yml@master
+    secrets: inherit
 
   release:
     needs: [test-repository, semantic-commit]

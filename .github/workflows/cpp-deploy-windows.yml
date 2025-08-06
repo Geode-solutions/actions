@@ -51,6 +51,7 @@ jobs:
           }
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           repository: ${{ inputs.repo }}
           token: ${{ secrets.TOKEN }}
       - uses: actions/cache/restore@v4

@@ -6,6 +6,15 @@ on:
       branch:
         type: string
         default: ${{ github.ref }}
+      docker:
+        type: boolean
+        required: true
+      python:
+        type: boolean
+        required: true
+      npm:
+        type: boolean
+        required: true
     secrets:
       TOKEN:
         required: true
@@ -13,13 +22,17 @@ on:
         required: true
 
 jobs:
-  test:
+  test-python:
+    if: inputs.python
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -44,3 +57,42 @@ jobs:
         run: |
           pip install pytest pytest-xprocess
           pytest
+  
+  test-npm:
+    if: inputs.npm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
+      - name: Setup NODE
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22"
+      - name: Upload NPM
+        run: |
+          npm install
+          npm run test
+
+  test-docker:
+    if: inputs.docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
+      - name: Set IMAGE variable
+        run: |
+          repo=${GITHUB_REPOSITORY,,}
+          echo $repo
+          echo "IMAGE=ghcr.io/$repo:test" >>${GITHUB_ENV}
+      - name: Build Docker image
+        run: |
+          if [ "${{ secrets.LICENSE_TOKEN }}" != '' ]; then
+            docker build -t $IMAGE --build-arg TOKEN=${{ secrets.LICENSE_TOKEN }} .
+          else
+            docker build -t $IMAGE .
+          fi

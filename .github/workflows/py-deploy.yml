@@ -4,7 +4,7 @@ on:
       docker:
         type: boolean
         default: false
-      wheel:
+      python:
         type: boolean
         default: true
       npm:
@@ -39,11 +39,10 @@ jobs:
       release: v${{ needs.semantic-release.outputs.new_version }}
       release_channel: ${{ needs.semantic-release.outputs.new_release_channel }}
       upload-pypi: true
-      wheel: ${{ inputs.wheel }}
+      python: ${{ inputs.python }}
       npm: ${{ inputs.npm }}
       docker: ${{ inputs.docker }}
     secrets: inherit
-
 
   notify:
     runs-on: ubuntu-latest

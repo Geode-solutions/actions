@@ -13,7 +13,7 @@ on:
       docker:
         type: boolean
         required: true
-      wheel:
+      python:
         type: boolean
         required: true
       npm:
@@ -32,7 +32,7 @@ on:
 
 jobs:
   release-python:
-    if: ${{ inputs.wheel }}
+    if: inputs.python
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

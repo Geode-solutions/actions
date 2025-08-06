@@ -44,6 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           repository: Geode-solutions/${{ inputs.repository }}
           token: ${{ secrets.TOKEN }}
       - name: Get info
@@ -99,6 +100,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           repository: Geode-solutions/${{ inputs.repository }}
           token: ${{ secrets.TOKEN }}
       - name: Get info

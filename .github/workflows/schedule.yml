@@ -35,6 +35,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
           ref: ${{ inputs.branch }}
       - uses: actions/cache/restore@v4
         with:
@@ -87,6 +89,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
           ref: ${{ inputs.branch }}
       - uses: actions/cache/restore@v4
         with:
@@ -132,6 +136,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
           ref: ${{ inputs.branch }}
       - uses: actions/cache/restore@v4
         with:

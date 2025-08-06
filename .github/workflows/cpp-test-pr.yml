@@ -31,6 +31,9 @@ jobs:
   #   container: ghcr.io/geode-solutions/ubuntu:master
   #   steps:
   #     - uses: actions/checkout@v4
+        # with:
+        #   fetch-depth: 0
+        #   token: ${{ secrets.TOKEN }}
   #     - uses: actions/cache/restore@v4
   #       with:
   #         path: build/third_party

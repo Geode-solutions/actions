@@ -18,6 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
       - name: Install Eslint and plugins
         run: npm install eslint eslint-plugin-vue@latest eslint-plugin-vuetify@latest eslint-plugin-nuxt@latest --save-dev
       - uses: reviewdog/action-eslint@v1

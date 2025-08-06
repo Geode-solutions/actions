@@ -6,7 +6,7 @@ on:
       docker:
         type: boolean
         default: false
-      wheel:
+      python:
         type: boolean
         default: true
       npm:
@@ -30,6 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
       - uses: dciborow/action-pylint@main
         with:
           github_token: ${{ secrets.github_token }}
@@ -42,6 +45,9 @@ jobs:
     with:
       repos: ${{ inputs.repos }}
       branch: ${{ github.event.pull_request.head.ref }}
+      docker: ${{ inputs.docker }}
+      python: ${{ inputs.python }}
+      npm: ${{ inputs.npm }}
     secrets: inherit
 
   semantic-commit:
@@ -60,7 +66,7 @@ jobs:
       release: ${{ github.head_ref }}-tag
       release_channel: ${{ needs.release.outputs.new_release_channel }}
       upload-pypi: false
-      wheel: ${{ inputs.wheel }}
+      python: ${{ inputs.python }}
       npm: ${{ inputs.npm }}
       docker: ${{ inputs.docker }}
     secrets: inherit

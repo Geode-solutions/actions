@@ -83,18 +83,29 @@ jobs:
           registry-url: "https://registry.npmjs.org"
           node-version: "22"
       - name: Build
+        id: build
         run: |
           npm install
           npm run build
           npm --no-git-tag-version --allow-same-version version ${{ inputs.version }}
           npm pack
-      - name: Upload NPM
-        if: inputs.upload
-        run: |
           package_name=$(jq -r '.name' package.json)
           version=$(jq -r '.version' package.json)
           tarball=$(echo "$package_name" | sed 's/@//' | sed 's/\//-/')-${version}.tgz
-          npm publish "$tarball" --tag ${{ inputs.release_channel }}
+          echo "tarball=$tarball" >> $GITHUB_OUTPUT
+      - name: Upload GH
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          counter=0
+          for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY ${{ inputs.release }} ${{ steps.build.outputs.tarball }} && break || counter=$[$counter +1] && sleep 30; done
+          echo $counter
+          if [ "$counter" -eq "5" ]; then exit 1; fi
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload NPM
+        if: inputs.upload
+        run: |
+          npm publish "${{ steps.build.outputs.tarball }}" --tag ${{ inputs.release_channel }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

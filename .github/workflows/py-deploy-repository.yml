@@ -86,7 +86,7 @@ jobs:
         run: |
           npm install
           npm run build
-          npm --no-git-tag-version version ${{ inputs.version }}
+          npm --no-git-tag-version --allow-same-version version ${{ inputs.version }}
           npm pack
       - name: Upload NPM
         if: inputs.upload

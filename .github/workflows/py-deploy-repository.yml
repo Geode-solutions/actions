@@ -19,7 +19,7 @@ on:
       npm:
         type: boolean
         required: true
-      upload-pypi:
+      upload:
         type: boolean
         default: true
     secrets:
@@ -63,7 +63,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Upload PYPI
-        if: inputs.upload-pypi
+        if: inputs.upload
         run: |
           python3 -m pip install twine==6.0.1
           python3 -m twine upload --repository pypi dist/* -u __token__ -p ${{ secrets.PYPI_TOKEN }}
@@ -82,13 +82,19 @@ jobs:
         with:
           registry-url: "https://registry.npmjs.org"
           node-version: "22"
-      - name: Upload NPM
+      - name: Build
         run: |
-          npm i
-          npm run json
+          npm install
+          npm run build
           npm --no-git-tag-version version ${{ inputs.version }}
-          cat package.json
-          npm publish --tag ${{ inputs.release_channel }}
+          npm pack
+      - name: Upload NPM
+        if: inputs.upload
+        run: |
+          package_name=$(jq -r '.name' package.json)
+          version=$(jq -r '.version' package.json)
+          tarball=$(echo "$package_name" | sed 's/@//' | sed 's/\//-/')-${version}.tgz
+          npm publish "$tarball" --tag ${{ inputs.release_channel }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -97,6 +103,7 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/docker-build-squash-push.yml@master
     with:
       tag: ${{ github.ref_name }}
+      upload: ${{ inputs.upload }}
     secrets:
       TOKEN: ${{secrets.TOKEN}}
 

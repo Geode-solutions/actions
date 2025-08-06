@@ -65,7 +65,7 @@ jobs:
       version: "0.0.0"
       release: ${{ github.head_ref }}-tag
       release_channel: ${{ needs.release.outputs.new_release_channel }}
-      upload-pypi: false
+      upload: false
       python: ${{ inputs.python }}
       npm: ${{ inputs.npm }}
       docker: ${{ inputs.docker }}

@@ -57,7 +57,7 @@ jobs:
         run: |
           pip install pytest pytest-xprocess
           pytest
-  
+
   test-npm:
     if: inputs.npm
     runs-on: ubuntu-latest
@@ -78,21 +78,9 @@ jobs:
 
   test-docker:
     if: inputs.docker
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.TOKEN }}
-      - name: Set IMAGE variable
-        run: |
-          repo=${GITHUB_REPOSITORY,,}
-          echo $repo
-          echo "IMAGE=ghcr.io/$repo:test" >>${GITHUB_ENV}
-      - name: Build Docker image
-        run: |
-          if [ "${{ secrets.LICENSE_TOKEN }}" != '' ]; then
-            docker build -t $IMAGE --build-arg TOKEN=${{ secrets.LICENSE_TOKEN }} .
-          else
-            docker build -t $IMAGE .
-          fi
+    uses: Geode-solutions/actions/.github/workflows/docker-build-squash-push.yml@master
+    with:
+      tag: test
+      upload: false
+    secrets:
+      TOKEN: ${{secrets.TOKEN}}

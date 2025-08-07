@@ -17,7 +17,7 @@ jobs:
       - name: Install commitlint
         run: |
           npm install --save-dev @commitlint/cli @commitlint/config-angular
-          echo "module.exports = {extends: ['@commitlint/config-angular'], rules: { 'scope-case': [0, 'always', 'pascal-case'], 'subject-case': [0, 'always', 'sentence-case']}}" > commitlint.config.js
+          echo "module.exports = {extends: ['@commitlint/config-angular'], rules: { 'scope-case': [0, 'always', 'pascal-case'], 'subject-case': [0, 'always', 'sentence-case'], 'header-max-length': [0, 'always', 100]}}" > commitlint.config.js
       - name: Check commit messages
         run: |
           # Get commit messages in the PR range

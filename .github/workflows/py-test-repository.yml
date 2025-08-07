@@ -60,20 +60,38 @@ jobs:
 
   test-npm:
     if: inputs.npm
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-      - name: Setup NODE
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: "22"
-      - name: Upload NPM
+      - uses: Geode-solutions/actions/get-release@master
+        id: tarball
+        with:
+          repository: ${{ inputs.repos }}
+          file: ".tgz"
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Install dependencies
         run: |
           npm install
+          tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
+          echo $tarballs
+          if [ -n "$wtarballsheels" ]; then 
+            npm install $tarballs
+          fi
+          npm list --depth=0
+        shell: bash
+      - name: Test
+        run: |
           npm run test
 
   test-docker:

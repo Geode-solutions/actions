@@ -53,6 +53,8 @@ jobs:
     needs: release
     uses: Geode-solutions/actions/.github/workflows/web-deploy-repository.yml@master
     with:
+      repos: ${{ inputs.repos }}
+      branch: ${{ github.event.pull_request.head.ref }}
       version: "0.0.0"
       release: ${{ github.head_ref }}-tag
       release_channel: ${{ needs.release.outputs.new_release_channel }}

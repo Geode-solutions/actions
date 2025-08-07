@@ -1,6 +1,8 @@
 on:
   workflow_call:
     inputs:
+      repos:
+        type: string
       docker:
         type: boolean
         default: false
@@ -35,6 +37,7 @@ jobs:
     if: needs.semantic-release.outputs.new_release == 'true'
     uses: Geode-solutions/actions/.github/workflows/web-deploy-repository.yml@master
     with:
+      repos: ${{ inputs.repos }}
       version: ${{ needs.semantic-release.outputs.new_version }}
       release: v${{ needs.semantic-release.outputs.new_version }}
       release_channel: ${{ needs.semantic-release.outputs.new_release_channel }}

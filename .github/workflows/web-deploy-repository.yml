@@ -1,6 +1,11 @@
 on:
   workflow_call:
     inputs:
+      repos:
+        type: string
+      branch:
+        type: string
+        default: ${{ github.ref }}
       version:
         type: string
         required: true
@@ -43,9 +48,26 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Build
+      - uses: Geode-solutions/actions/get-release@master
+        id: wheels
+        with:
+          repository: ${{ inputs.repos }}
+          file: ".whl"
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Install dependencies
         run: |
           sed -i 's/version = "[0-9]*\.[0-9]*\.[0-9]*\(-rc\.[0-9]*\)\?"/version = "${{ inputs.version }}"/' pyproject.toml
+          pip install --extra-index-url https://wheels.vtk.org .[cpu]
+          wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
+          echo $wheels
+          if [ -n "$wheels" ]; then 
+            pip install --no-deps $wheels
+          fi
+          pip list
+        shell: bash
+      - name: Build
+        run: |
           python3 -m pip install --upgrade build
           python3 -m build
       - name: Upload GH
@@ -82,12 +104,28 @@ jobs:
         with:
           registry-url: "https://registry.npmjs.org"
           node-version: "22"
+      - uses: Geode-solutions/actions/get-release@master
+        id: tarball
+        with:
+          repository: ${{ inputs.repos }}
+          file: ".tgz"
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Install dependencies
+        run: |
+          npm install
+          tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
+          echo "Tarballs = $tarballs"
+          if [ -n "$tarballs" ]; then 
+            npm install $tarballs
+          fi
+          npm list --depth=0
+        shell: bash
       - name: Build
         id: build
         run: |
-          npm install
-          npm run build
           npm --no-git-tag-version --allow-same-version version ${{ inputs.version }}
+          npm run build
           npm pack
           package_name=$(jq -r '.name' package.json)
           version=$(jq -r '.version' package.json)

@@ -18,28 +18,13 @@ jobs:
         run: |
           npm install @commitlint/cli @commitlint/config-angular
           echo "module.exports = {extends: ['@commitlint/config-angular'], rules: { 'scope-empty': [2, 'never'],'subject-empty': [2, 'never'], 'subject-max-length': [0], 'body-leading-blank': [0], 'footer-leading-blank': [0], 'header-max-length': [0], 'scope-case': [0], 'subject-case': [0], 'subject-full-stop': [0], 'type-case': [0], 'type-empty': [0]}}" > commitlint.config.js
+          npm list --depth=0
       - name: Check commit messages
         run: |
-          # Get commit messages in the PR range
-          COMMITS=$(git log --pretty=%s origin/${{ github.base_ref }}..origin/${{ github.head_ref }} --)
-          FOUND_VALID_COMMIT=false
-
-          # Loop through commit messages to check if at least one is valid
-          while IFS= read -r message; do
-            # Write message to a temporary file to use with commitlint
-            echo "$message" > temp-commit-message.txt
-            if npx commitlint --config commitlint.config.js < temp-commit-message.txt; then
-              echo "Valid Angular commit message found: $message"
-              FOUND_VALID_COMMIT=true
-              break
-            fi
-          done <<< "$COMMITS"
-
-          # Check if at least one valid commit was found
-          if [ "$FOUND_VALID_COMMIT" = true ]; then
-            echo "At least one valid semantic commit message found. Success!"
+          if npx commitlint --from origin/${{ github.base_ref }} --to origin/${{ github.head_ref }}; then
+            echo "At least one valid Angular commit message found."
             exit 0
           else
-            echo "PR is not mergeable: no valid semantic commit message found."
+            echo "No valid Angular commit messages found."
             exit 1
           fi

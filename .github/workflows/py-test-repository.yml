@@ -85,7 +85,7 @@ jobs:
           npm install
           tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
           echo $tarballs
-          if [ -n "$wtarballsheels" ]; then 
+          if [ -n "$tarballs" ]; then 
             npm install $tarballs
           fi
           npm list --depth=0

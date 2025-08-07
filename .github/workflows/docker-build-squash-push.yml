@@ -14,7 +14,7 @@ on:
         required: false
 
 jobs:
-  build:
+  build-docker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,9 +41,9 @@ jobs:
             docker build -t $IMAGE .
           fi
       - name: Squash Docker image
-        if: inputs.upload
         run: |
           pip install docker-squash
           docker-squash $IMAGE -t $IMAGE
       - name: Push Docker image to ghcr.io
+        if: inputs.upload
         run: docker push $IMAGE

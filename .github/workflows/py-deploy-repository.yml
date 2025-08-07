@@ -113,7 +113,7 @@ jobs:
     if: inputs.docker
     uses: Geode-solutions/actions/.github/workflows/docker-build-squash-push.yml@master
     with:
-      tag: ${{ inputs.upload == 'false' && 'test' || github.ref_name }}
+      tag: ${{ inputs.upload && github.ref_name || 'test' }}
       upload: ${{ inputs.upload }}
     secrets:
       TOKEN: ${{secrets.TOKEN}}

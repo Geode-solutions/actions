@@ -84,7 +84,7 @@ jobs:
         run: |
           npm install
           tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
-          echo $tarballs
+          echo "Tarballs = $tarballs"
           if [ -n "$tarballs" ]; then 
             npm install $tarballs
           fi

@@ -52,7 +52,7 @@ const download_asset = async (asset, token) => {
               fs.unlinkSync(asset.name)
               resolve(result)
             })
-        } else if (extension == "whl") {
+        } else {
           console.log("Skipping", asset.name)
           const result = path.join(process.env.GITHUB_WORKSPACE, asset.name)
           resolve(result)
@@ -88,24 +88,51 @@ const main = async () => {
             ? octokit.repos
                 .getLatestRelease({ owner, repo })
                 .then((release) => release.data.id)
-            : octokit.repos.listReleases({ owner, repo, per_page: 100}).then((releases) => {
-                if (github.context.payload.pull_request) {
-                  const head_release = releases.data.find(
-                    (r) =>
-                      r.name === github.context.payload.pull_request.head.ref
+            : octokit.repos
+                .listReleases({ owner, repo, per_page: 100 })
+                .then((releases) => {
+                  if (github.context.payload.pull_request) {
+                    const head_release = releases.data.find(
+                      (r) =>
+                        r.name === github.context.payload.pull_request.head.ref
+                    )
+                    if (head_release) {
+                      console.log(
+                        "Found head release:",
+                        head_release.name,
+                        " for ",
+                        repo
+                      )
+                      return head_release.id
+                    }
+                    const base_release = releases.data.find(
+                      (r) =>
+                        r.name === github.context.payload.pull_request.base.ref
+                    )
+                    if (base_release) {
+                      console.log(
+                        "Found base release:",
+                        base_release.name,
+                        " for ",
+                        repo
+                      )
+                      return base_release.id
+                    }
+                  }
+                  const branch_release = releases.data.find(
+                    (r) => r.name === branch
                   )
-                  if (head_release) {
+                  if (branch_release) {
                     console.log(
-                      "Found head release:",
-                      head_release.name,
+                      "Found branch release:",
+                      branch_release.name,
                       " for ",
                       repo
                     )
-                    return head_release.id
+                    return branch_release.id
                   }
                   const base_release = releases.data.find(
-                    (r) =>
-                      r.name === github.context.payload.pull_request.base.ref
+                    (r) => r.name === base
                   )
                   if (base_release) {
                     console.log(
@@ -116,44 +143,21 @@ const main = async () => {
                     )
                     return base_release.id
                   }
-                }
-                const branch_release = releases.data.find(
-                  (r) => r.name === branch
-                )
-                if (branch_release) {
+                  const release = releases.data.find(
+                    (r) => r.name.startsWith("v") && r.name.includes("-rc.")
+                  )
+                  if (release) {
+                    console.log("Found release:", release.name, " for ", repo)
+                    return release.id
+                  }
                   console.log(
-                    "Found branch release:",
-                    branch_release.name,
+                    "Found default release:",
+                    releases.data[0].name,
                     " for ",
                     repo
                   )
-                  return branch_release.id
-                }
-                const base_release = releases.data.find((r) => r.name === base)
-                if (base_release) {
-                  console.log(
-                    "Found base release:",
-                    base_release.name,
-                    " for ",
-                    repo
-                  )
-                  return base_release.id
-                }
-                const release = releases.data.find(
-                  (r) => r.name.startsWith("v") && r.name.includes("-rc.")
-                )
-                if (release) {
-                  console.log("Found release:", release.name, " for ", repo)
-                  return release.id
-                }
-                console.log(
-                  "Found default release:",
-                  releases.data[0].name,
-                  " for ",
-                  repo
-                )
-                return releases.data[0].id
-              })
+                  return releases.data[0].id
+                })
           query.then((release_id) => {
             octokit.repos
               .listReleaseAssets({ owner, repo, release_id })

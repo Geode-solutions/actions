@@ -21,9 +21,9 @@ jobs:
       - name: "Get config files"
         run: |
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.prettierrc\?ref\=master > .prettierrc
-          curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.eslintrc.cjs\?ref\=master > .eslintrc.cjs
+          curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.releaserc\?ref\=master > .releaserc
       - name: Prettier
-        run: npx prettier --write .
+        run: npx prettier . --write
       - uses: stefanzweifel/git-auto-commit-action@v5
         id: commit
         with:

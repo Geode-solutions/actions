@@ -3,15 +3,6 @@ on:
     inputs:
       repos:
         type: string
-      docker:
-        type: boolean
-        default: false
-      python:
-        type: boolean
-        default: true
-      npm:
-        type: boolean
-        default: false
     secrets:
       TOKEN:
         required: true
@@ -22,10 +13,10 @@ concurrency:
 
 jobs:
   prepare:
-    uses: Geode-solutions/actions/.github/workflows/py-prepare.yml@master
+    uses: Geode-solutions/actions/.github/workflows/js-prepare.yml@master
     secrets: inherit
 
-  pylint:
+  oxlint:
     needs: prepare
     runs-on: ubuntu-latest
     steps:
@@ -33,11 +24,10 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-      - uses: dciborow/action-pylint@main
+      - uses: oxc-project/oxlint-action@v2.0.1
         with:
-          github_token: ${{ secrets.github_token }}
-          reporter: github-pr-review
-          glob_pattern: "**/*.py"
+          allow: all
+          plugins: vue vitest
 
   test-repository:
     needs: prepare
@@ -45,9 +35,9 @@ jobs:
     with:
       repos: ${{ inputs.repos }}
       branch: ${{ github.event.pull_request.head.ref }}
-      docker: ${{ inputs.docker }}
-      python: ${{ inputs.python }}
-      npm: ${{ inputs.npm }}
+      docker: false
+      python: false
+      npm: true
     secrets: inherit
 
   semantic-commit:
@@ -56,7 +46,7 @@ jobs:
     secrets: inherit
 
   release:
-    needs: [test-repository, semantic-commit, pylint]
+    needs: [test-repository, semantic-commit, oxlint]
     uses: Geode-solutions/actions/.github/workflows/dev-release.yml@master
 
   deploy-repository:
@@ -67,7 +57,7 @@ jobs:
       release: ${{ github.head_ref }}-tag
       release_channel: ${{ needs.release.outputs.new_release_channel }}
       upload: false
-      python: ${{ inputs.python }}
-      npm: ${{ inputs.npm }}
-      docker: ${{ inputs.docker }}
+      python: false
+      npm: true
+      docker: false
     secrets: inherit

@@ -3,15 +3,6 @@ on:
     inputs:
       repos:
         type: string
-      docker:
-        type: boolean
-        default: false
-      python:
-        type: boolean
-        default: true
-      npm:
-        type: boolean
-        default: false
     secrets:
       TOKEN:
         required: true
@@ -44,7 +35,7 @@ jobs:
     with:
       repos: ${{ inputs.repos }}
       branch: ${{ github.ref_name }}
-      docker: ${{ inputs.docker }}
-      python: ${{ inputs.python }}
-      npm: ${{ inputs.npm }}
+      docker: false
+      python: false
+      npm: true
     secrets: inherit

@@ -100,7 +100,7 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.TOKEN }}
       - name: Setup NODE
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           registry-url: "https://registry.npmjs.org"
           node-version: "22"

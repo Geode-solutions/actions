@@ -82,7 +82,6 @@ jobs:
           branch: ${{ inputs.branch }}
       - name: Install dependencies
         run: |
-          echo $OSTYPE
           npm install
           tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
           echo "Tarballs = $tarballs"
@@ -93,14 +92,7 @@ jobs:
         shell: bash
       - name: Test
         run: |
-          os=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
-          echo "Running tests for OS: $os"
-          if jq -e ".scripts.[\"test:$os\"]" package.json >/dev/null; then
-            npm run test:$os
-          else
-            npm run test
-          fi
-        shell: bash
+          npm run test
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

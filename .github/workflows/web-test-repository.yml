@@ -93,12 +93,19 @@ jobs:
       - name: Test
         run: |
           os=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
-          if jq -e '.scripts.["test:$os"]' package.json >/dev/null; then
+          echo "Running tests for OS: $os"
+          if jq -e ".scripts.[\"test:$os\"]" package.json >/dev/null; then
             npm run test:$os
           else
             npm run test
           fi
         shell: bash
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-${{ runner.os }}
+          path: playwright-report/
+          retention-days: 5
 
   test-docker:
     if: inputs.docker

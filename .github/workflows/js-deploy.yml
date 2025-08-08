@@ -1,0 +1,52 @@
+on:
+  workflow_call:
+    inputs:
+      repos:
+        type: string
+    outputs:
+      new_release:
+        description: "Whether a new release was published"
+        value: ${{ jobs.semantic-release.outputs.new_release }}
+      new_version:
+        description: "New release number"
+        value: ${{ jobs.semantic-release.outputs.new_version }}
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+      PYPI_TOKEN:
+        required: true
+
+jobs:
+  semantic-release:
+    uses: Geode-solutions/actions/.github/workflows/release.yml@master
+    secrets: inherit
+
+  deploy-repository:
+    needs: semantic-release
+    if: needs.semantic-release.outputs.new_release == 'true'
+    uses: Geode-solutions/actions/.github/workflows/web-deploy-repository.yml@master
+    with:
+      repos: ${{ inputs.repos }}
+      version: ${{ needs.semantic-release.outputs.new_version }}
+      release: v${{ needs.semantic-release.outputs.new_version }}
+      release_channel: ${{ needs.semantic-release.outputs.new_release_channel }}
+      upload: true
+      python: false
+      npm: true
+      docker: false
+    secrets: inherit
+
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ always() && needs.deploy-repository.result == 'failure' }}
+    needs: [deploy-repository]
+    steps:
+      - name: Notify slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

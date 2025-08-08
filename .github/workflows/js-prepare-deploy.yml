@@ -1,0 +1,18 @@
+on:
+  workflow_call:
+    secrets:
+      TOKEN:
+        required: true
+
+jobs:
+  semantic-release:
+    uses: Geode-solutions/actions/.github/workflows/release.yml@master
+    with:
+      dry_run: true
+    secrets: inherit
+
+  prepare:
+    needs: semantic-release
+    if: needs.semantic-release.outputs.new_release == 'true'
+    uses: Geode-solutions/actions/.github/workflows/js-prepare.yml@master
+    secrets: inherit

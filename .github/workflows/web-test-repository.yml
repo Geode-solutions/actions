@@ -73,6 +73,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Install Azure Sign Tool
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: dotnet tool install --global AzureSignTool --version 4.0.1
       - uses: Geode-solutions/actions/get-release@master
         id: tarball
         with:
@@ -90,13 +93,11 @@ jobs:
           fi
           npm list --depth=0
         shell: bash
-      - name: Install Azure Sign Tool
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: dotnet tool install --global AzureSignTool --version 4.0.1
       - name: Test
         run: |
           npm run test
         env:
+          DEBUG: "pw:browser"
           AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}

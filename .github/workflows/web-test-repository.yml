@@ -92,11 +92,13 @@ jobs:
         shell: bash
       - name: Test
         run: |
-          if jq -e '.scripts.["test:${{ runner.os }}"]' package.json >/dev/null; then
-            npm run test:${{ runner.os }}
+          os=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
+          if jq -e '.scripts.["test:$os"]' package.json >/dev/null; then
+            npm run test:$os
           else
             npm run test
           fi
+        shell: bash
 
   test-docker:
     if: inputs.docker

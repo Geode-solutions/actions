@@ -82,6 +82,7 @@ jobs:
           branch: ${{ inputs.branch }}
       - name: Install dependencies
         run: |
+          echo $OSTYPE
           npm install
           tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
           echo "Tarballs = $tarballs"

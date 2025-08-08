@@ -90,9 +90,18 @@ jobs:
           fi
           npm list --depth=0
         shell: bash
+      - name: Install Azure Sign Tool
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: dotnet tool install --global AzureSignTool --version 4.0.1
       - name: Test
         run: |
           npm run test
+        env:
+          AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

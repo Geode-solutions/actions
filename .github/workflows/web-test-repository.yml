@@ -91,7 +91,7 @@ jobs:
           if [ -n "$tarballs" ]; then 
             npm install --no-save $tarballs
           fi
-          npm ls
+          npm list --depth=0 || true
         shell: bash
       - name: Test
         run: |

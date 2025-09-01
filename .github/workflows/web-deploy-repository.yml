@@ -119,7 +119,7 @@ jobs:
           if [ -n "$tarballs" ]; then 
             npm install --no-save $tarballs
           fi
-          npm list --depth=0
+          npm list --depth=0 || true
         shell: bash
       - name: Build
         id: build

@@ -23,6 +23,7 @@ jobs:
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/commitlint.config.js\?ref\=master > commitlint.config.js
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.prettierrc\?ref\=master > .prettierrc
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.releaserc\?ref\=master > .releaserc
+          curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.oxlintrc.json\?ref\=master > .oxlintrc.json
       - name: Prettier
         run: npx prettier . --write
       - uses: stefanzweifel/git-auto-commit-action@v5

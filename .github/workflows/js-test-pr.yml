@@ -26,8 +26,7 @@ jobs:
           token: ${{ secrets.TOKEN }}
       - uses: oxc-project/oxlint-action@v2.0.1
         with:
-          allow: all
-          plugins: vue vitest
+          config: .oxlintrc.json
 
   test-repository:
     needs: prepare

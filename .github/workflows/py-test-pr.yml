@@ -46,21 +46,29 @@ jobs:
       #     setup_method: "install"
       #     install_types: false
       #     fail_on_error: true
-      - name: Run mypy
+      - name: Install dependencies
         run: |
-          pip install mypy reviewdog
-          mypy . --show-error-codes --strict > mypy-report.txt || true
-        env:
-          MYPY_FORCE_COLOR: 1 # Ensure colored output for better formatting
+          python -m pip install --upgrade pip
+          pip install mypy
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      # - name: Run reviewdog
-      #   uses: reviewdog/action-reviewdog@v2
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     reporter: github-pr-review  # Inline comments in PR
-      #     tool_name: mypy
-      #     level: warning  # Treat mypy warnings as review comments
-      #     input_file: mypy-report.txt
+      - name: Setup reviewdog
+        uses: reviewdog/action-setup@e04ffabe3898a0af8d0fb1af00c188831c4b5893 # Pinned to v1.3.2 commit SHA for security
+
+      - name: Run mypy and reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mypy . --show-column-numbers --show-error-codes | \
+          reviewdog -efm="%E%f:%l:%c: error: %m" \
+                    -efm="%E%f:%l: error: %m" \
+                    -efm="%W%f:%l:%c: warning: %m" \
+                    -efm="%W%f:%l: warning: %m" \
+                    -name="mypy" \
+                    -reporter=github-pr-review \
+                    -level=warning \
+                    -filter-mode=added \
+                    -fail-on-error=true
 
   test-repository:
     needs: prepare

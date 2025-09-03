@@ -68,7 +68,7 @@ jobs:
                     -reporter=github-pr-review \
                     -level=warning \
                     -filter-mode=added \
-                    -fail-on-error=true
+                    -fail-level=any
 
   test-repository:
     needs: prepare

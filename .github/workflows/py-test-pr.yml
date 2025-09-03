@@ -25,7 +25,7 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/py-prepare.yml@master
     secrets: inherit
 
-  pylint:
+  checkers:
     needs: prepare
     runs-on: ubuntu-latest
     steps:
@@ -38,6 +38,11 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
           glob_pattern: "**/*.py"
+      - uses: tsuyoshicho/action-mypy@v4
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          mypy_flags: "--config-file mypy.ini"
 
   test-repository:
     needs: prepare
@@ -56,7 +61,7 @@ jobs:
     secrets: inherit
 
   release:
-    needs: [test-repository, semantic-commit, pylint]
+    needs: [test-repository, semantic-commit, checkers]
     uses: Geode-solutions/actions/.github/workflows/dev-release.yml@master
 
   deploy-repository:

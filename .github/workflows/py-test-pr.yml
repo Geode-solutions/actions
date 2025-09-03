@@ -51,6 +51,7 @@ jobs:
           install_types: false
           target: "src"
           fail_level: "warning"
+          reporter: github-pr-review
 
   test-repository:
     needs: prepare

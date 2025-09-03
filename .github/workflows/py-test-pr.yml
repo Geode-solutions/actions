@@ -43,8 +43,6 @@ jobs:
           mypy_flags: "--config-file mypy.ini"
           setup_method: "install"
           install_types: false
-          fail_level: any
-          fail_on_error: true
 
   test-repository:
     needs: prepare

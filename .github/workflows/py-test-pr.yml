@@ -49,6 +49,7 @@ jobs:
           github_token: ${{ secrets.github_token }}
           mypy_flags: "--config-file mypy.ini"
           install_types: false
+          target: "src"
 
   test-repository:
     needs: prepare

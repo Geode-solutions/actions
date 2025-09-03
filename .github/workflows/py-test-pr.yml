@@ -38,16 +38,25 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
           glob_pattern: "**/*.py"
-      - uses: tsuyoshicho/action-mypy@v5
+      # - uses: tsuyoshicho/action-mypy@v5
+      #   with:
+      #     github_token: ${{ secrets.github_token }}
+      #     reporter: github-pr-review
+      #     mypy_flags: "--config-file mypy.ini"
+      #     setup_method: "install"
+      #     install_types: false
+      #     fail_level: any
+      #     fail_on_error: true
+      #     output_json: true
+      - name: Run mypy with reviewdog
+        uses: tsuyoshicho/action-mypy@v4
         with:
-          github_token: ${{ secrets.github_token }}
-          reporter: github-pr-review
-          mypy_flags: "--config-file mypy.ini"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review # Adds inline comments in PR
+          level: warning # Treats mypy warnings as review comments
+          workdir: src # Directory to run mypy (adjust if needed, e.g., 'src')
+          mypy_flags: "--show-error-codes --strict" # Optional: strict type checking
           setup_method: "install"
-          install_types: false
-          fail_level: any
-          fail_on_error: true
-          output_json: true
 
   test-repository:
     needs: prepare

@@ -41,6 +41,21 @@ jobs:
       - uses: tsuyoshicho/action-mypy@v4
         with:
           github_token: ${{ secrets.github_token }}
+          reporter: github-pr-check
+          mypy_flags: "--config-file mypy.ini"
+          setup_method: "install"
+
+  mypy:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
+      - uses: tsuyoshicho/action-mypy@v4
+        with:
+          github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
           mypy_flags: "--config-file mypy.ini"
           setup_method: "install"

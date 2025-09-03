@@ -38,27 +38,29 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
           glob_pattern: "**/*.py"
-      # - uses: tsuyoshicho/action-mypy@v4
-      #   with:
-      #     github_token: ${{ secrets.github_token }}
-      #     reporter: github-pr-review
-      #     mypy_flags: "--config-file mypy.ini"
-      #     setup_method: "install"
-      #     install_types: false
-      #     fail_on_error: true
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install mypy
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          mypy . --show-column-numbers --show-error-codes --strict || true
-      - name: Setup reviewdog
-        uses: reviewdog/action-setup@v1
-      - name: Run mypy and reviewdog
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mypy . --show-column-numbers --show-error-codes --strict | reviewdog -efm="%E%f:%l:%c: error: %m" -efm="%E%f:%l: error: %m" -efm="%W%f:%l:%c: warning: %m" -efm="%W%f:%l: warning: %m" -name="mypy" -reporter=github-pr-review -level=warning -filter-mode=nofilter -fail-level=any
+      - uses: tsuyoshicho/action-mypy@v5
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          mypy_flags: "--config-file mypy.ini"
+          setup_method: "install"
+          install_types: false
+          fail_level: any
+          fail_on_error: true
+          filter_mode: "nofilter"
+      # - name: Install dependencies
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     pip install mypy
+      #     if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      #     mypy . --show-column-numbers --show-error-codes --strict || true
+      # - name: Setup reviewdog
+      #   uses: reviewdog/action-setup@v1
+      # - name: Run mypy and reviewdog
+      #   env:
+      #     REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     mypy . --show-column-numbers --show-error-codes --strict | reviewdog -efm="%E%f:%l:%c: error: %m" -efm="%E%f:%l: error: %m" -efm="%W%f:%l:%c: warning: %m" -efm="%W%f:%l: warning: %m" -name="mypy" -reporter=github-pr-review -level=warning -filter-mode=nofilter -fail-level=any
 
   test-repository:
     needs: prepare

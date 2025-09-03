@@ -47,6 +47,7 @@ jobs:
           install_types: false
           fail_level: any
           fail_on_error: true
+          output_json: true
 
   test-repository:
     needs: prepare

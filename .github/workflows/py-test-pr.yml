@@ -33,6 +33,13 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          pip install mypy pylint
+          pip install .
       - uses: dciborow/action-pylint@main
         with:
           github_token: ${{ secrets.github_token }}
@@ -41,7 +48,6 @@ jobs:
         with:
           github_token: ${{ secrets.github_token }}
           mypy_flags: "--config-file mypy.ini"
-          setup_method: "install"
           install_types: false
 
   test-repository:

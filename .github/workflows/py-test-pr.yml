@@ -43,6 +43,7 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
           mypy_flags: "--config-file mypy.ini"
+          setup_method: "install"
 
   test-repository:
     needs: prepare

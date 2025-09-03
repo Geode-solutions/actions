@@ -41,7 +41,7 @@ jobs:
       - uses: tsuyoshicho/action-mypy@v5
         with:
           github_token: ${{ secrets.github_token }}
-          reporter: github-pr-review
+          reporter: github-pr-check
           mypy_flags: "--config-file mypy.ini"
           setup_method: "install"
           install_types: false

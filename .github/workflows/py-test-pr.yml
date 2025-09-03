@@ -57,6 +57,7 @@ jobs:
           workdir: src # Directory to run mypy (adjust if needed, e.g., 'src')
           mypy_flags: "--show-error-codes --strict" # Optional: strict type checking
           setup_method: "install"
+          install_types: false
 
   test-repository:
     needs: prepare

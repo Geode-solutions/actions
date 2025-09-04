@@ -43,7 +43,9 @@ jobs:
       - uses: dciborow/action-pylint@main
         with:
           github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
           glob_pattern: "**/*.py"
+          level: "warning"
       - uses: tsuyoshicho/action-mypy@v5
         with:
           github_token: ${{ secrets.github_token }}

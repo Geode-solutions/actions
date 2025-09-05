@@ -48,10 +48,12 @@ jobs:
           pip install --extra-index-url https://wheels.vtk.org .[cpu]
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
           echo "all wheels = $wheels"
-          wheels=$(echo "$wheels" | tr ' ' '\n' | grep '0\.0\.0' | tr '\n' ' ' | sed 's/ $//')
-          echo "filtered wheels = $wheels"
           if [ -n "$wheels" ]; then 
-            pip install --extra-index-url https://wheels.vtk.org $wheels
+            filtered_wheels=$(echo "$wheels" | tr ' ' '\n' | grep '0\.0\.0' | tr '\n' ' ' | sed 's/ $//')
+            echo "filtered wheels = $filtered_wheels"
+            if [ -n "$filtered_wheels" ]; then 
+              pip install --extra-index-url https://wheels.vtk.org $filtered_wheels
+            fi
           fi
           pip list
         shell: bash

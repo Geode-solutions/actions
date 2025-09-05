@@ -60,7 +60,9 @@ jobs:
           sed -i 's/version = "[0-9]*\.[0-9]*\.[0-9]*\(-rc\.[0-9]*\)\?"/version = "${{ inputs.version }}"/' pyproject.toml
           pip install --extra-index-url https://wheels.vtk.org .[cpu]
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
-          echo $wheels
+          echo "all wheels = $wheels"
+          wheels=$(echo "$wheels" | tr ' ' '\n' | grep '0\.0\.0' | tr '\n' ' ' | sed 's/ $//')
+          echo "filtered wheels = $wheels"
           if [ -n "$wheels" ]; then 
             pip install --extra-index-url https://wheels.vtk.org $wheels
           fi

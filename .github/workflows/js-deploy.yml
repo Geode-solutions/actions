@@ -9,7 +9,7 @@ on:
         value: ${{ jobs.semantic-release.outputs.new_release }}
       new_version:
         description: "New release number"
-        value: ${{ jobs.semantic-release.outputs.new_version }}
+        value: ${{ jobs.semantic-release.outputs.new_version }} | "latest" 
     secrets:
       TOKEN:
         required: true

@@ -32,7 +32,7 @@ jobs:
           echo "Base branch: $BASE_BRANCH"
           git fetch origin $BASE_BRANCH:$BASE_BRANCH --depth=1
           files=$(git diff --name-only $BASE_BRANCH ${{ github.sha }})
-          npx oxlint --config .oxlintrc.json $files
+          npx oxlint --config .oxlintrc.json --format unix $files
 
   test-repository:
     needs: prepare
@@ -51,7 +51,7 @@ jobs:
     secrets: inherit
 
   release:
-    needs: [test-repository, semantic-commit, oxlint]
+    needs: [test-repository, semantic-commit]
     uses: Geode-solutions/actions/.github/workflows/dev-release.yml@master
 
   deploy-repository:

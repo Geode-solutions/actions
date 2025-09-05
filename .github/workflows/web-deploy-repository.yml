@@ -62,7 +62,7 @@ jobs:
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
           echo $wheels
           if [ -n "$wheels" ]; then 
-            pip install --no-deps $wheels
+            pip install --extra-index-url https://wheels.vtk.org $wheels
           fi
           pip list
         shell: bash

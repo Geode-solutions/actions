@@ -24,9 +24,15 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-      - uses: oxc-project/oxlint-action@v2.0.1
-        with:
-          config: .oxlintrc.json
+      # - uses: oxc-project/oxlint-action@v2.0.1
+      #   with:
+      #     config: .oxlintrc.json
+      - run: |
+          BASE_BRANCH=${{ github.event.pull_request.base.ref }}
+          echo "Base branch: $BASE_BRANCH"
+          git fetch origin $BASE_BRANCH:$BASE_BRANCH --depth=1
+          files=$(git diff --name-only $BASE_BRANCH ${{ github.sha }})
+          npx oxlint --config .oxlintrc.json $files
 
   test-repository:
     needs: prepare

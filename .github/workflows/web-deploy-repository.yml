@@ -147,7 +147,11 @@ jobs:
       - name: Upload NPM
         if: inputs.upload
         run: |
-          npm publish "${{ steps.build.outputs.tarball }}" --tag ${{ inputs.release_channel }}
+          if [ -n "${{ inputs.release_channel }}" ]; then
+            npm publish "${{ steps.build.outputs.tarball }}" --tag ${{ inputs.release_channel }}
+          else
+            npm publish "${{ steps.build.outputs.tarball }}"
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

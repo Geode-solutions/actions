@@ -24,9 +24,6 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-      # - uses: oxc-project/oxlint-action@v2.0.1
-      #   with:
-      #     config: .oxlintrc.json
       - uses: reviewdog/action-setup@v1
       - name: oxlint
         run: |

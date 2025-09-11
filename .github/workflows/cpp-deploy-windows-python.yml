@@ -18,6 +18,9 @@ on:
       release:
         type: string
         required: true
+      wheels_from_pypi:
+        type: boolean
+        default: false
       upload-pypi:
         type: boolean
         default: true
@@ -43,6 +46,12 @@ jobs:
           - python: ${{ inputs.light && '3.10' || 'dummy' }}
           - python: ${{ inputs.light && '3.11' || 'dummy' }}
     steps:
+      - name: Get info
+        id: info
+        run: |
+          $tag = "cp${{ matrix.python }}-cp${{ matrix.python }}"
+          $tag = $tag.Replace(".", "")
+          echo "tag=$tag" >> $env:GITHUB_OUTPUT
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -60,6 +69,14 @@ jobs:
         with:
           repository: ${{ inputs.repos }}
           file: "win64-private.zip"
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - uses: Geode-solutions/actions/get-release@master
+        if: ${{ !inputs.wheels_from_pypi }}
+        id: wheels
+        with:
+          repository: ${{ inputs.repos }}
+          file: "-${{ steps.info.outputs.tag }}-win_amd64.whl"
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
       - name: "pip-compile"
@@ -86,7 +103,25 @@ jobs:
           cd build
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DWHEEL_VERSION:STRING=${{ inputs.version }} -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} ..
           cmake --build .
-          cd ${{ inputs.directory }}
+      - name: Wheels from Github in venv
+        if: ${{ !inputs.wheels_from_pypi }}
+        run: |
+          $wheels ="${{ steps.wheels.outputs.path }}"
+          if($wheels) {
+            Foreach($wheel in $wheels.split(";")){
+              build/${{ inputs.directory }}/wheel/venv/Scripts/pip install --no-deps $wheel
+            }
+          }
+      - name: Wheels from Pypi in venv
+        if: ${{ inputs.wheels_from_pypi }}
+        run: |
+          $requirements = "bindings/python/requirements.txt"
+          if(test-path -Path $requirements -PathType Leaf) {
+            build/${{ inputs.directory }}/wheel/venv/Scripts/pip install --pre -r $requirements
+          }
+      - name: Compile wheel
+        run: |
+          cd build/${{ inputs.directory }}
           cmake --build . --target wheel
       - name: Upload GH
         run: |

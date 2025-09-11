@@ -117,14 +117,14 @@ jobs:
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
           echo $wheels
           if [ -n "$wheels" ]; then 
-            build/${{ inputs.directory }}/wheel/bin/pip install --no-deps $wheels
+            build/${{ inputs.directory }}/wheel/venv/bin/pip install --no-deps $wheels
           fi
       - name: Wheels from Pypi in venv
         if: ${{ inputs.wheels_from_pypi }}
         run: |
           requirements="bindings/python/requirements.txt"
           if [ -f "$requirements" ]; then 
-            build/${{ inputs.directory }}/wheel/bin/pip install --pre -r $requirements
+            build/${{ inputs.directory }}/wheel/venv/bin/pip install --pre -r $requirements
           fi
       - name: Compile wheel
         run: |

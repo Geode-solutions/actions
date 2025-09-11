@@ -85,21 +85,6 @@ jobs:
             pip-compile -v --pre --upgrade $file
           fi
           sed -i -E 's/==(.+)\.(.+)\.(.+)/==\1\.*,>=\1\.\2\.\3/' bindings/python/requirements.txt
-      - name: Wheels from Github
-        if: ${{ !inputs.wheels_from_pypi }}
-        run: |
-          wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
-          echo $wheels
-          if [ -n "$wheels" ]; then 
-            pip install --no-deps $wheels
-          fi
-      - name: Wheels from Pypi
-        if: ${{ inputs.wheels_from_pypi }}
-        run: |
-          requirements="bindings/python/requirements.txt"
-          if [ -f "$requirements" ]; then 
-            pip install --pre -r $requirements
-          fi
       - name: Compile
         run: |
           mkdir -p build
@@ -111,6 +96,21 @@ jobs:
           echo "LD_LIBRARY_PATH=" >> $GITHUB_ENV
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+      - name: Wheels from Github
+        if: ${{ !inputs.wheels_from_pypi }}
+        run: |
+          wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
+          echo $wheels
+          if [ -n "$wheels" ]; then 
+            build/${{ inputs.directory }}/wheel/bin/pip install --no-deps $wheels
+          fi
+      - name: Wheels from Pypi
+        if: ${{ inputs.wheels_from_pypi }}
+        run: |
+          requirements="bindings/python/requirements.txt"
+          if [ -f "$requirements" ]; then 
+            build/${{ inputs.directory }}/wheel/bin/pip install --pre -r $requirements
+          fi
       - name: Compile wheel
         run: |
           cd build/${{ inputs.directory }}

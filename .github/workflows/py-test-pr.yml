@@ -36,10 +36,23 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: Geode-solutions/actions/get-release@master
+        id: wheels
+        with:
+          repository: ${{ inputs.repos }}
+          file: ".whl"
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ github.event.pull_request.head.ref }}
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install --extra-index-url https://wheels.vtk.org .[cpu]
           pip install mypy pylint
+          wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
+          echo "all wheels = $wheels"
+          if [ -n "$wheels" ]; then 
+            pip install --extra-index-url https://wheels.vtk.org $wheels
+          fi
+          pip list
       - uses: dciborow/action-pylint@main
         with:
           github_token: ${{ secrets.github_token }}

@@ -136,6 +136,25 @@ jobs:
               Copy-Item -Path $share\* -Destination share -Recurse
             }
           }
+      - name: Wheels from Github in venv
+        if: ${{ !inputs.wheels_from_pypi }}
+        run: |
+          $wheels ="${{ steps.wheels.outputs.path }}"
+          if($wheels) {
+            Foreach($wheel in $wheels.split(";")){
+              build/${{ inputs.directory }}/wheel/venv/Scripts/pip install --no-deps $wheel
+            }
+          }
+      - name: Wheels from Pypi in venv
+        if: ${{ inputs.wheels_from_pypi }}
+        run: |
+          $requirements = "bindings/python/requirements.txt"
+          if(test-path -Path $requirements -PathType Leaf) {
+            build/${{ inputs.directory }}/wheel/venv/Scripts/pip install --pre -r $requirements
+          }
+      - name: Compile wheel
+        run: |
+          cd build/${{ inputs.directory }}
           ctest --output-on-failure -R -py- -j 2
           cmake --build . --target wheel
           cmake --build . --target test-wheel

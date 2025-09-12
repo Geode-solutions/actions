@@ -50,7 +50,9 @@ jobs:
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
           echo "all wheels = $wheels"
           if [ -n "$wheels" ]; then 
-            pip install --extra-index-url https://wheels.vtk.org $wheels
+            for wheel in $wheels; do
+              pip install --extra-index-url https://wheels.vtk.org $wheel
+            done
           fi
           pip list
       - uses: dciborow/action-pylint@main

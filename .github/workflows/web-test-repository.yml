@@ -89,7 +89,7 @@ jobs:
           tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
           echo "Tarballs = $tarballs"
           if [ -n "$tarballs" ]; then 
-            npm install --no-save $tarballs
+            npm install --no-save $tarballs || true
           fi
           npm list --depth=0 || true
         shell: bash

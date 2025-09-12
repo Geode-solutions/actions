@@ -85,11 +85,11 @@ jobs:
           branch: ${{ inputs.branch }}
       - name: Install dependencies
         run: |
-          npm install || true
+          npm install
           tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
           echo "Tarballs = $tarballs"
           if [ -n "$tarballs" ]; then 
-            npm install --no-save $tarballs || true
+            npm install --no-save $tarballs
           fi
           npm list --depth=0 || true
         shell: bash

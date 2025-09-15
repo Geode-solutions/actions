@@ -199,7 +199,7 @@ jobs:
           npm list --depth=0 || true
         shell: bash
       - name: Install microservices
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: microservices-${{ runner.os }}
       - name: Test
@@ -248,7 +248,7 @@ jobs:
           npm list --depth=0 || true
         shell: bash
       - name: Install microservices
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: microservices-${{ runner.os }}
       - name: Build
@@ -257,6 +257,7 @@ jobs:
       - name: Test on Linux
         if: runner.os == 'Linux'
         run: |
+          ls
           xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:e2e:browser
         env:
           DEBUG: "pw:browser"

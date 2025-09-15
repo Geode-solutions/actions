@@ -144,7 +144,7 @@ jobs:
           file: ".whl"
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - name: Install node dependencies
+      - name: Install dependencies
         run: |
           npm install
           tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
@@ -154,20 +154,16 @@ jobs:
           fi
           npm list --depth=0 || true
         shell: bash
-      - name: Install dependencies
+      - name: Install microservices
         if: inputs.microservices_path != ''
         run: |
-          if [ ${{ matrix.os }} == 'windows-latest' ]; then
-            bin_folder=Scripts
-          else
-            bin_folder=bin
-          fi
+          bin_folder=$([[ ${{ matrix.os }} == 'windows-latest' ]] && echo "Scripts" || echo "bin")
           for microservice in ${{ inputs.microservices_path }}; do
             echo "microservice = $microservice"
             if [ -d "$microservice" ]; then
               cd $microservice
               python -m venv venv
-              venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org .[cpu]
+              venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org -r requirements.txt
               wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
               echo "all wheels = $wheels"
               if [ -n "$wheels" ]; then 

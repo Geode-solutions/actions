@@ -21,9 +21,9 @@ on:
       browser:
         type: boolean
         required: true
-      # desktop:
-      #   type: boolean
-      #   required: true
+      desktop:
+        type: boolean
+        required: true
       # cloud:
       #   type: boolean
       #   required: true
@@ -111,59 +111,8 @@ jobs:
         run: |
           npm run test
 
-  install-microservices:
-    if: inputs.microservices_path != ''
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.TOKEN }}
-      - name: Python setup
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
-      - uses: Geode-solutions/actions/get-release@master
-        id: wheels
-        with:
-          repository: ${{ inputs.repos }}
-          file: ".whl"
-          token: ${{ secrets.TOKEN }}
-          branch: ${{ inputs.branch }}
-      - name: Install microservices
-        run: |
-          bin_folder=$([[ ${{ matrix.os }} == 'windows-latest' ]] && echo "Scripts" || echo "bin")
-          for microservice in ${{ inputs.microservices_path }}/*/; do
-            microservice="$GITHUB_WORKSPACE/$microservice"
-            echo "microservice = $microservice"
-            if [ -d "$microservice" ]; then
-              cd $microservice
-              python -m venv venv
-              venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org -r requirements.txt
-              wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
-              echo "all wheels = $wheels"
-              if [ -n "$wheels" ]; then 
-                for wheel in $wheels; do
-                  venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org $wheel
-                done
-              fi
-              venv/$bin_folder/pip list
-            fi
-          done
-        shell: bash
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: microservices-${{ runner.os }}
-          path: ${{ inputs.microservices_path }}
-
   test-integration:
     if: inputs.integration
-    needs: [install-microservices]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -188,6 +137,13 @@ jobs:
           file: ".tgz"
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
+      - uses: Geode-solutions/actions/get-release@master
+        id: wheels
+        with:
+          repository: ${{ inputs.repos }}
+          file: ".whl"
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
       - name: Install dependencies
         run: |
           npm install
@@ -199,24 +155,32 @@ jobs:
           npm list --depth=0 || true
         shell: bash
       - name: Install microservices
-        uses: actions/download-artifact@v5
-        with:
-          name: microservices-${{ runner.os }}
-          path: ${{ inputs.microservices_path }}
+        run: |
+          bin_folder=$([[ ${{ matrix.os }} == 'windows-latest' ]] && echo "Scripts" || echo "bin")
+          for microservice in ${{ inputs.microservices_path }}/*/; do
+            microservice="$GITHUB_WORKSPACE/$microservice"
+            echo "microservice = $microservice"
+            if [ -d "$microservice" ]; then
+              cd $microservice
+              python -m venv venv
+              venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org -r requirements.txt
+              wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
+              echo "all wheels = $wheels"
+              if [ -n "$wheels" ]; then 
+                for wheel in $wheels; do
+                  venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org $wheel
+                done
+              fi
+              venv/$bin_folder/pip list
+            fi
+          done
+        shell: bash
       - name: Test
         run: |
           npm run test:integration
-        env:
-          DEBUG: "pw:browser"
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-integration-report-${{ runner.os }}
-          path: playwright-report/
 
   test-browser:
     if: inputs.browser
-    # needs: [install-microservices]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -279,11 +243,6 @@ jobs:
             fi
           done
         shell: bash
-      # - name: Install microservices
-      #   uses: actions/download-artifact@v5
-      #   with:
-      #     name: microservices-${{ runner.os }}
-      #     path: ${{ inputs.microservices_path }}
       - name: Build
         run: |
           npm run build:browser
@@ -291,9 +250,6 @@ jobs:
       - name: Test on Linux
         if: runner.os == 'Linux'
         run: |
-          ls ${{ inputs.microservices_path }}
-          ls ${{ inputs.microservices_path }}/back
-          ls ${{ inputs.microservices_path }}/back/venv
           xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:e2e:browser
         env:
           DEBUG: "pw:browser"
@@ -306,59 +262,106 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-browserreport-${{ runner.os }}
+          name: playwright-browser-${{ runner.os }}
           path: playwright-report/
 
-  # test-integration2:
-  #   if: inputs.node
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-latest, windows-latest]
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
-  #         token: ${{ secrets.TOKEN }}
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: "22"
-  #     - name: Install Azure Sign Tool
-  #       if: ${{ matrix.os == 'windows-latest' }}
-  #       run: dotnet tool install --global AzureSignTool --version 4.0.1
-  #     - uses: Geode-solutions/actions/get-release@master
-  #       id: tarball
-  #       with:
-  #         repository: ${{ inputs.repos }}
-  #         file: ".tgz"
-  #         token: ${{ secrets.TOKEN }}
-  #         branch: ${{ inputs.branch }}
-  #     - name: Install dependencies
-  #       run: |
-  #         npm install
-  #         tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
-  #         echo "Tarballs = $tarballs"
-  #         if [ -n "$tarballs" ]; then
-  #           npm install --no-save $tarballs
-  #         fi
-  #         npm list --depth=0 || true
-  #       shell: bash
-  #     - name: Test
-  #       run: |
-  #         npm run test
-  #       env:
-  #         DEBUG: "pw:browser"
-  #         AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
-  #         AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-  #         AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-  #         AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-  #         AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
-  #     - uses: actions/upload-artifact@v4
-  #       if: ${{ !cancelled() }}
-  #       with:
-  #         name: playwright-report-${{ runner.os }}
-  #         path: playwright-report/
+  test-desktop:
+    if: inputs.desktop
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Python setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - uses: Geode-solutions/actions/get-release@master
+        id: tarball
+        with:
+          repository: ${{ inputs.repos }}
+          file: ".tgz"
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - uses: Geode-solutions/actions/get-release@master
+        id: wheels
+        with:
+          repository: ${{ inputs.repos }}
+          file: ".whl"
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Install Azure Sign Tool
+        if: ${{ runner.os == 'Windows' }}
+        run: dotnet tool install --global AzureSignTool --version 4.0.1
+      - name: Install dependencies
+        run: |
+          npm install
+          tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
+          echo "Tarballs = $tarballs"
+          if [ -n "$tarballs" ]; then
+            npm install --no-save $tarballs
+          fi
+          npm list --depth=0 || true
+        shell: bash
+      - name: Install microservices
+        run: |
+          bin_folder=$([[ ${{ runner.os }} == 'Windows' ]] && echo "Scripts" || echo "bin")
+          for microservice in ${{ inputs.microservices_path }}/*/; do
+            microservice="$GITHUB_WORKSPACE/$microservice"
+            echo "microservice = $microservice"
+            if [ -d "$microservice" ]; then
+              cd $microservice
+              python -m venv venv
+              venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org -r requirements.txt
+              wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
+              echo "all wheels = $wheels"
+              if [ -n "$wheels" ]; then 
+                for wheel in $wheels; do
+                  venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org $wheel
+                done
+              fi
+              venv/$bin_folder/pip list
+            fi
+          done
+        shell: bash
+      - name: Build
+        run: |
+          npm run build:microservices
+          npm run build:desktop
+          npx playwright install --with-deps
+        env:
+          AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
+      - name: Test on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo chown root:root ./release/0.0.0/linux-unpacked/chrome-sandbox
+          sudo chmod 4755 ./release/0.0.0/linux-unpacked/chrome-sandbox
+          xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:e2e:desktop
+        env:
+          DEBUG: "pw:browser"
+      - name: Test on Windows
+        if: runner.os == 'Windows'
+        run: |
+          npm run test:e2e:desktop
+        env:
+          DEBUG: "pw:browser"
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-desktop-${{ runner.os }}
+          path: playwright-report/
 
   test-docker:
     if: inputs.docker

@@ -12,6 +12,9 @@ on:
       browser:
         type: boolean
         default: false
+      desktop:
+        type: boolean
+        required: true
       microservices_path:
         type: string
         default: "microservices"
@@ -58,6 +61,7 @@ jobs:
       node: ${{ inputs.node }}
       integration: ${{ inputs.integration }}
       browser: ${{ inputs.browser }}
+      desktop: ${{ inputs.desktop }}
       microservices_path: ${{ inputs.microservices_path }}
     secrets: inherit
 

@@ -216,7 +216,7 @@ jobs:
 
   test-browser:
     if: inputs.browser
-    needs: [install-microservices]
+    # needs: [install-microservices]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -237,6 +237,13 @@ jobs:
           file: ".tgz"
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
+      - uses: Geode-solutions/actions/get-release@master
+        id: wheels
+        with:
+          repository: ${{ inputs.repos }}
+          file: ".whl"
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
       - name: Install dependencies
         run: |
           npm install
@@ -248,10 +255,31 @@ jobs:
           npm list --depth=0 || true
         shell: bash
       - name: Install microservices
-        uses: actions/download-artifact@v5
-        with:
-          name: microservices-${{ runner.os }}
-          path: ${{ inputs.microservices_path }}
+        run: |
+          bin_folder=$([[ ${{ matrix.os }} == 'windows-latest' ]] && echo "Scripts" || echo "bin")
+          for microservice in ${{ inputs.microservices_path }}/*/; do
+            microservice="$GITHUB_WORKSPACE/$microservice"
+            echo "microservice = $microservice"
+            if [ -d "$microservice" ]; then
+              cd $microservice
+              python -m venv venv
+              venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org -r requirements.txt
+              wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
+              echo "all wheels = $wheels"
+              if [ -n "$wheels" ]; then 
+                for wheel in $wheels; do
+                  venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org $wheel
+                done
+              fi
+              venv/$bin_folder/pip list
+            fi
+          done
+        shell: bash
+      # - name: Install microservices
+      #   uses: actions/download-artifact@v5
+      #   with:
+      #     name: microservices-${{ runner.os }}
+      #     path: ${{ inputs.microservices_path }}
       - name: Build
         run: |
           npm run build:browser

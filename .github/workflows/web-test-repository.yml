@@ -158,6 +158,7 @@ jobs:
         run: |
           bin_folder=$([[ ${{ matrix.os }} == 'windows-latest' ]] && echo "Scripts" || echo "bin")
           for microservice in ${{ inputs.microservices_path }}/*/; do
+            microservice=${{ github.workspace }}/$microservice
             echo "microservice = $microservice"
             if [ -d "$microservice" ]; then
               cd $microservice

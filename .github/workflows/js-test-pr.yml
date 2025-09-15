@@ -9,6 +9,9 @@ on:
       integration:
         type: boolean
         default: false
+      browser:
+        type: boolean
+        default: false
       microservices_path:
         type: string
         default: "microservices"
@@ -54,6 +57,7 @@ jobs:
       python: false
       node: ${{ inputs.node }}
       integration: ${{ inputs.integration }}
+      browser: ${{ inputs.browser }}
       microservices_path: ${{ inputs.microservices_path }}
     secrets: inherit
 

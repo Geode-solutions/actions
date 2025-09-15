@@ -48,4 +48,5 @@ jobs:
       python: ${{ inputs.python }}
       node: ${{ inputs.node }}
       integration: false
+      browser: false
     secrets: inherit

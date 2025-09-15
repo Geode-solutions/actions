@@ -18,9 +18,9 @@ on:
       integration:
         type: boolean
         required: true
-      # browser:
-      #   type: boolean
-      #   required: true
+      browser:
+        type: boolean
+        required: true
       # desktop:
       #   type: boolean
       #   required: true
@@ -111,8 +111,59 @@ jobs:
         run: |
           npm run test
 
+  install-microservices:
+    if: inputs.microservices_path != ''
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
+      - name: Python setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - uses: Geode-solutions/actions/get-release@master
+        id: wheels
+        with:
+          repository: ${{ inputs.repos }}
+          file: ".whl"
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Install microservices
+        run: |
+          bin_folder=$([[ ${{ matrix.os }} == 'windows-latest' ]] && echo "Scripts" || echo "bin")
+          for microservice in ${{ inputs.microservices_path }}/*/; do
+            microservice="$GITHUB_WORKSPACE/$microservice"
+            echo "microservice = $microservice"
+            if [ -d "$microservice" ]; then
+              cd $microservice
+              python -m venv venv
+              venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org -r requirements.txt
+              wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
+              echo "all wheels = $wheels"
+              if [ -n "$wheels" ]; then 
+                for wheel in $wheels; do
+                  venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org $wheel
+                done
+              fi
+              venv/$bin_folder/pip list
+            fi
+          done
+        shell: bash
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: microservices-${{ runner.os }}
+          path: ${{ inputs.microservices_path }}
+
   test-integration:
-    if: inputs.node
+    if: inputs.integration
+    needs: [install-microservices]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -137,13 +188,6 @@ jobs:
           file: ".tgz"
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - uses: Geode-solutions/actions/get-release@master
-        id: wheels
-        with:
-          repository: ${{ inputs.repos }}
-          file: ".whl"
-          token: ${{ secrets.TOKEN }}
-          branch: ${{ inputs.branch }}
       - name: Install dependencies
         run: |
           npm install
@@ -155,31 +199,71 @@ jobs:
           npm list --depth=0 || true
         shell: bash
       - name: Install microservices
-        run: |
-          bin_folder=$([[ ${{ matrix.os }} == 'windows-latest' ]] && echo "Scripts" || echo "bin")
-          for microservice in ${{ inputs.microservices_path }}/*/; do
-            echo "$GITHUB_WORKSPACE"
-            echo "${{ github.workspace }}"
-            microservice="$GITHUB_WORKSPACE/$microservice"
-            echo "microservice = $microservice"
-            if [ -d "$microservice" ]; then
-              cd $microservice
-              python -m venv venv
-              venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org -r requirements.txt
-              wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
-              echo "all wheels = $wheels"
-              if [ -n "$wheels" ]; then 
-                for wheel in $wheels; do
-                  venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org $wheel
-                done
-              fi
-              venv/$bin_folder/pip list
-            fi
-          done
-        shell: bash
+        uses: actions/download-artifact@v4
+        with:
+          name: microservices-${{ runner.os }}
       - name: Test
         run: |
           npm run test:integration
+        env:
+          DEBUG: "pw:browser"
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-${{ runner.os }}
+          path: playwright-report/
+          retention-days: 5
+
+  test-browser:
+    if: inputs.browser
+    needs: [install-microservices]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: Geode-solutions/actions/get-release@master
+        id: tarball
+        with:
+          repository: ${{ inputs.repos }}
+          file: ".tgz"
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Install dependencies
+        run: |
+          npm install
+          tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
+          echo "Tarballs = $tarballs"
+          if [ -n "$tarballs" ]; then
+            npm install --no-save $tarballs
+          fi
+          npm list --depth=0 || true
+        shell: bash
+      - name: Install microservices
+        uses: actions/download-artifact@v4
+        with:
+          name: microservices-${{ runner.os }}
+      - name: Build
+        run: |
+          npm run build:browser
+      - name: Test on Linux
+        if: runner.os == 'Linux'
+        run: |
+          xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:e2e:browser
+        env:
+          DEBUG: "pw:browser"
+      - name: Test on Windows
+        if: runner.os == 'Windows'
+        run: |
+          npm run test:e2e:browser
         env:
           DEBUG: "pw:browser"
       - uses: actions/upload-artifact@v4

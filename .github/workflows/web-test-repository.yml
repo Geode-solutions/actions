@@ -165,7 +165,7 @@ jobs:
           for microservice in ${{ inputs.microservices_path }}; do
             echo "microservice = $microservice"
             if [ -d "$microservice" ]; then
-              cd ${{ inputs.microservices_path }}/$microservice
+              cd $microservice
               python -m venv venv
               venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org .[cpu]
               wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')

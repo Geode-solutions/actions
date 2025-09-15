@@ -202,6 +202,7 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: microservices-${{ runner.os }}
+          path: ${{ inputs.microservices_path }}
       - name: Test
         run: |
           npm run test:integration
@@ -210,9 +211,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report-${{ runner.os }}
+          name: playwright-integration-report-${{ runner.os }}
           path: playwright-report/
-          retention-days: 5
 
   test-browser:
     if: inputs.browser
@@ -251,6 +251,7 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: microservices-${{ runner.os }}
+          path: ${{ inputs.microservices_path }}
       - name: Build
         run: |
           npm run build:browser
@@ -270,9 +271,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report-${{ runner.os }}
+          name: playwright-browserreport-${{ runner.os }}
           path: playwright-report/
-          retention-days: 5
 
   # test-integration2:
   #   if: inputs.node
@@ -324,7 +324,6 @@ jobs:
   #       with:
   #         name: playwright-report-${{ runner.os }}
   #         path: playwright-report/
-  #         retention-days: 5
 
   test-docker:
     if: inputs.docker

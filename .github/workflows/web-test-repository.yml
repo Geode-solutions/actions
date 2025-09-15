@@ -155,10 +155,9 @@ jobs:
           npm list --depth=0 || true
         shell: bash
       - name: Install microservices
-        if: inputs.microservices_path != ''
         run: |
           bin_folder=$([[ ${{ matrix.os }} == 'windows-latest' ]] && echo "Scripts" || echo "bin")
-          for microservice in ${{ inputs.microservices_path }}; do
+          for microservice in ${{ inputs.microservices_path }}/*/; do
             echo "microservice = $microservice"
             if [ -d "$microservice" ]; then
               cd $microservice

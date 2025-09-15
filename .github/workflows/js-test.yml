@@ -3,6 +3,12 @@ on:
     inputs:
       repos:
         type: string
+      node:
+        type: boolean
+        default: true
+      integration:
+        type: boolean
+        default: false
     secrets:
       TOKEN:
         required: true
@@ -37,5 +43,6 @@ jobs:
       branch: ${{ github.ref_name }}
       docker: false
       python: false
-      npm: true
+      npm: ${{ inputs.node }}
+      integration: ${{ inputs.integration }}
     secrets: inherit

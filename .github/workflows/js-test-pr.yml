@@ -3,6 +3,12 @@ on:
     inputs:
       repos:
         type: string
+      node:
+        type: boolean
+        default: true
+      integration:
+        type: boolean
+        default: false
     secrets:
       TOKEN:
         required: true
@@ -43,7 +49,8 @@ jobs:
       branch: ${{ github.event.pull_request.head.ref }}
       docker: false
       python: false
-      npm: true
+      node: ${{ inputs.node }}
+      integration: ${{ inputs.integration }}
     secrets: inherit
 
   semantic-commit:
@@ -66,6 +73,6 @@ jobs:
       release_channel: ${{ needs.release.outputs.new_release_channel }}
       upload: false
       python: false
-      npm: true
+      node: true
       docker: false
     secrets: inherit

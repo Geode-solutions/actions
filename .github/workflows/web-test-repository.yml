@@ -12,8 +12,23 @@ on:
       python:
         type: boolean
         required: true
-      npm:
+      node:
         type: boolean
+        required: true
+      integration:
+        type: boolean
+        required: true
+      # browser:
+      #   type: boolean
+      #   required: true
+      # desktop:
+      #   type: boolean
+      #   required: true
+      # cloud:
+      #   type: boolean
+      #   required: true
+      microservices_path:
+        type: string
         required: true
     secrets:
       TOKEN:
@@ -60,8 +75,8 @@ jobs:
           pip install pytest pytest-xprocess
           pytest
 
-  test-npm:
-    if: inputs.npm
+  test-node:
+    if: inputs.node
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -75,9 +90,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Install Azure Sign Tool
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: dotnet tool install --global AzureSignTool --version 4.0.1
       - uses: Geode-solutions/actions/get-release@master
         id: tarball
         with:
@@ -98,19 +110,138 @@ jobs:
       - name: Test
         run: |
           npm run test
+
+  test-integration:
+    if: inputs.node
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Python setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - uses: Geode-solutions/actions/get-release@master
+        id: tarball
+        with:
+          repository: ${{ inputs.repos }}
+          file: ".tgz"
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - uses: Geode-solutions/actions/get-release@master
+        id: wheels
+        with:
+          repository: ${{ inputs.repos }}
+          file: ".whl"
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Install node dependencies
+        run: |
+          npm install
+          tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
+          echo "Tarballs = $tarballs"
+          if [ -n "$tarballs" ]; then 
+            npm install --no-save $tarballs
+          fi
+          npm list --depth=0 || true
+        shell: bash
+      - name: Install dependencies
+        if: inputs.microservices_path != ''
+        run: |
+          if [ ${{ matrix.os }} == 'windows-latest' ]; then
+            bin_folder=Scripts
+          else
+            bin_folder=bin
+          fi
+          for microservice in ${{ inputs.microservices_path }}; do
+            echo "microservice = $microservice"
+            if [ -d "$microservice" ]; then
+              cd ${{ inputs.microservices_path }}/$microservice
+              python -m venv venv
+              venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org .[cpu]
+              wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
+              echo "all wheels = $wheels"
+              if [ -n "$wheels" ]; then 
+                for wheel in $wheels; do
+                  venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org $wheel
+                done
+              fi
+              pip list
+            fi
+          done
+        shell: bash
+      - name: Test
+        run: |
+          npm run test:integration
         env:
           DEBUG: "pw:browser"
-          AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
           name: playwright-report-${{ runner.os }}
           path: playwright-report/
           retention-days: 5
+
+  # test-integration2:
+  #   if: inputs.node
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       os: [ubuntu-latest, windows-latest]
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #         token: ${{ secrets.TOKEN }}
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "22"
+  #     - name: Install Azure Sign Tool
+  #       if: ${{ matrix.os == 'windows-latest' }}
+  #       run: dotnet tool install --global AzureSignTool --version 4.0.1
+  #     - uses: Geode-solutions/actions/get-release@master
+  #       id: tarball
+  #       with:
+  #         repository: ${{ inputs.repos }}
+  #         file: ".tgz"
+  #         token: ${{ secrets.TOKEN }}
+  #         branch: ${{ inputs.branch }}
+  #     - name: Install dependencies
+  #       run: |
+  #         npm install
+  #         tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
+  #         echo "Tarballs = $tarballs"
+  #         if [ -n "$tarballs" ]; then
+  #           npm install --no-save $tarballs
+  #         fi
+  #         npm list --depth=0 || true
+  #       shell: bash
+  #     - name: Test
+  #       run: |
+  #         npm run test
+  #       env:
+  #         DEBUG: "pw:browser"
+  #         AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
+  #         AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  #         AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  #         AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  #         AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
+  #     - uses: actions/upload-artifact@v4
+  #       if: ${{ !cancelled() }}
+  #       with:
+  #         name: playwright-report-${{ runner.os }}
+  #         path: playwright-report/
+  #         retention-days: 5
 
   test-docker:
     if: inputs.docker

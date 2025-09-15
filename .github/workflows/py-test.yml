@@ -9,7 +9,7 @@ on:
       python:
         type: boolean
         default: true
-      npm:
+      node:
         type: boolean
         default: false
     secrets:
@@ -46,5 +46,6 @@ jobs:
       branch: ${{ github.ref_name }}
       docker: ${{ inputs.docker }}
       python: ${{ inputs.python }}
-      npm: ${{ inputs.npm }}
+      node: ${{ inputs.node }}
+      integration: false
     secrets: inherit

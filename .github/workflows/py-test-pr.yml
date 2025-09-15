@@ -9,7 +9,7 @@ on:
       python:
         type: boolean
         default: true
-      npm:
+      node:
         type: boolean
         default: false
     secrets:
@@ -78,7 +78,8 @@ jobs:
       branch: ${{ github.event.pull_request.head.ref }}
       docker: ${{ inputs.docker }}
       python: ${{ inputs.python }}
-      npm: ${{ inputs.npm }}
+      node: ${{ inputs.node }}
+      integration: false
     secrets: inherit
 
   semantic-commit:
@@ -101,6 +102,6 @@ jobs:
       release_channel: ${{ needs.release.outputs.new_release_channel }}
       upload: false
       python: ${{ inputs.python }}
-      npm: ${{ inputs.npm }}
+      npm: ${{ inputs.node }}
       docker: ${{ inputs.docker }}
     secrets: inherit

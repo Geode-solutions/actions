@@ -9,6 +9,9 @@ on:
       integration:
         type: boolean
         default: false
+      microservices_path:
+        type: string
+        default: "microservices"
     secrets:
       TOKEN:
         required: true
@@ -51,6 +54,7 @@ jobs:
       python: false
       node: ${{ inputs.node }}
       integration: ${{ inputs.integration }}
+      microservices_path: ${{ inputs.microservices_path }}
     secrets: inherit
 
   semantic-commit:
@@ -73,6 +77,6 @@ jobs:
       release_channel: ${{ needs.release.outputs.new_release_channel }}
       upload: false
       python: false
-      node: true
+      npm: true
       docker: false
     secrets: inherit

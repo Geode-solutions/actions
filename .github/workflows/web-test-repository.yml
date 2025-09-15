@@ -158,7 +158,9 @@ jobs:
         run: |
           bin_folder=$([[ ${{ matrix.os }} == 'windows-latest' ]] && echo "Scripts" || echo "bin")
           for microservice in ${{ inputs.microservices_path }}/*/; do
-            microservice=${{ github.workspace }}/$microservice
+            echo "$GITHUB_WORKSPACE"
+            echo "${{ github.workspace }}"
+            microservice="$GITHUB_WORKSPACE/$microservice"
             echo "microservice = $microservice"
             if [ -d "$microservice" ]; then
               cd $microservice
@@ -171,7 +173,7 @@ jobs:
                   venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org $wheel
                 done
               fi
-              pip list
+              venv/$bin_folder/pip list
             fi
           done
         shell: bash

@@ -14,7 +14,7 @@ on:
         default: false
       desktop:
         type: boolean
-        required: true
+        default: false
       microservices_path:
         type: string
         default: "microservices"

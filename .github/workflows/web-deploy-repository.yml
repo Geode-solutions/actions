@@ -181,7 +181,10 @@ jobs:
         shell: bash
       - name: Release
         run: |
-          cd release/${{ inputs.version }}
+          ls
+          ls release
+          ls release/${{ inputs.version }}
+          cd "release/${{ inputs.version }}"
           gh release upload v${{ inputs.version }} vease* latest* --clobber
         env:
           GITHUB_TOKEN: ${{ github.token }}

@@ -194,10 +194,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Python setup
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
       - uses: Geode-solutions/actions/get-release@master
         id: tarball
         with:
@@ -205,13 +201,12 @@ jobs:
           file: ".tgz"
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - uses: Geode-solutions/actions/get-release@master
-        id: wheels
+      - uses: Geode-solutions/actions/install-microservices@master
         with:
-          repository: ${{ inputs.repos }}
-          file: ".whl"
-          token: ${{ secrets.TOKEN }}
+          repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+          microservices_path: ${{ inputs.microservices_path }}
       - name: Install dependencies
         run: |
           npm install
@@ -221,27 +216,6 @@ jobs:
             npm install --no-save $tarballs
           fi
           npm list --depth=0 || true
-        shell: bash
-      - name: Install microservices
-        run: |
-          bin_folder=$([[ ${{ matrix.os }} == 'windows-latest' ]] && echo "Scripts" || echo "bin")
-          for microservice in ${{ inputs.microservices_path }}/*/; do
-            microservice="$GITHUB_WORKSPACE/$microservice"
-            echo "microservice = $microservice"
-            if [ -d "$microservice" ]; then
-              cd $microservice
-              python -m venv venv
-              venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org -r requirements.txt
-              wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
-              echo "all wheels = $wheels"
-              if [ -n "$wheels" ]; then 
-                for wheel in $wheels; do
-                  venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org $wheel
-                done
-              fi
-              venv/$bin_folder/pip list
-            fi
-          done
         shell: bash
       - name: Install Playwright
         run: npx playwright install chromium firefox --with-deps

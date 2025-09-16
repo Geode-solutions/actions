@@ -243,10 +243,12 @@ jobs:
             fi
           done
         shell: bash
+      - uses: browser-actions/setup-chrome@v2
+      - uses: browser-actions/setup-firefox@v1
       - name: Build
         run: |
           npm run build:browser
-          npx playwright install --with-deps
+          # npx playwright install --with-deps
       - name: Test on Linux
         if: runner.os == 'Linux'
         run: |
@@ -332,11 +334,13 @@ jobs:
             fi
           done
         shell: bash
+      - uses: browser-actions/setup-chrome@v2
+      - uses: browser-actions/setup-firefox@v1
       - name: Build
         run: |
           npm run build:microservices
           npm run build:desktop
-          npx playwright install --with-deps
+          # npx playwright install --with-deps
         env:
           AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}

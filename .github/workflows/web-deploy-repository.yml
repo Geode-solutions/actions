@@ -185,6 +185,7 @@ jobs:
           gh release upload v${{ inputs.version }} vease* latest* --clobber
         env:
           GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
 
   release-docker:
     if: inputs.docker

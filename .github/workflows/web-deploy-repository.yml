@@ -181,11 +181,9 @@ jobs:
         shell: bash
       - name: Release
         run: |
-          ls
-          ls release
-          ls release/${{ inputs.version }}
-          cd "release/${{ inputs.version }}"
-          gh release upload v${{ inputs.version }} vease* latest* --clobber
+          name=$(jq -r '.name' package.json)
+          cd release/${{ inputs.version }}
+          gh release upload ${{ inputs.release }} $name* latest* --clobber
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash

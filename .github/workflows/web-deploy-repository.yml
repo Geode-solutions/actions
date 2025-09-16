@@ -24,9 +24,15 @@ on:
       node:
         type: boolean
         required: true
+      desktop:
+        type: boolean
+        required: true
       upload:
         type: boolean
         default: true
+      microservices_path:
+        type: string
+        default: "microservices"
     secrets:
       TOKEN:
         required: true
@@ -136,6 +142,45 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+  release-desktop:
+    if: inputs.desktop
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: Geode-solutions/actions/install-node-dependencies@master
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+      - uses: Geode-solutions/actions/install-microservices@master
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+          microservices_path: ${{ inputs.microservices_path }}
+      - name: Install Azure Sign Tool
+        if: ${{ runner.os == 'Windows' }}
+        run: dotnet tool install --global AzureSignTool --version 4.0.1
+      - name: Package
+        run: |
+          jq '.version = "${{ inputs.version }}"' package.json > temp && mv temp package.json
+          npm run build:microservices
+          npm run package
+        env:
+          AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
+      - name: Release
+        run: |
+          cd release/${{ inputs.version }}
+          gh release upload v${{ inputs.version }} vease* latest* --clobber
+
   release-docker:
     if: inputs.docker
     uses: Geode-solutions/actions/.github/workflows/docker-build-squash-push.yml@master
@@ -148,5 +193,5 @@ jobs:
   notify:
     if: ${{ !failure() && !cancelled() }}
     uses: Geode-solutions/actions/.github/workflows/cpp-deploy-notify.yml@master
-    needs: [release-python, release-node, release-docker]
+    needs: [release-python, release-node, release-docker, release-desktop]
     secrets: inherit

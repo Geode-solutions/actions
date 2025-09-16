@@ -29,7 +29,7 @@ on:
       #   required: true
       microservices_path:
         type: string
-        required: true
+        default: "microservices"
     secrets:
       TOKEN:
         required: true

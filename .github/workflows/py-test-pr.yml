@@ -81,6 +81,7 @@ jobs:
       node: ${{ inputs.node }}
       integration: false
       browser: false
+      desktop: false
     secrets: inherit
 
   semantic-commit:
@@ -105,4 +106,5 @@ jobs:
       python: ${{ inputs.python }}
       node: ${{ inputs.node }}
       docker: ${{ inputs.docker }}
+      desktop: false
     secrets: inherit

@@ -85,6 +85,6 @@ jobs:
       release_channel: ${{ needs.release.outputs.new_release_channel }}
       upload: false
       python: false
-      npm: true
+      node: true
       docker: false
     secrets: inherit

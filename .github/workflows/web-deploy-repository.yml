@@ -21,7 +21,7 @@ on:
       python:
         type: boolean
         required: true
-      npm:
+      node:
         type: boolean
         required: true
       upload:
@@ -92,8 +92,8 @@ jobs:
           python3 -m pip install twine==6.0.1
           python3 -m twine upload --repository pypi dist/* -u __token__ -p ${{ secrets.PYPI_TOKEN }}
 
-  release-npm:
-    if: inputs.npm
+  release-node:
+    if: inputs.node
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

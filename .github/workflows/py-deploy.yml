@@ -9,7 +9,7 @@ on:
       python:
         type: boolean
         default: true
-      npm:
+      node:
         type: boolean
         default: false
     outputs:
@@ -43,7 +43,7 @@ jobs:
       release_channel: ${{ needs.semantic-release.outputs.new_release_channel }}
       upload: true
       python: ${{ inputs.python }}
-      npm: ${{ inputs.npm }}
+      node: ${{ inputs.node }}
       docker: ${{ inputs.docker }}
     secrets: inherit
 

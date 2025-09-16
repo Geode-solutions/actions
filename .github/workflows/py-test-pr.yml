@@ -103,6 +103,6 @@ jobs:
       release_channel: ${{ needs.release.outputs.new_release_channel }}
       upload: false
       python: ${{ inputs.python }}
-      npm: ${{ inputs.node }}
+      node: ${{ inputs.node }}
       docker: ${{ inputs.docker }}
     secrets: inherit

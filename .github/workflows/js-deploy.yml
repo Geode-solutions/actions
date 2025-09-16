@@ -34,7 +34,7 @@ jobs:
       release_channel: ${{ needs.semantic-release.outputs.new_release_channel }}
       upload: true
       python: false
-      npm: true
+      node: true
       docker: false
     secrets: inherit
 

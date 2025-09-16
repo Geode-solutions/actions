@@ -5,3 +5,4 @@ runs:
   steps:
     - name: Install Playwright
       run: npx playwright install chromium firefox --with-deps
+      shell: bash

@@ -165,5 +165,5 @@ jobs:
   notify:
     if: ${{ !failure() && !cancelled() }}
     uses: Geode-solutions/actions/.github/workflows/cpp-deploy-notify.yml@master
-    needs: [release-python, release-npm, release-docker]
+    needs: [release-python, release-node, release-docker]
     secrets: inherit

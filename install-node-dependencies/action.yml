@@ -1,0 +1,37 @@
+name: "Install node dependencies"
+
+inputs:
+  repos:
+    type: string
+    required: true
+  branch:
+    type: string
+    required: true
+  token:
+    type: string
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        registry-url: "https://registry.npmjs.org"
+        node-version: 22
+    - uses: Geode-solutions/actions/get-release@master
+      id: tarball
+      with:
+        repository: ${{ inputs.repos }}
+        file: ".tgz"
+        token: ${{ inputs.TOKEN }}
+        branch: ${{ inputs.branch }}
+    - name: Install dependencies
+      run: |
+        npm install
+        tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
+        echo "Tarballs = $tarballs"
+        if [ -n "$tarballs" ]; then
+          npm install --no-save $tarballs
+        fi
+        npm list --depth=0 || true
+      shell: bash

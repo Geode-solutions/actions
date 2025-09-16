@@ -101,28 +101,11 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-      - name: Setup NODE
-        uses: actions/setup-node@v4
+      - uses: Geode-solutions/actions/install-node-dependencies@master
         with:
-          registry-url: "https://registry.npmjs.org"
-          node-version: "22"
-      - uses: Geode-solutions/actions/get-release@master
-        id: tarball
-        with:
-          repository: ${{ inputs.repos }}
-          file: ".tgz"
-          token: ${{ secrets.TOKEN }}
+          repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
-      - name: Install dependencies
-        run: |
-          npm install || true
-          tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
-          echo "Tarballs = $tarballs"
-          if [ -n "$tarballs" ]; then 
-            npm install --no-save $tarballs
-          fi
-          npm list --depth=0 || true
-        shell: bash
+          token: ${{ secrets.TOKEN }}
       - name: Build
         id: build
         run: |

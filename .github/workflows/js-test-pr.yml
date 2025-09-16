@@ -87,4 +87,5 @@ jobs:
       python: false
       node: true
       docker: false
+      desktop: ${{ inputs.desktop }}
     secrets: inherit

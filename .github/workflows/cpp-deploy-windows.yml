@@ -68,11 +68,11 @@ jobs:
       - uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x64
+      - name: Install Azure Sign Tool
+        uses: Geode-solutions/actions/install/azure-sign@master
       - name: Generate package
         run: |
           gh api https://api.github.com/repos/Geode-solutions/actions/contents/code_sign.cmake -H "Accept: application/vnd.github.raw" > code_sign.cmake
-          dotnet tool install --global AzureSignTool --version 4.0.1
-          if(!$?) { exit 1 }
           if(!(test-path build)) { mkdir build }
           cd build
           cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=${{ inputs.config }} -DBUILD_SHARED_LIBS:BOOL=${{ matrix.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=${{ inputs.version }} -DCPACK_SYSTEM_NAME:STRING=${{ steps.info.outputs.name }} -DCPACK_PRE_BUILD_SCRIPTS:FILEPATH="${{ github.workspace }}/code_sign.cmake" ..

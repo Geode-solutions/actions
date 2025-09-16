@@ -87,7 +87,8 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-      - uses: Geode-solutions/actions/install-node-dependencies@master
+      - name: Install dependencies 
+        uses: Geode-solutions/actions/install/node-dependencies@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
@@ -108,12 +109,14 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-      - uses: Geode-solutions/actions/install-node-dependencies@master
+      - name: Install dependencies 
+        uses: Geode-solutions/actions/install/node-dependencies@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-      - uses: Geode-solutions/actions/install-microservices@master
+      - name: Install Microservices 
+        uses: Geode-solutions/actions/install/microservices@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
@@ -135,19 +138,21 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-      - uses: Geode-solutions/actions/install-node-dependencies@master
+      - name: Install dependencies 
+        uses: Geode-solutions/actions/install/node-dependencies@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-      - uses: Geode-solutions/actions/install-microservices@master
+      - name: Install Microservices 
+        uses: Geode-solutions/actions/install/microservices@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
           microservices_path: ${{ inputs.microservices_path }}
       - name: Install Playwright
-        run: npx playwright install chromium firefox --with-deps
+        uses: Geode-solutions/actions/install/playwright@master
       - name: Build
         run: |
           npm run build:browser
@@ -181,22 +186,23 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-      - uses: Geode-solutions/actions/install-node-dependencies@master
+      - name: Install dependencies 
+        uses: Geode-solutions/actions/install/node-dependencies@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-      - uses: Geode-solutions/actions/install-microservices@master
+      - name: Install Microservices 
+        uses: Geode-solutions/actions/install/microservices@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
           microservices_path: ${{ inputs.microservices_path }}
       - name: Install Azure Sign Tool
-        if: ${{ runner.os == 'Windows' }}
-        run: dotnet tool install --global AzureSignTool --version 4.0.1
+        uses: Geode-solutions/actions/install/azure-sign@master
       - name: Install Playwright
-        run: npx playwright install chromium firefox --with-deps
+        uses: Geode-solutions/actions/install/playwright@master
       - name: Build
         run: |
           npm run build:microservices
@@ -234,4 +240,4 @@ jobs:
       tag: test
       upload: false
     secrets:
-      TOKEN: ${{secrets.TOKEN}}
+      TOKEN: ${{ secrets.TOKEN }}

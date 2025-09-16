@@ -107,7 +107,8 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-      - uses: Geode-solutions/actions/install-node-dependencies@master
+      - name: Install dependencies 
+        uses: Geode-solutions/actions/install/node-dependencies@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
@@ -151,20 +152,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: Geode-solutions/actions/install-node-dependencies@master
+      - name: Install dependencies 
+        uses: Geode-solutions/actions/install/node-dependencies@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-      - uses: Geode-solutions/actions/install-microservices@master
+      - name: Install Microservices 
+        uses: Geode-solutions/actions/install/microservices@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
           microservices_path: ${{ inputs.microservices_path }}
       - name: Install Azure Sign Tool
-        if: ${{ runner.os == 'Windows' }}
-        run: dotnet tool install --global AzureSignTool --version 4.0.1
+        uses: Geode-solutions/actions/install/azure-sign@master
       - name: Package
         run: |
           jq '.version = "${{ inputs.version }}"' package.json > temp && mv temp package.json
@@ -181,6 +183,8 @@ jobs:
         run: |
           cd release/${{ inputs.version }}
           gh release upload v${{ inputs.version }} vease* latest* --clobber
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   release-docker:
     if: inputs.docker

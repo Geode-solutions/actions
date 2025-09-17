@@ -1,6 +1,8 @@
 on:
   workflow_call:
     outputs:
+      node:
+        value: ${{ jobs.config.outputs.node }}
       python:
         value: ${{ jobs.config.outputs.python }}
       docker:
@@ -12,6 +14,7 @@ jobs:
   config:
     runs-on: ubuntu-latest
     outputs:
+      node: ${{ steps.config.outputs.node }}
       python: ${{ steps.config.outputs.python }}
       docker: ${{ steps.config.outputs.docker }}
     steps:
@@ -23,6 +26,7 @@ jobs:
         id: config
         run: |
           declare -A DEFAULTS=(
+            ["node"]=true
             ["python"]=true
             ["docker"]=false
           )

@@ -23,9 +23,15 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/release.yml@master
     secrets: inherit
 
-  deploy-repository:
+  config:
     needs: semantic-release
     if: needs.semantic-release.outputs.new_release == 'true'
+    uses: Geode-solutions/actions/.github/workflows/js-config.yml@master
+    secrets: inherit
+
+
+  deploy-repository:
+    needs: [config, semantic-release]
     uses: Geode-solutions/actions/.github/workflows/web-deploy-repository.yml@master
     with:
       repos: ${{ inputs.repos }}
@@ -34,9 +40,9 @@ jobs:
       release_channel: ${{ needs.semantic-release.outputs.new_release_channel }}
       upload: true
       python: false
-      node: true
       docker: false
-      desktop: false
+      node: ${{ needs.config.outputs.node }}
+      desktop: ${{ needs.config.outputs.desktop }}
     secrets: inherit
 
   notify:

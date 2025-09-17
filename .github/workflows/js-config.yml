@@ -52,3 +52,10 @@ jobs:
             echo "$key: ${DEFAULTS[$key]}"
             echo "$key=${DEFAULTS[$key]}" >> $GITHUB_OUTPUT
           done
+      - name: Debug outputs
+        run: |
+          echo "node: ${{ steps.config.outputs.node }}"
+          echo "integration: ${{ steps.config.outputs.integration }}"
+          echo "browser: ${{ steps.config.outputs.browser }}"
+          echo "desktop: ${{ steps.config.outputs.desktop }}"
+          echo "microservices: ${{ steps.config.outputs.microservices }}"

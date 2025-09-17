@@ -45,9 +45,11 @@ jobs:
               value=$(jq -r ".$key // empty" "$CONFIG_FILE" 2>/dev/null)
               echo "$value"
               if [[ -n "$value" ]]; then
-                echo '$key="$value"' >> $GITHUB_OUTPUT
+                echo "$key: $value"
+                echo "$key=$value" >> $GITHUB_OUTPUT
                 continue
               fi
             fi
-            echo '$key="${DEFAULTS[$key]}"' >> $GITHUB_OUTPUT
+            echo "$key: ${DEFAULTS[$key]}"
+            echo "$key=${DEFAULTS[$key]}" >> $GITHUB_OUTPUT
           done

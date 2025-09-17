@@ -16,16 +16,16 @@ on:
         type: string
         required: true
       docker:
-        type: boolean
+        type: string
         required: true
       python:
-        type: boolean
+        type: string
         required: true
       node:
-        type: boolean
+        type: string
         required: true
       desktop:
-        type: boolean
+        type: string
         required: true
       upload:
         type: boolean
@@ -43,7 +43,7 @@ on:
 
 jobs:
   release-python:
-    if: inputs.python
+    if: inputs.python == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -98,7 +98,7 @@ jobs:
           python3 -m twine upload --repository pypi dist/* -u __token__ -p ${{ secrets.PYPI_TOKEN }}
 
   release-node:
-    if: inputs.node
+    if: inputs.node == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -142,7 +142,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   release-desktop:
-    if: inputs.desktop
+    if: inputs.desktop == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -189,7 +189,7 @@ jobs:
         shell: bash
 
   release-docker:
-    if: inputs.docker
+    if: inputs.docker == 'true'
     uses: Geode-solutions/actions/.github/workflows/docker-build-squash-push.yml@master
     with:
       tag: ${{ inputs.upload && github.ref_name || 'test' }}

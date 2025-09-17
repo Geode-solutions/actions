@@ -1,0 +1,23 @@
+on:
+  workflow_call:
+    outputs:
+      pr_found:
+        value: ${{ jobs.skip.outputs.pr_found }}
+    secrets:
+      TOKEN:
+        required: true
+
+jobs:
+  skip:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_found: ${{ steps.PR.outputs.pr_found }}
+    steps:
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ secrets.TOKEN }}
+      - uses: 8BitJonny/gh-get-current-pr@2.2.0
+        id: PR
+        with:
+          filterOutClosed: true

@@ -3,21 +3,6 @@ on:
     inputs:
       repos:
         type: string
-      node:
-        type: boolean
-        default: true
-      integration:
-        type: boolean
-        default: false
-      browser:
-        type: boolean
-        default: false
-      desktop:
-        type: boolean
-        default: false
-      microservices:
-        type: string
-        default: "microservices"
     secrets:
       TOKEN:
         required: true
@@ -50,19 +35,24 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  test-repository:
+  config:
     needs: prepare
+    uses: Geode-solutions/actions/.github/workflows/js-config.yml@master
+    secrets: inherit
+
+  test-repository:
+    needs: config
     uses: Geode-solutions/actions/.github/workflows/web-test-repository.yml@master
     with:
       repos: ${{ inputs.repos }}
       branch: ${{ github.event.pull_request.head.ref }}
       docker: false
       python: false
-      node: ${{ inputs.node }}
-      integration: ${{ inputs.integration }}
-      browser: ${{ inputs.browser }}
-      desktop: ${{ inputs.desktop }}
-      microservices: ${{ inputs.microservices }}
+      node: ${{ needs.config.outputs.node }}
+      integration: ${{ needs.config.outputs.integration }}
+      browser: ${{ needs.config.outputs.browser }}
+      desktop: ${{ needs.config.outputs.desktop }}
+      microservices: ${{ needs.config.outputs.microservices }}
     secrets: inherit
 
   semantic-commit:
@@ -75,7 +65,7 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/dev-release.yml@master
 
   deploy-repository:
-    needs: release
+    needs: [release, config]
     uses: Geode-solutions/actions/.github/workflows/web-deploy-repository.yml@master
     with:
       repos: ${{ inputs.repos }}
@@ -85,7 +75,7 @@ jobs:
       release_channel: ${{ needs.release.outputs.new_release_channel }}
       upload: false
       python: false
-      node: true
       docker: false
-      desktop: ${{ inputs.desktop }}
+      node: ${{ needs.config.outputs.node }}
+      desktop: ${{ needs.config.outputs.desktop }}
     secrets: inherit

@@ -7,7 +7,7 @@ inputs:
   branch:
     type: string
     required: true
-  microservices_path:
+  microservices:
     type: string
     required: true
   token:
@@ -31,7 +31,7 @@ runs:
     - name: Install microservices
       run: |
         bin_folder=$([[ ${{ runner.os }} == 'Windows' ]] && echo "Scripts" || echo "bin")
-        for microservice in ${{ inputs.microservices_path }}/*/; do
+        for microservice in ${{ inputs.microservices }}/*/; do
           microservice="$GITHUB_WORKSPACE/$microservice"
           echo "microservice = $microservice"
           if [ -d "$microservice" ]; then

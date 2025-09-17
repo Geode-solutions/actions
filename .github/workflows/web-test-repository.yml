@@ -27,7 +27,7 @@ on:
       # cloud:
       #   type: boolean
       #   required: true
-      microservices_path:
+      microservices:
         type: string
         default: "microservices"
     secrets:
@@ -119,7 +119,7 @@ jobs:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-          microservices_path: ${{ inputs.microservices_path }}
+          microservices: ${{ inputs.microservices }}
       - name: Test
         run: |
           npm run test:integration
@@ -147,7 +147,7 @@ jobs:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-          microservices_path: ${{ inputs.microservices_path }}
+          microservices: ${{ inputs.microservices }}
       - name: Install Playwright
         uses: Geode-solutions/actions/install/playwright@master
       - name: Build
@@ -194,7 +194,7 @@ jobs:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-          microservices_path: ${{ inputs.microservices_path }}
+          microservices: ${{ inputs.microservices }}
       - name: Install Azure Sign Tool
         uses: Geode-solutions/actions/install/azure-sign@master
       - name: Install Playwright

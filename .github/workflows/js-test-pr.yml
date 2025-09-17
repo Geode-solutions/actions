@@ -15,7 +15,7 @@ on:
       desktop:
         type: boolean
         default: false
-      microservices_path:
+      microservices:
         type: string
         default: "microservices"
     secrets:
@@ -62,7 +62,7 @@ jobs:
       integration: ${{ inputs.integration }}
       browser: ${{ inputs.browser }}
       desktop: ${{ inputs.desktop }}
-      microservices_path: ${{ inputs.microservices_path }}
+      microservices: ${{ inputs.microservices }}
     secrets: inherit
 
   semantic-commit:

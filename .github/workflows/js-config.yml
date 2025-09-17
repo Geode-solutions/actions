@@ -1,0 +1,53 @@
+on:
+  workflow_call:
+    outputs:
+      node:
+        value: ${{ jobs.config.outputs.node }}
+      integration:
+        value: ${{ jobs.config.outputs.integration }}
+      browser:
+        value: ${{ jobs.config.outputs.browser }}
+      desktop:
+        value: ${{ jobs.config.outputs.desktop }}
+      microservices:
+        value: ${{ jobs.config.outputs.microservices }}
+    secrets:
+      TOKEN:
+        required: true
+jobs:
+  config:
+    runs-on: ubuntu-latest
+    outputs:
+      node: ${{ steps.config.outputs.node }}
+      integration: ${{ steps.config.outputs.integration }}
+      browser: ${{ steps.config.outputs.browser }}
+      desktop: ${{ steps.config.outputs.desktop }}
+      microservices: ${{ steps.config.outputs.microservices }}
+    steps:
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ secrets.TOKEN }}
+      - name: Read config
+        id: config
+        run: |
+          declare -A DEFAULTS=(
+            ["node"]=true
+            ["integration"]=false
+            ["browser"]=false
+            ["desktop"]=false
+            ["microservices"]="microservices"
+          )
+          CONFIG_FILE=".github/workflows/config.json"
+          for key in "${!DEFAULTS[@]}"; do
+            echo "$key"
+            if [[ -f "$CONFIG_FILE" ]]; then
+              value=$(jq -r ".$key // empty" "$CONFIG_FILE" 2>/dev/null)
+              echo "$value"
+              if [[ -n "$value" ]]; then
+                echo "$key=$value" >> $GITHUB_OUTPUT
+                continue
+              fi
+            fi
+            echo "$key=${DEFAULTS[$key]}" >> $GITHUB_OUTPUT
+          done

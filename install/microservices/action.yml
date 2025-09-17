@@ -26,7 +26,7 @@ runs:
       with:
         repository: ${{ inputs.repos }}
         file: ".whl"
-        token: ${{ inputs.TOKEN }}
+        token: ${{ inputs.token }}
         branch: ${{ inputs.branch }}
     - name: Install microservices
       run: |

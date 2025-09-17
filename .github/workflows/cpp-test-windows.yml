@@ -24,35 +24,20 @@ on:
 jobs:
   windows:
     runs-on: windows-2022
-    strategy:
-      matrix:
-        shared: ["ON"]
     steps:
-      - name: Get info
-        id: info
-        run: |
-          if( "${{ matrix.shared }}" -eq "ON" ) {
-            echo "name=win64" >> $env:GITHUB_OUTPUT
-          }
-          else {
-            echo "name=win64-static" >> $env:GITHUB_OUTPUT
-          }
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - uses: actions/cache@v4
-        with:
-          path: build/third_party
-          key: ${{ runner.os }}-${{ steps.info.outputs.name }}-${{ hashFiles('cmake/Configure**.cmake') }}
-      - uses: Geode-solutions/actions/get-release@master
+      - name: Install dependencies
+        uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
         with:
-          repository: ${{ inputs.repos }}
-          file: "-${{ steps.info.outputs.name }}-private.zip"
+          repos: ${{ inputs.repos }}
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
+          system: win64
       - name: Libraries
         id: libraries
         run: |
@@ -68,7 +53,7 @@ jobs:
         run: |
           if(!(test-path build)) { mkdir build }
           cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=${{ matrix.shared }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
           cmake --build . -t third_party
           cd ${{ inputs.directory }}
           $paths = "${{ steps.libraries.outputs.bin }}"
@@ -88,15 +73,8 @@ jobs:
               Copy-Item -Path $share\* -Destination share -Recurse
             }
           }
-          if( "${{ matrix.shared }}" -eq "ON" ) {
-            cmake --build . -j 2
-            cmake --build . -t install
-            ctest --output-on-failure --no-tests=error -j 2 -LE unstable
-          }else{
-            cmake --build . -t essential -j 2 -LE unstable
-            if(!$?) { cmake --build . -t essential -j 1 -LE unstable}
-            cmake --build . -t install
-            ctest --output-on-failure --no-tests=error -j 2 -L essential -LE unstable
-          }
+          cmake --build . -j 2
+          cmake --build . -t install
+          ctest --output-on-failure --no-tests=error -j 2 -LE unstable
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

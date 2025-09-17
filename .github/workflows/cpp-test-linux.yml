@@ -62,17 +62,14 @@ jobs:
         with:
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - uses: actions/cache@v4
-        with:
-          path: build/third_party
-          key: ${{ runner.os }}-${{ steps.info.outputs.name }}-${{ hashFiles('cmake/Configure**.cmake') }}
-      - uses: Geode-solutions/actions/get-release@master
+      - name: Install dependencies
+        uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
         with:
-          repository: ${{ inputs.repos }}
-          file: "-${{ steps.info.outputs.name }}-private.tar.gz"
+          repos: ${{ inputs.repos }}
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
+          system: ${{ matrix.system }}
       - name: Libraries
         id: libraries
         run: |

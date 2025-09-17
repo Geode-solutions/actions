@@ -45,21 +45,19 @@ jobs:
         with:
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - uses: actions/cache/restore@v4
+      - name: Install dependencies
+        uses: Geode-solutions/actions/install/cpp-dependencies@master
+        id: repos
         with:
-          path: build/third_party
-          key: ${{ runner.os }}-win64-${{ hashFiles('cmake/Configure**.cmake') }}
+          repos: ${{ inputs.repos }}
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+          system: win64
+          save: false
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - uses: Geode-solutions/actions/get-release@master
-        id: repos
-        with:
-          repository: ${{ inputs.repos }}
-          file: "-win64-private.zip"
-          token: ${{ secrets.TOKEN }}
-          branch: ${{ inputs.branch }}
       - name: Libraries
         id: libraries
         run: |

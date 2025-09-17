@@ -1,0 +1,49 @@
+name: "Install C++ dependencies"
+
+inputs:
+  repos:
+    type: string
+    required: true
+  branch:
+    type: string
+    required: true
+  system:
+    type: string
+    required: true
+  token:
+    type: string
+    required: true
+  save:
+    type: boolean
+    default: true
+outputs:
+  path:
+    value: ${{ steps.repos.outputs.path }}
+
+runs:
+  using: "composite"
+  steps:
+    - if: ${{ inputs.save }}
+      uses: actions/cache@v4
+      with:
+        path: build/third_party
+        key: ${{ inputs.system }}-${{ hashFiles('cmake/Configure**.cmake') }}
+    - if: ${{ !inputs.save }}
+      uses: actions/cache/restore@v4
+      with:
+        path: build/third_party
+        key: ${{ inputs.system }}-${{ hashFiles('cmake/Configure**.cmake') }}
+    - run: |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          echo "ext=zip" >> $GITHUB_ENV
+        else
+          echo "ext=tar.gz" >> $GITHUB_ENV
+        fi
+      shell: bash
+    - uses: Geode-solutions/actions/get-release@master
+      id: repos
+      with:
+        repository: ${{ inputs.repos }}
+        file: "-${{ inputs.system }}-private.${{ env.ext }}"
+        token: ${{ inputs.token }}
+        branch: ${{ inputs.branch }}

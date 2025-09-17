@@ -18,5 +18,5 @@ runs:
       with:
         fetch-depth: 0
         repository: ${{ inputs.repo }}
-        token: ${{ inputs.TOKEN }}
+        token: ${{ inputs.token }}
         ref: ${{ inputs.branch }}

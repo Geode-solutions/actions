@@ -59,17 +59,15 @@ jobs:
         with:
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - uses: actions/cache/restore@v4
-        with:
-          path: build/third_party
-          key: ${{ runner.os }}-rhel-${{ hashFiles('cmake/Configure**.cmake') }}
-      - uses: Geode-solutions/actions/get-release@master
+      - name: Install dependencies
+        uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
         with:
-          repository: ${{ inputs.repos }}
-          file: "-rhel-private.tar.gz"
+          repos: ${{ inputs.repos }}
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
+          system: rhel
+          save: false
       - name: Libraries
         id: libraries
         run: |

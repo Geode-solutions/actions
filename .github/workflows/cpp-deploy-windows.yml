@@ -33,35 +33,21 @@ on:
 jobs:
   windows:
     runs-on: windows-2022
-    strategy:
-      matrix:
-        shared: ["ON"]
     steps:
-      - name: Get info
-        id: info
-        run: |
-          if( "${{ matrix.shared }}" -eq "ON" ) {
-            echo "name=win64" >> $env:GITHUB_OUTPUT
-          }
-          else {
-            echo "name=win64-static" >> $env:GITHUB_OUTPUT
-          }
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - uses: actions/cache/restore@v4
-        with:
-          path: build/third_party
-          key: ${{ runner.os }}-${{ steps.info.outputs.name }}-${{ hashFiles('cmake/Configure**.cmake') }}
-      - uses: Geode-solutions/actions/get-release@master
+      - name: Install dependencies
+        uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
         with:
-          repository: ${{ inputs.repos }}
-          file: "-${{ steps.info.outputs.name }}-private.zip"
+          repos: ${{ inputs.repos }}
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
+          system: win64
+          save: false
       - uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x64
@@ -72,7 +58,7 @@ jobs:
           gh api https://api.github.com/repos/Geode-solutions/actions/contents/code_sign.cmake -H "Accept: application/vnd.github.raw" > code_sign.cmake
           if(!(test-path build)) { mkdir build }
           cd build
-          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=${{ inputs.config }} -DBUILD_SHARED_LIBS:BOOL=${{ matrix.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=${{ inputs.version }} -DCPACK_SYSTEM_NAME:STRING=${{ steps.info.outputs.name }} -DCPACK_PRE_BUILD_SCRIPTS:FILEPATH="${{ github.workspace }}/code_sign.cmake" ..
+          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=${{ inputs.config }} -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DINCLUDE_PYBIND11:BOOL=ON -DCPACK_PACKAGE_VERSION:STRING=${{ inputs.version }} -DCPACK_SYSTEM_NAME:STRING=win64 -DCPACK_PRE_BUILD_SCRIPTS:FILEPATH="${{ github.workspace }}/code_sign.cmake" ..
           cmake --build . -j 2
           if(!$?) { cmake --build . -j 1 }
           cd ${{ inputs.directory }}

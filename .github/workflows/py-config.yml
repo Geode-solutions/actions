@@ -1,16 +1,10 @@
 on:
   workflow_call:
     outputs:
-      node:
-        value: ${{ jobs.config.outputs.node }}
-      integration:
-        value: ${{ jobs.config.outputs.integration }}
-      browser:
-        value: ${{ jobs.config.outputs.browser }}
-      desktop:
-        value: ${{ jobs.config.outputs.desktop }}
-      microservices:
-        value: ${{ jobs.config.outputs.microservices }}
+      python:
+        value: ${{ jobs.config.outputs.python }}
+      docker:
+        value: ${{ jobs.config.outputs.docker }}
     secrets:
       TOKEN:
         required: true
@@ -18,11 +12,8 @@ jobs:
   config:
     runs-on: ubuntu-latest
     outputs:
-      node: ${{ steps.config.outputs.node }}
-      integration: ${{ steps.config.outputs.integration }}
-      browser: ${{ steps.config.outputs.browser }}
-      desktop: ${{ steps.config.outputs.desktop }}
-      microservices: ${{ steps.config.outputs.microservices }}
+      python: ${{ steps.config.outputs.python }}
+      docker: ${{ steps.config.outputs.docker }}
     steps:
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
@@ -32,11 +23,8 @@ jobs:
         id: config
         run: |
           declare -A DEFAULTS=(
-            ["node"]=true
-            ["integration"]=false
-            ["browser"]=false
-            ["desktop"]=false
-            ["microservices"]="microservices"
+            ["python"]=true
+            ["docker"]=false
           )
           CONFIG_FILE=".github/workflows/config.json"
           if [[ -f "$CONFIG_FILE" ]]; then

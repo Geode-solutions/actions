@@ -31,6 +31,7 @@ jobs:
     needs: skip
     if: needs.skip.outputs.pr_found == 'false'
     uses: Geode-solutions/actions/.github/workflows/js-config.yml@master
+    secrets: inherit
 
   test-repository:
     needs: config

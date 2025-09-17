@@ -7,22 +7,22 @@ on:
         type: string
         default: ${{ github.ref }}
       docker:
-        type: boolean
+        type: string
         required: true
       python:
-        type: boolean
+        type: string
         required: true
       node:
-        type: boolean
+        type: string
         required: true
       integration:
-        type: boolean
+        type: string
         required: true
       browser:
-        type: boolean
+        type: string
         required: true
       desktop:
-        type: boolean
+        type: string
         required: true
       # cloud:
       #   type: boolean
@@ -38,7 +38,7 @@ on:
 
 jobs:
   test-python:
-    if: inputs.python
+    if: inputs.python == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -76,7 +76,7 @@ jobs:
           pytest
 
   test-node:
-    if: inputs.node
+    if: inputs.node == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -97,7 +97,7 @@ jobs:
           npm run test
 
   test-integration:
-    if: inputs.integration
+    if: inputs.integration == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -125,7 +125,7 @@ jobs:
           npm run test:integration
 
   test-browser:
-    if: inputs.browser
+    if: inputs.browser == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -172,7 +172,7 @@ jobs:
           path: playwright-report/
 
   test-desktop:
-    if: inputs.desktop
+    if: inputs.desktop == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -230,7 +230,7 @@ jobs:
           path: playwright-report/
 
   test-docker:
-    if: inputs.docker
+    if: inputs.docker == 'true'
     uses: Geode-solutions/actions/.github/workflows/docker-build-squash-push.yml@master
     with:
       tag: test

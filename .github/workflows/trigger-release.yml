@@ -12,11 +12,11 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
         with:
-          fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-          ref: ${{ inputs.branch }}
+          branch: ${{ inputs.branch }}
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           skip_dirty_check: true

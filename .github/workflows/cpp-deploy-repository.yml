@@ -9,9 +9,6 @@ on:
         default: "."
       repos:
         type: string
-      repo:
-        type: string
-        default: ${{ github.repository }}
       version:
         type: string
         required: true
@@ -44,7 +41,6 @@ jobs:
     with:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
-      repo: ${{ inputs.repo }}
       repos: ${{ inputs.repos }}
       version: ${{ inputs.version }}
       release: ${{ inputs.release }}
@@ -69,7 +65,6 @@ jobs:
     with:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
-      repo: ${{ inputs.repo }}
       repos: ${{ inputs.repos }}
       version: ${{ inputs.version }}
       release: ${{ inputs.release }}

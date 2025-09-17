@@ -44,9 +44,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
         with:
-          fetch-depth: 0
           token: ${{ secrets.TOKEN }}
       - uses: actions/setup-python@v5
         with:
@@ -83,9 +83,8 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: Geode-solutions/actions/install/checkout@master
         with:
-          fetch-depth: 0
           token: ${{ secrets.TOKEN }}
       - name: Install dependencies 
         uses: Geode-solutions/actions/install/node-dependencies@master
@@ -105,9 +104,8 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: Geode-solutions/actions/install/checkout@master
         with:
-          fetch-depth: 0
           token: ${{ secrets.TOKEN }}
       - name: Install dependencies 
         uses: Geode-solutions/actions/install/node-dependencies@master
@@ -134,9 +132,8 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: Geode-solutions/actions/install/checkout@master
         with:
-          fetch-depth: 0
           token: ${{ secrets.TOKEN }}
       - name: Install dependencies 
         uses: Geode-solutions/actions/install/node-dependencies@master
@@ -182,9 +179,8 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: Geode-solutions/actions/install/checkout@master
         with:
-          fetch-depth: 0
           token: ${{ secrets.TOKEN }}
       - name: Install dependencies 
         uses: Geode-solutions/actions/install/node-dependencies@master

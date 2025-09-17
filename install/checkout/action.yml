@@ -1,0 +1,22 @@
+name: "Checkout"
+
+inputs:
+  branch:
+    type: string
+    default: ${{ github.ref_name }}
+  repo:
+    type: string
+    default: ${{ github.repository }}
+  token:
+    type: string
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        repository: ${{ inputs.repo }}
+        token: ${{ inputs.TOKEN }}
+        ref: ${{ inputs.branch }}

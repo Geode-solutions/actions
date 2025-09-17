@@ -42,11 +42,12 @@ jobs:
       matrix:
         system: ["ubuntu", "rhel"]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
         with:
-          fetch-depth: 0
-          repository: Geode-solutions/${{ inputs.repository }}
+          repo: Geode-solutions/${{ inputs.repository }}
           token: ${{ secrets.TOKEN }}
+          branch: master
       - name: Get info
         run: |
           if [ "${{ inputs.shared }}" = "ON" ]; then
@@ -98,11 +99,12 @@ jobs:
     outputs:
       key: ${{ steps.info.outputs.key }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
         with:
-          fetch-depth: 0
-          repository: Geode-solutions/${{ inputs.repository }}
+          repo: Geode-solutions/${{ inputs.repository }}
           token: ${{ secrets.TOKEN }}
+          branch: master
       - name: Get info
         run: |
           if( "${{ inputs.shared }}" -eq "ON" ) {

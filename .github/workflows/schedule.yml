@@ -33,11 +33,11 @@ jobs:
               lib: "lib64",
             }
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
         with:
-          fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-          ref: ${{ inputs.branch }}
+          branch: ${{ inputs.branch }}
       - uses: actions/cache/restore@v4
         with:
           path: build/third_party
@@ -87,11 +87,11 @@ jobs:
         config:
           - { python: "3.12", tag: "cp312-cp312" }
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
         with:
-          fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-          ref: ${{ inputs.branch }}
+          branch: ${{ inputs.branch }}
       - uses: actions/cache/restore@v4
         with:
           path: build/third_party
@@ -134,11 +134,11 @@ jobs:
   windows:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
         with:
-          fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-          ref: ${{ inputs.branch }}
+          branch: ${{ inputs.branch }}
       - uses: actions/cache/restore@v4
         with:
           path: build/third_party

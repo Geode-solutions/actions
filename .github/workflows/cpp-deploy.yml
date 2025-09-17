@@ -9,9 +9,6 @@ on:
         default: "."
       repos:
         type: string
-      repo:
-        type: string
-        default: ${{ github.repository }}
       python:
         type: boolean
         default: true
@@ -42,7 +39,6 @@ jobs:
     with:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
-      repo: ${{ inputs.repo }}
       repos: ${{ inputs.repos }}
       version: ${{ needs.semantic-release.outputs.new_version }}
       release: v${{ needs.semantic-release.outputs.new_version }}

@@ -29,9 +29,9 @@ jobs:
     needs: prepare
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
         with:
-          fetch-depth: 0
           token: ${{ secrets.TOKEN }}
       - uses: actions/setup-python@v5
         with:

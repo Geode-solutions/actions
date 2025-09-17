@@ -37,11 +37,11 @@ jobs:
           else {
             echo "name=win64-static" >> $env:GITHUB_OUTPUT
           }
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
         with:
-          fetch-depth: 0
           token: ${{ secrets.TOKEN }}
-          ref: ${{ inputs.branch }}
+          branch: ${{ inputs.branch }}
       - uses: actions/cache@v4
         with:
           path: build/third_party

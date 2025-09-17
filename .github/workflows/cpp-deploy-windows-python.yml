@@ -52,10 +52,11 @@ jobs:
           $tag = "cp${{ matrix.python }}-cp${{ matrix.python }}"
           $tag = $tag.Replace(".", "")
           echo "tag=$tag" >> $env:GITHUB_OUTPUT
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
         with:
-          fetch-depth: 0
           token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
       - uses: actions/cache/restore@v4
         with:
           path: build/third_party

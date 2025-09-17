@@ -32,10 +32,10 @@ jobs:
         id: config
         run: |
           declare -A DEFAULTS=(
-            ["node"]=true
-            ["integration"]=false
-            ["browser"]=false
-            ["desktop"]=false
+            ["node"]="true"
+            ["integration"]="false"
+            ["browser"]="false"
+            ["desktop"]="false"
             ["microservices"]="microservices"
           )
           CONFIG_FILE=".github/workflows/config.json"

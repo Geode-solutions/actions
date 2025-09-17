@@ -3,7 +3,6 @@ name: "Checkout"
 inputs:
   branch:
     type: string
-    default: ${{ github.ref_name }}
   repo:
     type: string
     default: ${{ github.repository }}

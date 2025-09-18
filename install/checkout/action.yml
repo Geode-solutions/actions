@@ -13,9 +13,26 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: check branch exist
+      id: branch
+      run: |
+        if gh api repos/${{ inputs.repo }}/branches/${{ inputs.branch }} --silent; then
+          echo "found branch ${{ inputs.branch }}"
+          echo "branch="true" >> $GITHUB_OUTPUT
+        else
+          echo "branch not found, checking base branch"
+          echo "branch="false" >> $GITHUB_OUTPUT
+        fi
     - uses: actions/checkout@v4
+      if: steps.branch.outputs.branch == 'true'
       with:
         fetch-depth: 0
         repository: ${{ inputs.repo }}
         token: ${{ inputs.token }}
         ref: ${{ inputs.branch }}
+    - uses: actions/checkout@v4
+      if: steps.branch.outputs.branch == 'false'
+      with:
+        fetch-depth: 0
+        repository: ${{ inputs.repo }}
+        token: ${{ inputs.token }}

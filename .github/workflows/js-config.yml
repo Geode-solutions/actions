@@ -4,6 +4,8 @@ on:
       repo:
         type: string
         default: ${{ github.repository }}
+      branch:
+        type: string
     outputs:
       node:
         value: ${{ jobs.config.outputs.node }}
@@ -32,6 +34,7 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
       - name: Read config
         id: config
         uses: actions/github-script@v7

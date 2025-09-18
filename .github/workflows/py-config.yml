@@ -35,7 +35,7 @@ jobs:
             };
             const configFile = '.github/workflows/config.json';
             const outputFile = 'py-config.json';
-            output_config = {};
+            const outputConfig = {};
             try {
               // Attempt to read and parse the config file
               const configData = await fs.readFile(configFile, 'utf8');
@@ -52,7 +52,7 @@ jobs:
                   core.info(`${key}: ${value} (default)`);
                 }
                 core.setOutput(key, value);
-                output_config[key] = value;
+                outputConfig[key] = value;
               }
             } catch (error) {
               // If config file doesn't exist or fails to parse, use defaults
@@ -60,7 +60,7 @@ jobs:
               for (const key of Object.keys(defaults)) {
                 core.info(`${key}: ${defaults[key]} (default)`);
                 core.setOutput(key, defaults[key]);
-                output_config[key] = defaults[key];
+                outputConfig[key] = defaults[key];
               }
             }
             await fs.writeFile(outputFile, JSON.stringify(outputConfig));

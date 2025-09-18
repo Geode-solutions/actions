@@ -3,6 +3,8 @@ name: "Checkout"
 inputs:
   branch:
     type: string
+  base:
+    type: string
   repo:
     type: string
     default: ${{ github.repository }}
@@ -37,7 +39,14 @@ runs:
         token: ${{ inputs.token }}
         ref: refs/heads/${{ inputs.branch }}
     - uses: actions/checkout@v4
-      if: steps.branch.outputs.branch == 'false'
+      if: steps.branch.outputs.branch == 'false' && inputs.base != ''
+      with:
+        fetch-depth: 0
+        repository: ${{ inputs.repo }}
+        token: ${{ inputs.token }}
+        ref: refs/heads/${{ inputs.base }}
+    - uses: actions/checkout@v4
+      if: steps.branch.outputs.branch == 'false' && inputs.base == ''
       with:
         fetch-depth: 0
         repository: ${{ inputs.repo }}

@@ -1,0 +1,17 @@
+name: "Install License"
+
+inputs:
+  token:
+    type: string
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get license
+      run: |
+        gh auth setup-git
+        gh api https://api.github.com/repos/Geode-solutions/open-license-manager/contents/projects/geode/geode.lic -H "Accept: application/vnd.github.raw" > geode.lic
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}

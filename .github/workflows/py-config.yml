@@ -24,41 +24,50 @@ jobs:
           token: ${{ secrets.TOKEN }}
       - name: Read config
         id: config
-        run: |
-          declare -A DEFAULTS=(
-            ["node"]=true
-            ["python"]=true
-            ["docker"]=false
-          )
-          CONFIG_FILE=".github/workflows/config.json"
-          if [[ -f "$CONFIG_FILE" ]]; then
-            for key in "${!DEFAULTS[@]}"; do
-              value=$(jq -r --arg key "$key" '
-                if has($key) then
-                  if .[$key] != null then
-                    .[$key]
-                  else
-                    "null"
-                  end
-                else
-                  empty
-                end
-              ' "$CONFIG_FILE" 2>/dev/null)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs').promises;
+            const core = require('@actions/core');
+            const defaults = {
+              node: true,
+              python: true,
+              docker: false
+            };
+            const configFile = '.github/workflows/config.json';
+            const outputFile = 'py-config.json';
+            output_config = {};
+            try {
+              // Attempt to read and parse the config file
+              const configData = await fs.readFile(configFile, 'utf8');
+              const config = JSON.parse(configData);
 
-              # If jq returned a value (including "null"), use it; otherwise, use default
-              if [[ -n "$value" ]]; then
-                echo "$key: $value (from config)"
-                echo "$key=$value" >> "$GITHUB_OUTPUT"
-              else
-                echo "$key: ${DEFAULTS[$key]} (default)"
-                echo "$key=${DEFAULTS[$key]}" >> "$GITHUB_OUTPUT"
-              fi
-            done
-          else
-            # If config file doesn't exist, use all defaults
-            echo "Config file $CONFIG_FILE not found, using defaults"
-            for key in "${!DEFAULTS[@]}"; do
-              echo "$key: ${DEFAULTS[$key]} (default)"
-              echo "$key=${DEFAULTS[$key]}" >> "$GITHUB_OUTPUT"
-            done
-          fi
+              // Process each key
+              for (const key of Object.keys(defaults)) {
+                let value;
+                if (config.hasOwnProperty(key)) {
+                  value = config[key] !== null ? config[key] : 'null';
+                  core.info(`${key}: ${value} (from config)`);
+                } else {
+                  value = defaults[key];
+                  core.info(`${key}: ${value} (default)`);
+                }
+                core.setOutput(key, value);
+                output_config[key] = value;
+              }
+            } catch (error) {
+              // If config file doesn't exist or fails to parse, use defaults
+              core.info(`Config file ${configFile} not found or invalid, using defaults: ${error.message}`);
+              for (const key of Object.keys(defaults)) {
+                core.info(`${key}: ${defaults[key]} (default)`);
+                core.setOutput(key, defaults[key]);
+                output_config[key] = defaults[key];
+              }
+            }
+            await fs.writeFile(outputFile, JSON.stringify(outputConfig));
+            core.info(`Created ${outputFile} with processed configuration`);
+      - name: Upload processed config as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: processed-config
+          path: processed-config.json

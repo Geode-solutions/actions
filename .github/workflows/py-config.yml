@@ -1,5 +1,9 @@
 on:
   workflow_call:
+    inputs:
+      repo:
+        type: string
+        default: ${{ github.repository }}
     outputs:
       node:
         value: ${{ jobs.config.outputs.node }}
@@ -34,7 +38,7 @@ jobs:
               docker: false
             };
             const configFile = '.github/workflows/config.json';
-            const outputFile = 'py-config.json';
+            const outputFile = '${{ inputs.repo }}-py-config.json';
             const outputConfig = {};
             try {
               // Attempt to read and parse the config file
@@ -68,5 +72,5 @@ jobs:
       - name: Upload processed config as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: processed-config
-          path: processed-config.json
+          name: ${{ inputs.repo }}-py-config
+          path: ${{ inputs.repo }}-py-config.json

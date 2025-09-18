@@ -23,6 +23,7 @@ runs:
           echo "branch not found, checking base branch"
           echo "branch="false" >> $GITHUB_OUTPUT
         fi
+      shell: bash
     - uses: actions/checkout@v4
       if: steps.branch.outputs.branch == 'true'
       with:

@@ -27,6 +27,7 @@ jobs:
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
+          repo: ${{ inputs.repo }}
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
       - name: Read config

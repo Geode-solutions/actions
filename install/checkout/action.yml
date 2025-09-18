@@ -29,7 +29,7 @@ runs:
         fetch-depth: 0
         repository: ${{ inputs.repo }}
         token: ${{ inputs.token }}
-        ref: ${{ inputs.branch }}
+        ref: refs/heads/${{ inputs.branch }}
     - uses: actions/checkout@v4
       if: steps.branch.outputs.branch == 'false'
       with:

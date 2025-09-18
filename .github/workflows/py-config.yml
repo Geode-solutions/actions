@@ -37,7 +37,7 @@ jobs:
               python: true,
               docker: false
             };
-            const fullRepo = '${{ inputs.repo }}''
+            const fullRepo = '${{ inputs.repo }}'
             const repoName = fullRepo.split('/')[1];
             const configFile = '.github/workflows/config.json';
             const outputFile = `${repoName}-py-config.json`;

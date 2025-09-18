@@ -71,7 +71,7 @@ jobs:
             }
             await fs.writeFile(outputFile, JSON.stringify(outputConfig));
             core.info(`Created ${outputFile} with processed configuration`);
-            core.setOuput('repo', repoName);
+            core.setOutput('repo', repoName);
       - name: Upload processed config as artifact
         uses: actions/upload-artifact@v4
         with:

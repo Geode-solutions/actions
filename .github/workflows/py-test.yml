@@ -3,15 +3,6 @@ on:
     inputs:
       repos:
         type: string
-      docker:
-        type: boolean
-        default: false
-      python:
-        type: boolean
-        default: true
-      node:
-        type: boolean
-        default: false
     secrets:
       TOKEN:
         required: true
@@ -26,17 +17,22 @@ jobs:
   skip:
     uses: Geode-solutions/actions/.github/workflows/skip-pr.yml@master
     secrets: inherit
-
-  test-repository:
+    
+  config:
     needs: skip
     if: needs.skip.outputs.pr_found == 'false'
+    uses: Geode-solutions/actions/.github/workflows/py-config.yml@master
+    secrets: inherit
+
+  test-repository:
+    needs: config
     uses: Geode-solutions/actions/.github/workflows/web-test-repository.yml@master
     with:
       repos: ${{ inputs.repos }}
       branch: ${{ github.ref_name }}
-      docker: ${{ inputs.docker }}
-      python: ${{ inputs.python }}
-      node: ${{ inputs.node }}
+      docker: ${{ needs.config.outputs.docker }}
+      python: ${{ needs.config.outputs.python }}
+      node: ${{ needs.config.outputs.node }}
       integration: false
       browser: false
       desktop: false

@@ -3,15 +3,6 @@ on:
     inputs:
       repos:
         type: string
-      docker:
-        type: boolean
-        default: false
-      python:
-        type: boolean
-        default: true
-      node:
-        type: boolean
-        default: false
     secrets:
       TOKEN:
         required: true
@@ -69,16 +60,21 @@ jobs:
           target: "src"
           fail_level: "warning"
           reporter: github-pr-review
+    
+  config:
+    needs: prepare
+    uses: Geode-solutions/actions/.github/workflows/py-config.yml@master
+    secrets: inherit
 
   test-repository:
-    needs: prepare
+    needs: config
     uses: Geode-solutions/actions/.github/workflows/web-test-repository.yml@master
     with:
       repos: ${{ inputs.repos }}
       branch: ${{ github.event.pull_request.head.ref }}
-      docker: ${{ inputs.docker }}
-      python: ${{ inputs.python }}
-      node: ${{ inputs.node }}
+      docker: ${{ needs.config.outputs.docker }}
+      python: ${{ needs.config.outputs.python }}
+      node: ${{ needs.config.outputs.node }}
       integration: false
       browser: false
       desktop: false

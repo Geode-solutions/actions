@@ -37,8 +37,9 @@ jobs:
               python: true,
               docker: false
             };
+            const repoName = ${{ inputs.repo }}.split('/')[1];
             const configFile = '.github/workflows/config.json';
-            const outputFile = '${{ inputs.repo }}-py-config.json';
+            const outputFile = '$repoName-py-config.json';
             const outputConfig = {};
             try {
               // Attempt to read and parse the config file
@@ -69,8 +70,9 @@ jobs:
             }
             await fs.writeFile(outputFile, JSON.stringify(outputConfig));
             core.info(`Created ${outputFile} with processed configuration`);
+            core.setOuput('repo', repoName);
       - name: Upload processed config as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.repo }}-py-config
-          path: ${{ inputs.repo }}-py-config.json
+          name: ${{ steps.config.outputs.repo }}-py-config
+          path: ${{ steps.config.outputs.repo }}-py-config.json

@@ -26,6 +26,9 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
+    - run: |
+        echo "${{ steps.branch.outputs.branch }}"
+      shell: bash
     - uses: actions/checkout@v4
       if: steps.branch.outputs.branch == 'true'
       with:

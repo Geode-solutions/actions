@@ -40,7 +40,7 @@ jobs:
             const fullRepo = '${{ inputs.repo }}''
             const repoName = fullRepo.split('/')[1];
             const configFile = '.github/workflows/config.json';
-            const outputFile = '${repoName}-py-config.json';
+            const outputFile = `${repoName}-py-config.json`;
             const outputConfig = {};
             try {
               // Attempt to read and parse the config file

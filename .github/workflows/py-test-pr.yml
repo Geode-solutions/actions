@@ -90,7 +90,7 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/dev-release.yml@master
 
   deploy-repository:
-    needs: release
+    needs: [release, config]
     uses: Geode-solutions/actions/.github/workflows/web-deploy-repository.yml@master
     with:
       repos: ${{ inputs.repos }}
@@ -99,8 +99,8 @@ jobs:
       release: ${{ github.head_ref }}-tag
       release_channel: ${{ needs.release.outputs.new_release_channel }}
       upload: false
-      python: ${{ inputs.python }}
-      node: ${{ inputs.node }}
-      docker: ${{ inputs.docker }}
+      python: ${{ needs.config.outputs.python }}
+      node: ${{ needs.config.outputs.node }}
+      docker: ${{ needs.config.outputs.docker }}
       desktop: false
     secrets: inherit

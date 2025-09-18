@@ -28,7 +28,6 @@ jobs:
         with:
           script: |
             const fs = require('fs').promises;
-            const core = require('@actions/core');
             const defaults = {
               node: true,
               python: true,

@@ -19,7 +19,7 @@ on:
       TOKEN:
         required: true
 jobs:
-  config:
+  js-config:
     runs-on: ubuntu-latest
     outputs:
       node: ${{ steps.config.outputs.node }}

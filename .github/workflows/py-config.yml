@@ -15,7 +15,7 @@ on:
       TOKEN:
         required: true
 jobs:
-  config:
+  py-config:
     runs-on: ubuntu-latest
     outputs:
       node: ${{ steps.config.outputs.node }}

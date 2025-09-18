@@ -24,6 +24,8 @@ runs:
           echo "branch="false" >> $GITHUB_OUTPUT
         fi
       shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.token }}
     - uses: actions/checkout@v4
       if: steps.branch.outputs.branch == 'true'
       with:

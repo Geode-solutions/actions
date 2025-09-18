@@ -30,6 +30,11 @@ jobs:
           repo: ${{ inputs.repo }}
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
+      - run: |
+          ls
+          ls .github
+          ls .github/workflows
+        shell: bash
       - name: Read config
         id: config
         uses: actions/github-script@v7

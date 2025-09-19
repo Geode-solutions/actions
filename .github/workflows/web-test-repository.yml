@@ -48,32 +48,11 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - uses: actions/setup-python@v5
+      - uses: Geode-solutions/test/python@master
         with:
-          python-version: "3.12"
-      - uses: Geode-solutions/actions/get-release@master
-        id: wheels
-        with:
-          repository: ${{ inputs.repos }}
-          file: ".whl"
+          repos: ${{ inputs.repos }}
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - name: Install dependencies
-        run: |
-          pip install --extra-index-url https://wheels.vtk.org .[cpu]
-          wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
-          echo "all wheels = $wheels"
-          if [ -n "$wheels" ]; then 
-            for wheel in $wheels; do
-              pip install --extra-index-url https://wheels.vtk.org $wheel
-            done
-          fi
-          pip list
-        shell: bash
-      - name: Test
-        run: |
-          pip install pytest pytest-xprocess
-          pytest
 
   test-node:
     if: inputs.node == 'true'

@@ -1,0 +1,29 @@
+name: "Test Python"
+
+inputs:
+  repos:
+    type: string
+  branch:
+    type: string
+  wheels:
+    type: string
+  token:
+    type: string
+    required: true
+
+  using: "composite"
+  steps:
+    - name: Install dependencies
+      uses: Geode-solutions/actions/install/python-dependencies@master
+      with:
+        repos: ${{ inputs.repos }}
+        branch: ${{ inputs.branch }}
+        wheels: ${{ inputs.wheels }}
+        token: ${{ inputs.token }}
+    - name: Run tests
+      run: |
+        pip install pytest pytest-xprocess
+        pytest
+      shell: bash
+      env:
+        GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

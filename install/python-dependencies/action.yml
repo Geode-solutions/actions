@@ -36,6 +36,8 @@ runs:
       shell: bash
     - name: Install dependencies
       run: |
+        pwd
+        ls
         pip install --extra-index-url https://wheels.vtk.org .[cpu]
         wheels=$(echo "${{ steps.result.outputs.wheels }}" | sed 's/\;/\ /g')
         echo "all wheels = $wheels"

@@ -5,7 +5,7 @@ on:
         type: string
       branch:
         type: string
-        default: ${{ github.ref }}
+        default: ${{ github.ref_name }}
       docker:
         type: string
         required: true
@@ -66,15 +66,12 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - name: Install dependencies 
-        uses: Geode-solutions/actions/install/node-dependencies@master
+      - name: Test Node 
+        uses: Geode-solutions/actions/test/node@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-      - name: Test
-        run: |
-          npm run test
 
   test-integration:
     if: inputs.integration == 'true'
@@ -87,22 +84,13 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - name: Install dependencies 
-        uses: Geode-solutions/actions/install/node-dependencies@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
-      - name: Install Microservices 
-        uses: Geode-solutions/actions/install/microservices@master
+      - name: Test Integration 
+        uses: Geode-solutions/actions/test/integration@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
           microservices: ${{ inputs.microservices }}
-      - name: Test
-        run: |
-          npm run test:integration
 
   test-browser:
     if: inputs.browser == 'true'

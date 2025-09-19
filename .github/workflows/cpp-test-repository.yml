@@ -17,7 +17,7 @@ on:
         default: "Debug"
       branch:
         type: string
-        default: ${{ github.ref }}
+        default: ${{ github.ref_name }}
       wheels_from_pypi:
         type: boolean
         default: false

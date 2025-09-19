@@ -20,7 +20,7 @@ on:
         default: ""
       branch:
         type: string
-        default: ${{ github.ref }}
+        default: ${{ github.ref_name }}
     secrets:
       TOKEN:
         required: true

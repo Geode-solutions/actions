@@ -1,0 +1,27 @@
+name: "Test Node"
+
+inputs:
+  repos:
+    type: string
+  branch:
+    type: string
+  tarballs:
+    type: string
+  token:
+    type: string
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install dependencies
+      uses: Geode-solutions/actions/install/node-dependencies@master
+      with:
+        repos: ${{ inputs.repos }}
+        branch: ${{ inputs.branch }}
+        tarballs: ${{ inputs.tarballs }}
+        token: ${{ inputs.token }}
+    - name: Run tests
+      run: |
+        npm run test
+      shell: bash

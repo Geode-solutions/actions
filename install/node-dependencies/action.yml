@@ -7,6 +7,8 @@ inputs:
   branch:
     type: string
     required: true
+  tarballs:
+    type: string
   token:
     type: string
     required: true
@@ -19,16 +21,26 @@ runs:
         registry-url: "https://registry.npmjs.org"
         node-version: 22
     - uses: Geode-solutions/actions/get-release@master
-      id: tarball
+      if: ${{ inputs.tarballs == '' }}
+      id: tarballs
       with:
         repository: ${{ inputs.repos }}
         file: ".tgz"
         token: ${{ inputs.token }}
         branch: ${{ inputs.branch }}
+    - name: Get tarballs
+      id: result
+      run: |
+        if [ -n "${{ inputs.tarballs }}" ]; then
+          echo "tarballs=${{ inputs.tarballs }}" >> $GITHUB_OUTPUT
+        else
+          echo "tarballs=${{ steps.tarballs.outputs.path }}" >> $GITHUB_OUTPUT
+        fi
+      shell: bash
     - name: Install dependencies
       run: |
         npm install
-        tarballs=$(echo "${{ steps.tarball.outputs.path }}" | sed 's/\;/\ /g')
+        tarballs=$(echo "${{ steps.result.outputs.tarballs }}" | sed 's/\;/\ /g')
         echo "Tarballs = $tarballs"
         if [ -n "$tarballs" ]; then
           npm install --no-save $tarballs

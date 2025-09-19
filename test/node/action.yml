@@ -1,0 +1,33 @@
+name: "Test Integration"
+
+inputs:
+  repos:
+    type: string
+  branch:
+    type: string
+  microservices:
+    type: string
+  token:
+    type: string
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install dependencies
+      uses: Geode-solutions/actions/install/node-dependencies@master
+      with:
+        repos: ${{ inputs.repos }}
+        branch: ${{ inputs.branch }}
+        token: ${{ inputs.token }}
+    - name: Install Microservices
+      uses: Geode-solutions/actions/install/microservices@master
+      with:
+        repos: ${{ inputs.repos }}
+        branch: ${{ inputs.branch }}
+        token: ${{ inputs.token }}
+        microservices: ${{ inputs.microservices }}
+    - name: Test
+      run: |
+        npm run test:integration
+      shell: bash

@@ -1,0 +1,35 @@
+name: "Test Docker"
+
+inputs:
+  tag:
+    type: string
+    required: true
+  license_token:
+    type: string
+outputs:
+  image:
+    value: ${{ steps.image.outputs.IMAGE }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set IMAGE variable
+      id: image
+      run: |
+        repo=${GITHUB_REPOSITORY,,}
+        echo $repo
+        echo "IMAGE=ghcr.io/$repo:${{ inputs.tag }}" >> $GITHUB_OUTPUT
+      shell: bash
+    - name: Build Docker image
+      run: |
+        if [ "${{ inputs.license_token }}" != '' ]; then
+          docker build -t ${{ steps.image.outputs.IMAGE }} --build-arg TOKEN=${{ inputs.license_token }} .
+        else
+          docker build -t ${{ steps.image.outputs.IMAGE }} .
+        fi
+      shell: bash
+    - name: Squash Docker image
+      run: |
+        pip install docker-squash
+        docker-squash ${{ steps.image.outputs.IMAGE }} -t ${{ steps.image.outputs.IMAGE }}
+      shell: bash

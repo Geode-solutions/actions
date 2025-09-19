@@ -211,9 +211,14 @@ jobs:
 
   test-docker:
     if: inputs.docker == 'true'
-    uses: Geode-solutions/actions/.github/workflows/docker-build-squash-push.yml@master
-    with:
-      tag: test
-      upload: false
-    secrets:
-      TOKEN: ${{ secrets.TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ secrets.TOKEN }}
+      - name: Build docker
+        uses: Geode-solutions/actions/build/docker@master
+        id: docker
+        with:
+          tag: test

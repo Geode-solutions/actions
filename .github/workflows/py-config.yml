@@ -8,11 +8,11 @@ on:
         type: string
     outputs:
       node:
-        value: ${{ jobs.config.outputs.node }}
+        value: ${{ jobs.py-config.outputs.node }}
       python:
-        value: ${{ jobs.config.outputs.python }}
+        value: ${{ jobs.py-config.outputs.python }}
       docker:
-        value: ${{ jobs.config.outputs.docker }}
+        value: ${{ jobs.py-config.outputs.docker }}
     secrets:
       TOKEN:
         required: true
@@ -30,11 +30,6 @@ jobs:
           repo: ${{ inputs.repo }}
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - run: |
-          ls
-          ls .github
-          ls .github/workflows
-        shell: bash
       - name: Read config
         id: config
         uses: actions/github-script@v7

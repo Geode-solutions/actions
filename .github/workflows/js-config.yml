@@ -8,15 +8,15 @@ on:
         type: string
     outputs:
       node:
-        value: ${{ jobs.config.outputs.node }}
+        value: ${{ jobs.js-config.outputs.node }}
       integration:
-        value: ${{ jobs.config.outputs.integration }}
+        value: ${{ jobs.js-config.outputs.integration }}
       browser:
-        value: ${{ jobs.config.outputs.browser }}
+        value: ${{ jobs.js-config.outputs.browser }}
       desktop:
-        value: ${{ jobs.config.outputs.desktop }}
+        value: ${{ jobs.js-config.outputs.desktop }}
       microservices:
-        value: ${{ jobs.config.outputs.microservices }}
+        value: ${{ jobs.js-config.outputs.microservices }}
     secrets:
       TOKEN:
         required: true

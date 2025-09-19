@@ -1,4 +1,4 @@
-name: "Test Node"
+name: "Test Integration"
 
 inputs:
   repos:
@@ -6,6 +6,8 @@ inputs:
   branch:
     type: string
   tarballs:
+    type: string
+  microservices:
     type: string
   token:
     type: string
@@ -19,9 +21,16 @@ runs:
       with:
         repos: ${{ inputs.repos }}
         branch: ${{ inputs.branch }}
-        tarballs: ${{ inputs.tarballs }}
         token: ${{ inputs.token }}
-    - name: Run tests
+        tarballs: ${{ inputs.tarballs }}
+    - name: Install Microservices
+      uses: Geode-solutions/actions/install/microservices@master
+      with:
+        repos: ${{ inputs.repos }}
+        branch: ${{ inputs.branch }}
+        token: ${{ inputs.token }}
+        microservices: ${{ inputs.microservices }}
+    - name: Test
       run: |
-        npm run test
+        npm run test:integration
       shell: bash

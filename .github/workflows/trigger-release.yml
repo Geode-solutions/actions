@@ -31,5 +31,5 @@ jobs:
               repo: 'Versions',
               workflow_id: 'deploy.yml',
               ref: 'master',
-              inputs: { branch: '${{ inputs.branch }}' }
+              inputs: { branch: '${{ inputs.branch }}', workflow: 'cpp' }
             })

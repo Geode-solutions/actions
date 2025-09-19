@@ -48,7 +48,8 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - uses: Geode-solutions/test/python@master
+      - name: Test Python 
+        uses: Geode-solutions/actions/test/python@master
         with:
           repos: ${{ inputs.repos }}
           token: ${{ secrets.TOKEN }}

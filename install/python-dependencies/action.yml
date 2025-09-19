@@ -3,10 +3,8 @@ name: "Install Python dependencies"
 inputs:
   repos:
     type: string
-    required: true
   branch:
     type: string
-    required: true
   wheels:
     type: string
   token:

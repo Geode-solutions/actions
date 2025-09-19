@@ -62,7 +62,6 @@ jobs:
           branch: ${{ inputs.branch }}
       - name: Install dependencies
         run: |
-          sed -i 's/version = "[0-9]*\.[0-9]*\.[0-9]*\(-rc\.[0-9]*\)\?"/version = "${{ inputs.version }}"/' pyproject.toml
           pip install --extra-index-url https://wheels.vtk.org .[cpu]
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
           echo "all wheels = $wheels"
@@ -75,6 +74,7 @@ jobs:
         shell: bash
       - name: Build
         run: |
+          sed -i 's/version = "[0-9]*\.[0-9]*\.[0-9]*\(-rc\.[0-9]*\)\?"/version = "${{ inputs.version }}"/' pyproject.toml
           python3 -m pip install --upgrade build
           python3 -m build
       - name: Upload GH

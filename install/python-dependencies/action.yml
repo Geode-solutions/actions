@@ -1,0 +1,58 @@
+name: "Install Python dependencies"
+
+inputs:
+  repos:
+    type: string
+    required: true
+  branch:
+    type: string
+    required: true
+  wheels:
+    type: string
+  token:
+    type: string
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: 3.12
+    - uses: Geode-solutions/actions/get-release@master
+      if: ${{ inputs.wheels == '' }}
+      id: wheels
+      with:
+        repository: ${{ inputs.repos }}
+        file: ".whl"
+        token: ${{ inputs.token }}
+        branch: ${{ inputs.branch }}
+    - name: Get wheels
+      id: result
+      run: |
+        if [ -n "${{ inputs.wheels }}" ]; then
+          echo "wheels=${{ inputs.wheels }}" >> $GITHUB_OUTPUT
+        else
+          echo "wheels=${{ steps.wheels.outputs.path }}" >> $GITHUB_OUTPUT
+        fi
+      shell: bash
+    - name: Install dependencies
+      run: |
+        pip install --extra-index-url https://wheels.vtk.org .[cpu]
+        wheels=$(echo "${{ steps.result.outputs.wheels }}" | sed 's/\;/\ /g')
+        echo "all wheels = $wheels"
+        if [ -n "$wheels" ]; then 
+          dev_wheels=$(echo "$wheels" | tr ' ' '\n' | grep '0\.0\.0' || echo "")
+          echo "dev wheels = $dev_wheels"
+          if [ -n "$dev_wheels" ]; then 
+            filtered_wheels=$(echo "$dev_wheels" | tr '\n' ' ' | sed 's/ $//')
+            echo "filtered wheels = $filtered_wheels"
+            if [ -n "$filtered_wheels" ]; then 
+              for wheel in $filtered_wheels; do
+                pip install --extra-index-url https://wheels.vtk.org $wheel
+              done
+            fi
+          fi
+        fi
+        pip list
+      shell: bash

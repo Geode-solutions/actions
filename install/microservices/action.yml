@@ -7,6 +7,8 @@ inputs:
   branch:
     type: string
     required: true
+  wheels:
+    type: string
   microservices:
     type: string
     required: true
@@ -22,12 +24,22 @@ runs:
       with:
         python-version: 3.12
     - uses: Geode-solutions/actions/get-release@master
+      if: ${{ inputs.wheels == '' }}
       id: wheels
       with:
         repository: ${{ inputs.repos }}
         file: ".whl"
         token: ${{ inputs.token }}
         branch: ${{ inputs.branch }}
+    - name: Get wheels
+      id: result
+      run: |
+        if [ -n "${{ inputs.wheels }}" ]; then
+          echo "wheels=${{ inputs.wheels }}" >> $GITHUB_OUTPUT
+        else
+          echo "wheels=${{ steps.wheels.outputs.path }}" >> $GITHUB_OUTPUT
+        fi
+      shell: bash
     - name: Install microservices
       run: |
         bin_folder=$([[ ${{ runner.os }} == 'Windows' ]] && echo "Scripts" || echo "bin")
@@ -38,7 +50,7 @@ runs:
             cd $microservice
             python -m venv venv
             venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org -r requirements.txt
-            wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
+            wheels=$(echo "${{ steps.result.outputs.wheels }}" | sed 's/\;/\ /g')
             echo "all wheels = $wheels"
             if [ -n "$wheels" ]; then 
               for wheel in $wheels; do

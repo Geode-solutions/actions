@@ -7,6 +7,8 @@ inputs:
     type: string
   tarballs:
     type: string
+  wheels:
+    type: string
   microservices:
     type: string
   token:
@@ -29,6 +31,7 @@ runs:
         repos: ${{ inputs.repos }}
         branch: ${{ inputs.branch }}
         token: ${{ inputs.token }}
+        wheels: ${{ inputs.wheels }}
         microservices: ${{ inputs.microservices }}
     - name: Install Playwright
       uses: Geode-solutions/actions/install/playwright@master

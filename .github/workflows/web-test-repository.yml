@@ -48,7 +48,7 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - name: Test Python 
+      - name: Test Python
         uses: Geode-solutions/actions/test/python@master
         with:
           repos: ${{ inputs.repos }}
@@ -66,7 +66,7 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - name: Test Node 
+      - name: Test Node
         uses: Geode-solutions/actions/test/node@master
         with:
           repos: ${{ inputs.repos }}
@@ -84,7 +84,7 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - name: Test Integration 
+      - name: Test Integration
         uses: Geode-solutions/actions/test/integration@master
         with:
           repos: ${{ inputs.repos }}
@@ -103,41 +103,13 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - name: Install dependencies 
-        uses: Geode-solutions/actions/install/node-dependencies@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
-      - name: Install Microservices 
-        uses: Geode-solutions/actions/install/microservices@master
+      - name: Test Browser
+        uses: Geode-solutions/actions/test/browser@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
           microservices: ${{ inputs.microservices }}
-      - name: Install Playwright
-        uses: Geode-solutions/actions/install/playwright@master
-      - name: Build
-        run: |
-          npm run build:browser
-      - name: Test on Linux
-        if: runner.os == 'Linux'
-        run: |
-          xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:e2e:browser
-        env:
-          DEBUG: "pw:browser"
-      - name: Test on Windows
-        if: runner.os == 'Windows'
-        run: |
-          npm run test:e2e:browser
-        env:
-          DEBUG: "pw:browser"
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-browser-${{ runner.os }}
-          path: playwright-report/
 
   test-desktop:
     if: inputs.desktop == 'true'
@@ -150,52 +122,31 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - name: Install dependencies 
+      - name: Install dependencies
         uses: Geode-solutions/actions/install/node-dependencies@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-      - name: Install Microservices 
+      - name: Install Microservices
         uses: Geode-solutions/actions/install/microservices@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
           microservices: ${{ inputs.microservices }}
-      - name: Install Azure Sign Tool
-        uses: Geode-solutions/actions/install/azure-sign@master
-      - name: Install Playwright
-        uses: Geode-solutions/actions/install/playwright@master
-      - name: Build
-        run: |
-          npm run build:microservices
-          npm run build:desktop
-        env:
+      - name: Test Desktop
+        uses: Geode-solutions/actions/test/desktop@master
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+          microservices: ${{ inputs.microservices }}
           AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
-      - name: Test on Linux
-        if: runner.os == 'Linux'
-        run: |
-          sudo chown root:root ./release/0.0.0/linux-unpacked/chrome-sandbox
-          sudo chmod 4755 ./release/0.0.0/linux-unpacked/chrome-sandbox
-          xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:e2e:desktop
-        env:
-          DEBUG: "pw:browser"
-      - name: Test on Windows
-        if: runner.os == 'Windows'
-        run: |
-          npm run test:e2e:desktop
-        env:
-          DEBUG: "pw:browser"
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-desktop-${{ runner.os }}
-          path: playwright-report/
 
   test-docker:
     if: inputs.docker == 'true'

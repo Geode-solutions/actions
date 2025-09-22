@@ -53,7 +53,7 @@ const download_asset = async (asset, token) => {
               resolve(result)
             })
         } else {
-          console.log("Skipping", asset.name)
+          console.log("Downloading", asset.name)
           const result = path.join(process.env.GITHUB_WORKSPACE, asset.name)
           resolve(result)
         }

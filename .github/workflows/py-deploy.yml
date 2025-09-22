@@ -3,15 +3,6 @@ on:
     inputs:
       repos:
         type: string
-      docker:
-        type: boolean
-        default: false
-      python:
-        type: boolean
-        default: true
-      node:
-        type: boolean
-        default: false
     outputs:
       new_release:
         description: "Whether a new release was published"
@@ -32,9 +23,14 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/release.yml@master
     secrets: inherit
 
-  deploy-repository:
+  config:
     needs: semantic-release
     if: needs.semantic-release.outputs.new_release == 'true'
+    uses: Geode-solutions/actions/.github/workflows/py-config.yml@master
+    secrets: inherit
+
+  deploy-repository:
+    needs: [config, semantic-release]
     uses: Geode-solutions/actions/.github/workflows/web-deploy-repository.yml@master
     with:
       repos: ${{ inputs.repos }}
@@ -42,9 +38,9 @@ jobs:
       release: v${{ needs.semantic-release.outputs.new_version }}
       release_channel: ${{ needs.semantic-release.outputs.new_release_channel }}
       upload: true
-      python: ${{ inputs.python }}
-      node: ${{ inputs.node }}
-      docker: ${{ inputs.docker }}
+      docker: ${{ needs.config.outputs.docker }}
+      python: ${{ needs.config.outputs.python }}
+      node: ${{ needs.config.outputs.node }}
       desktop: false
     secrets: inherit
 

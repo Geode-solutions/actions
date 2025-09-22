@@ -29,7 +29,6 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/js-config.yml@master
     secrets: inherit
 
-
   deploy-repository:
     needs: [config, semantic-release]
     uses: Geode-solutions/actions/.github/workflows/web-deploy-repository.yml@master

@@ -9,6 +9,9 @@ inputs:
     required: true
   tarballs:
     type: string
+  use_registry:
+    type: boolean
+    required: true
   token:
     type: string
     required: true
@@ -21,7 +24,7 @@ runs:
         registry-url: "https://registry.npmjs.org"
         node-version: 22
     - uses: Geode-solutions/actions/get-release@master
-      if: ${{ inputs.tarballs == '' }}
+      if: ${{ inputs.tarballs == '' && inputs.use_registry == false }}
       id: tarballs
       with:
         repository: ${{ inputs.repos }}
@@ -33,8 +36,10 @@ runs:
       run: |
         if [ -n "${{ inputs.tarballs }}" ]; then
           echo "tarballs=${{ inputs.tarballs }}" >> $GITHUB_OUTPUT
-        else
+        elif [ -n "${{ steps.tarballs.outputs.path }}" ]; then
           echo "tarballs=${{ steps.tarballs.outputs.path }}" >> $GITHUB_OUTPUT
+        else
+          echo "tarballs=" >> $GITHUB_OUTPUT
         fi
       shell: bash
     - name: Install dependencies

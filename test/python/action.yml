@@ -7,6 +7,9 @@ inputs:
     type: string
   wheels:
     type: string
+  use_registry:
+    type: boolean
+    required: true
   token:
     type: string
     required: true
@@ -21,6 +24,7 @@ runs:
         branch: ${{ inputs.branch }}
         wheels: ${{ inputs.wheels }}
         token: ${{ inputs.token }}
+        use_registry: ${{ inputs.use_registry }}
     - name: Run tests
       run: |
         pip install pytest pytest-xprocess

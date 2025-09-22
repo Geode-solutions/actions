@@ -1,0 +1,46 @@
+on:
+  workflow_call:
+    inputs:
+      repos:
+        type: string
+      branch:
+        type: string
+        default: "master"
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  config:
+    uses: Geode-solutions/actions/.github/workflows/py-config.yml@master
+    secrets: inherit
+
+  test-repository:
+    needs: config
+    uses: Geode-solutions/actions/.github/workflows/web-test-repository.yml@master
+    with:
+      repos: ${{ inputs.repos }}
+      branch: ${{ inputs.branch }}
+      docker: ${{ needs.config.outputs.docker }}
+      python: ${{ needs.config.outputs.python }}
+      node: ${{ needs.config.outputs.node }}
+      integration: false
+      browser: false
+      desktop: false
+      use_registry: true
+    secrets: inherit
+
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ always() && needs.test-repository.result == 'failure' }}
+    needs: test-repository
+    steps:
+      - name: Notify slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -11,6 +11,9 @@ inputs:
     type: string
   microservices:
     type: string
+  use_registry:
+    type: boolean
+    required: true
   token:
     type: string
     required: true
@@ -40,6 +43,7 @@ runs:
         branch: ${{ inputs.branch }}
         token: ${{ inputs.token }}
         tarballs: ${{ inputs.tarballs }}
+        use_registry: ${{ inputs.use_registry }}
     - name: Install Microservices
       uses: Geode-solutions/actions/install/microservices@master
       with:
@@ -48,6 +52,7 @@ runs:
         token: ${{ inputs.token }}
         wheels: ${{ inputs.wheels }}
         microservices: ${{ inputs.microservices }}
+        use_registry: ${{ inputs.use_registry }}
     - name: Install Azure Sign Tool
       uses: Geode-solutions/actions/install/azure-sign@master
     - name: Install Playwright

@@ -12,6 +12,9 @@ inputs:
   microservices:
     type: string
     required: true
+  use_registry:
+    type: boolean
+    required: true
   token:
     type: string
     required: true
@@ -24,7 +27,7 @@ runs:
       with:
         python-version: 3.12
     - uses: Geode-solutions/actions/get-release@master
-      if: ${{ inputs.wheels == '' }}
+      if: ${{ inputs.wheels == '' && inputs.use_registry == false }}
       id: wheels
       with:
         repository: ${{ inputs.repos }}
@@ -36,8 +39,10 @@ runs:
       run: |
         if [ -n "${{ inputs.wheels }}" ]; then
           echo "wheels=${{ inputs.wheels }}" >> $GITHUB_OUTPUT
-        else
+        elif [ -n "${{ steps.wheels.outputs.path }}" ]; then
           echo "wheels=${{ steps.wheels.outputs.path }}" >> $GITHUB_OUTPUT
+        else
+          echo "wheels=" >> $GITHUB_OUTPUT
         fi
       shell: bash
     - name: Install microservices

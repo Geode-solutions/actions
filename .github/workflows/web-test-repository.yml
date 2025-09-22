@@ -30,6 +30,9 @@ on:
       microservices:
         type: string
         default: "microservices"
+      use_registry:
+        type: boolean
+        default: false
     secrets:
       TOKEN:
         required: true
@@ -54,6 +57,7 @@ jobs:
           repos: ${{ inputs.repos }}
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
+          use_registry: ${{ inputs.use_registry }}
 
   test-node:
     if: inputs.node == 'true'
@@ -72,6 +76,7 @@ jobs:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
+          use_registry: ${{ inputs.use_registry }}
 
   test-integration:
     if: inputs.integration == 'true'
@@ -91,6 +96,7 @@ jobs:
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
           microservices: ${{ inputs.microservices }}
+          use_registry: ${{ inputs.use_registry }}
 
   test-browser:
     if: inputs.browser == 'true'
@@ -110,6 +116,7 @@ jobs:
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
           microservices: ${{ inputs.microservices }}
+          use_registry: ${{ inputs.use_registry }}
 
   test-desktop:
     if: inputs.desktop == 'true'
@@ -122,25 +129,13 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - name: Install dependencies
-        uses: Geode-solutions/actions/install/node-dependencies@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
-      - name: Install Microservices
-        uses: Geode-solutions/actions/install/microservices@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
-          microservices: ${{ inputs.microservices }}
       - name: Test Desktop
         uses: Geode-solutions/actions/test/desktop@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
+          use_registry: ${{ inputs.use_registry }}
           microservices: ${{ inputs.microservices }}
           AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}

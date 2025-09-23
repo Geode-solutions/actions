@@ -29,7 +29,7 @@ runs:
         echo "Condition eval: $([ -z '${{ inputs.wheels }}' ] && [ '${{ inputs.use_registry }}' = 'false' ] && echo true || echo false)"
       shell: bash
     - uses: Geode-solutions/actions/get-release@master
-      if: ${{ inputs.wheels == '' && inputs.use_registry == false }}
+      if: ${{ inputs.wheels == '' && inputs.use_registry == 'false' }}
       id: wheels
       with:
         repository: ${{ inputs.repos }}

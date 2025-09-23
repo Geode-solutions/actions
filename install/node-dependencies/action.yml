@@ -41,6 +41,9 @@ runs:
         else
           echo "tarballs=" >> $GITHUB_OUTPUT
         fi
+        if [ "${{ inputs.branch }}" != "master" ]; then
+          jq '(.dependencies |= with_entries(if .value == "latest" then .value = "next" else . end)) | (.devDependencies |= with_entries(if .value == "latest" then .value = "next" else . end))' package.json > temp.json && mv temp.json package.json
+        fi
       shell: bash
     - name: Install dependencies
       run: |

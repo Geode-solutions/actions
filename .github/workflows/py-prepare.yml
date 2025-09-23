@@ -41,15 +41,15 @@ jobs:
           fi
           echo $GITHUB_REF_NAME
           if [ $GITHUB_REF_NAME == "master" ]; then
-            pip-compile -v --upgrade $files_in
+            pip-compile -v --upgrade $files_in --output-file $file_txt
           else
-            pip-compile -v --pre --upgrade $files_in
+            pip-compile -v --pre --upgrade $files_in --output-file $file_txt
           fi
           packages=$(grep -E '^(opengeode|geode|vease)' "$file_txt" | cut -d'=' -f1)
           for package in $packages; do
               current_version=$(grep "^$package==" "$file_txt" | cut -d'=' -f3)
-              if grep -q "^$package==" "$file_in"; then
-                  pinned_version=$(grep "^$package==" "$file_in" | cut -d'=' -f3)
+              if grep -q "^$package==" "$file_internal_in"; then
+                  pinned_version=$(grep "^$package==" "$file_internal_in" | cut -d'=' -f3)
                   if [[ -n "$pinned_version" ]]; then
                       continue
                   fi

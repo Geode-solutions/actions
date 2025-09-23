@@ -15,4 +15,6 @@ jobs:
     needs: semantic-release
     if: needs.semantic-release.outputs.new_release == 'true'
     uses: Geode-solutions/actions/.github/workflows/py-prepare.yml@master
+    with:
+      use_internal: true
     secrets: inherit

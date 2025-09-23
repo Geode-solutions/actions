@@ -20,14 +20,6 @@ runs:
     - uses: actions/setup-python@v5
       with:
         python-version: 3.12
-    - name: DEBUG
-      run: |
-        echo "repos=${{ inputs.repos }}"
-        echo "branch=${{ inputs.branch }}"
-        echo "wheels=${{ inputs.wheels }}"
-        echo "use_registry=${{ inputs.use_registry }}"
-        echo "Condition eval: $([ -z '${{ inputs.wheels }}' ] && [ '${{ inputs.use_registry }}' = 'false' ] && echo true || echo false)"
-      shell: bash
     - uses: Geode-solutions/actions/get-release@master
       if: ${{ inputs.wheels == '' && inputs.use_registry == 'false' }}
       id: wheels

@@ -51,6 +51,7 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
       - name: Test Python
         uses: Geode-solutions/actions/test/python@master
         with:
@@ -70,6 +71,7 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
       - name: Test Node
         uses: Geode-solutions/actions/test/node@master
         with:
@@ -89,6 +91,7 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
       - name: Test Integration
         uses: Geode-solutions/actions/test/integration@master
         with:
@@ -109,6 +112,7 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
       - name: Test Browser
         uses: Geode-solutions/actions/test/browser@master
         with:
@@ -129,6 +133,7 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
       - name: Test Desktop
         uses: Geode-solutions/actions/test/desktop@master
         with:
@@ -151,6 +156,7 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
       - name: Build docker
         uses: Geode-solutions/actions/build/docker@master
         id: docker

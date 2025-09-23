@@ -44,6 +44,7 @@ jobs:
               echo "Updating $package version in $file_txt"
               sed -i -E "s/^($package)==(.+)\.(.+)\.(.+)/\1==\2\.*,>=\2\.\3\.\4/" "$file_txt"
           done
+          cat $file_txt
       - name: "Get config files"
         run: |
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/commitlint.config.js\?ref\=master > commitlint.config.js

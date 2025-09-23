@@ -35,9 +35,9 @@ jobs:
           pip install pip-tools
           file_txt=requirements.txt
           if [ ${{ inputs.use_internal }} == "true" ]; then
-            files_in="file_in file_internal_in"
+            files_in="$file_in $file_internal_in"
           else
-            files_in="file_in"
+            files_in="$file_in"
           fi
           echo $GITHUB_REF_NAME
           if [ $GITHUB_REF_NAME == "master" ]; then

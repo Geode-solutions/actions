@@ -21,7 +21,7 @@ runs:
       with:
         python-version: 3.12
     - uses: Geode-solutions/actions/get-release@master
-      if: ${{ inputs.wheels == '' && inputs.use_registry == "false" }}
+      if: ${{ inputs.wheels == '' && inputs.use_registry == false }}
       id: wheels
       with:
         repository: ${{ inputs.repos }}

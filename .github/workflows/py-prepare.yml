@@ -32,7 +32,7 @@ jobs:
             pip-compile -v --pre --upgrade $file_in
           fi
           file_txt=requirements.txt
-          packages=$(grep -E '^(opengeode|geode)' "$file_txt" | cut -d'=' -f1)
+          packages=$(grep -E '^(opengeode|geode|vease)' "$file_txt" | cut -d'=' -f1)
           for package in $packages; do
               current_version=$(grep "^$package==" "$file_txt" | cut -d'=' -f3)
               if grep -q "^$package==" "$file_in"; then

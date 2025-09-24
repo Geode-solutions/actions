@@ -48,7 +48,7 @@ runs:
       shell: bash
     - name: Install dependencies
       run: |
-        npm install
+        npm install --no-package-lock
         tarballs=$(echo "${{ steps.result.outputs.tarballs }}" | sed 's/\;/\ /g')
         echo "Tarballs = $tarballs"
         if [ -n "$tarballs" ]; then

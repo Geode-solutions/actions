@@ -59,7 +59,7 @@ runs:
             echo "all wheels = $wheels"
             if [ -n "$wheels" ]; then 
               for wheel in $wheels; do
-                venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org $wheel
+                venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org $wheel[cpu]
               done
             fi
             venv/$bin_folder/pip list

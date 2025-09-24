@@ -52,7 +52,7 @@ runs:
             echo "filtered wheels = $filtered_wheels"
             if [ -n "$filtered_wheels" ]; then 
               for wheel in $filtered_wheels; do
-                pip install --extra-index-url https://wheels.vtk.org $wheel
+                pip install --extra-index-url https://wheels.vtk.org $wheel[cpu]
               done
             fi
           fi

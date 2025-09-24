@@ -42,7 +42,7 @@ jobs:
           echo "all wheels = $wheels"
           if [ -n "$wheels" ]; then 
             for wheel in $wheels; do
-              pip install --extra-index-url https://wheels.vtk.org $wheel
+              pip install --extra-index-url https://wheels.vtk.org $wheel[cpu]
             done
           fi
           pip list

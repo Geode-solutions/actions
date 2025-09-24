@@ -11,8 +11,15 @@ jobs:
       dry_run: true
     secrets: inherit
 
-  prepare:
+  config:
     needs: semantic-release
     if: needs.semantic-release.outputs.new_release == 'true'
+    uses: Geode-solutions/actions/.github/workflows/js-config.yml@master
+    secrets: inherit
+
+  prepare:
+    needs: config
     uses: Geode-solutions/actions/.github/workflows/js-prepare.yml@master
+    with:
+      microservices: ${{ needs.config.outputs.microservices }}
     secrets: inherit

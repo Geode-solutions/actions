@@ -12,8 +12,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  config:
+    uses: Geode-solutions/actions/.github/workflows/js-config.yml@master
+    secrets: inherit
+
   prepare:
+    needs: config
     uses: Geode-solutions/actions/.github/workflows/js-prepare.yml@master
+    with:
+      microservices: ${{ needs.config.outputs.microservices }}
     secrets: inherit
 
   oxlint:
@@ -35,13 +42,8 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  config:
-    needs: prepare
-    uses: Geode-solutions/actions/.github/workflows/js-config.yml@master
-    secrets: inherit
-
   test-repository:
-    needs: config
+    needs: [prepare, config]
     uses: Geode-solutions/actions/.github/workflows/web-test-repository.yml@master
     with:
       repos: ${{ inputs.repos }}

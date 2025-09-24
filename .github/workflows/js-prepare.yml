@@ -1,5 +1,8 @@
 on:
   workflow_call:
+    inputs:
+      microservices:
+        type: string
     outputs:
       changes_detected:
         description: "commit has been done"
@@ -19,11 +22,24 @@ jobs:
         with:
           token: ${{ secrets.TOKEN }}
       - name: "Get config files"
+        id: config
         run: |
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/commitlint.config.js\?ref\=master > commitlint.config.js
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.prettierrc\?ref\=master > .prettierrc
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.releaserc\?ref\=master > .releaserc
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.oxlintrc.json\?ref\=master > .oxlintrc.json
+          if [ -d "${{ inputs.microservices }}" ]; then
+            subfolders=$(find "${{ inputs.microservices }}" -maxdepth 1 -type d -not -path "${{ inputs.microservices }}" | tr '\n' ';')
+            subfolders=${subfolders%;} # Remove trailing semicolon
+            echo "$subfolders"
+            echo "folders=$subfolders" >> $GITHUB_OUTPUT
+          else
+            echo "folders=." >> $GITHUB_OUTPUT
+          fi
+      - name: pip-compile
+        uses: Geode-solutions/actions/install/pip-compile@master
+        with:
+          folders: ${{ steps.config.outputs.folders }}
       - name: Prettier
         run: npx prettier . --write
       - uses: stefanzweifel/git-auto-commit-action@v5

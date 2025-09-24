@@ -22,4 +22,5 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/js-prepare.yml@master
     with:
       microservices: ${{ needs.config.outputs.microservices }}
+      use_internal: true
     secrets: inherit

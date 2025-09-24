@@ -1,6 +1,9 @@
 on:
   workflow_call:
     inputs:
+      use_internal:
+        type: boolean
+        default: false
       microservices:
         type: string
     outputs:
@@ -40,6 +43,7 @@ jobs:
         uses: Geode-solutions/actions/install/pip-compile@master
         with:
           folders: ${{ steps.config.outputs.folders }}
+          use_internal: ${{ inputs.use_internal }}
       - name: Prettier
         run: npx prettier . --write
       - uses: stefanzweifel/git-auto-commit-action@v5

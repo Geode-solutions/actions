@@ -3,7 +3,10 @@ name: "Install pip-compile"
 inputs:
   folders:
     type: string
-    default: "."
+    required: true
+  use_internal:
+    type: boolean
+    required: true
 
 runs:
   using: "composite"
@@ -12,6 +15,7 @@ runs:
       run: |
         IFS=';' read -ra folders <<< "${{ inputs.folders }}"
         for folder in "${folders[@]}"; do
+          echo "Current folder: $folder"
           file_in=$folder/requirements.in
           if [ ! -f "$file_in" ]; then 
             exit 1
@@ -34,6 +38,7 @@ runs:
             pip-compile -v --pre --upgrade $files_in --output-file $file_txt
           fi
           packages=$(grep -E '^(opengeode|geode|vease)' "$file_txt" | cut -d'=' -f1)
+          echo "Packages: $packages"
           for package in $packages; do
               current_version=$(grep "^$package==" "$file_txt" | cut -d'=' -f3)
               if grep -q "^$package==" "$file_internal_in"; then

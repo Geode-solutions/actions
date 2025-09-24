@@ -37,7 +37,7 @@ runs:
           else
             pip-compile -v --pre --upgrade $files_in --output-file $file_txt
           fi
-          packages=$(grep -E '^(opengeode|geode|vease)' "$file_txt" | cut -d'=' -f1)
+          packages=$(grep -E '^(opengeode|geode|vease)' "$file_txt" | cut -d'=' -f1 || true)
           echo "Packages: $packages"
           for package in $packages; do
               current_version=$(grep "^$package==" "$file_txt" | cut -d'=' -f3)

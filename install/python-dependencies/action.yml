@@ -49,8 +49,9 @@ runs:
         choco install 7zip.install
         curl.exe -L --output mesa.7z --url https://github.com/pal1000/mesa-dist-win/releases/download/25.2.1/mesa3d-25.2.1-release-msvc.7z
         "C:\Program Files\7-Zip\7z.exe" x mesa.7z
-        mklink opengl32.dll "x64\opengl32.dll"
-        mklink libglapi.dll "x64\libglapi.dll"
+        dir
+        dir x64
+        echo. | set /p="%GITHUB_WORKSPACE%\x64" >> %GITHUB_PATH%
       shell: cmd
     - name: Install dependencies
       run: |

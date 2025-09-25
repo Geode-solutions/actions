@@ -56,9 +56,7 @@ runs:
       # shell: pwsh
     - name: Install dependencies
       run: |
-        ls 
-        ls x64
-        echo "${{ github.workspace }}/x64" >> $GITHUB_PATH
+        echo "${{ github.workspace }}" >> $GITHUB_PATH
         pip install --extra-index-url https://wheels.vtk.org .[cpu]
         wheels=$(echo "${{ steps.result.outputs.wheels }}" | sed 's/\;/\ /g')
         echo "all wheels = $wheels"

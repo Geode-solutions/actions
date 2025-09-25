@@ -36,13 +36,13 @@ jobs:
           branch: ${{ github.event.pull_request.head.ref }}
       - name: Install dependencies
         run: |
-          pip install --extra-index-url https://wheels.vtk.org .[cpu]
+          pip install .
           pip install mypy pylint
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
           echo "all wheels = $wheels"
           if [ -n "$wheels" ]; then 
             for wheel in $wheels; do
-              pip install --extra-index-url https://wheels.vtk.org $wheel[cpu]
+              pip install $wheel
             done
           fi
           pip list

@@ -41,7 +41,7 @@ runs:
       shell: bash
     - name: Install dependencies
       run: |
-        pip install --extra-index-url https://wheels.vtk.org .[cpu]
+        pip install .
         wheels=$(echo "${{ steps.result.outputs.wheels }}" | sed 's/\;/\ /g')
         echo "all wheels = $wheels"
         if [ -n "$wheels" ]; then 
@@ -52,7 +52,7 @@ runs:
             echo "filtered wheels = $filtered_wheels"
             if [ -n "$filtered_wheels" ]; then 
               for wheel in $filtered_wheels; do
-                pip install --extra-index-url https://wheels.vtk.org $wheel[cpu]
+                pip install $wheel
               done
             fi
           fi

@@ -45,19 +45,19 @@ runs:
       shell: bash
     - name: Install OSMesa
       if: ${{ runner.os == 'Windows' }}
-      uses: f3d-app/install-mesa-windows-action@v1
-      with:
-        path: ${{github.workspace}}
-        version: 25.0.7
-      # run: |
-      #   choco install 7zip.install
-      #   Invoke-WebRequest -Uri "https://github.com/pal1000/mesa-dist-win/releases/download/25.2.1/mesa3d-25.2.1-release-msvc.7z" -OutFile "mesa.7z"
-      #   & "C:\Program Files\7-Zip\7z.exe" x mesa.7z
-      #   echo "${{ github.workspace }}\x64" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-      # shell: pwsh
+      # uses: f3d-app/install-mesa-windows-action@v1
+      # with:
+      #   path: ${{github.workspace}}
+      #   version: 25.0.7
+      run: |
+        choco install 7zip.install
+        Invoke-WebRequest -Uri "https://github.com/pal1000/mesa-dist-win/releases/download/25.0.7/mesa3d-25.0.7-release-msvc.7z" -OutFile "mesa.7z"
+        & "C:\Program Files\7-Zip\7z.exe" x mesa.7z
+        echo "${{ github.workspace }}\x64" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      shell: pwsh
     - name: Install dependencies
       run: |
-        echo "${{ github.workspace }}" >> $GITHUB_PATH
+        echo "$PATH"
         pip install --extra-index-url https://wheels.vtk.org .[cpu]
         wheels=$(echo "${{ steps.result.outputs.wheels }}" | sed 's/\;/\ /g')
         echo "all wheels = $wheels"

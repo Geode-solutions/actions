@@ -50,7 +50,7 @@ runs:
         curl.exe -L --output mesa.7z --url https://github.com/pal1000/mesa-dist-win/releases/download/25.2.1/mesa3d-25.2.1-release-msvc.7z
         "C:\Program Files\7-Zip\7z.exe" x mesa.7z
         echo "${{ github.workspace }}\x64" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-      shell: cmd
+      shell: pwsh
     - name: Install dependencies
       run: |
         pip install --extra-index-url https://wheels.vtk.org .[cpu]

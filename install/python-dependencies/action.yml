@@ -42,6 +42,7 @@ runs:
     - name: Install OSMesa
       if: ${{ runner.os == 'Linux' }}
       run: sudo apt-get install libosmesa6-dev
+      shell: bash
     - name: Install dependencies
       run: |
         pip install --extra-index-url https://wheels.vtk.org .[cpu]

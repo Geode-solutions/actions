@@ -58,12 +58,12 @@ jobs:
       - name: Install dependencies
         run: |
           sed -i 's/version = "[0-9]*\.[0-9]*\.[0-9]*\(-rc\.[0-9]*\)\?"/version = "${{ inputs.version }}"/' pyproject.toml
-          pip install --extra-index-url https://wheels.vtk.org .[cpu]
+          pip install .
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
           echo "all wheels = $wheels"
           if [ -n "$wheels" ]; then 
             for wheel in $wheels; do
-              pip install --extra-index-url https://wheels.vtk.org $wheel
+              pip install $wheel
             done
           fi
           pip list

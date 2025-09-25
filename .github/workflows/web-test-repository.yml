@@ -60,12 +60,12 @@ jobs:
           branch: ${{ inputs.branch }}
       - name: Install dependencies
         run: |
-          pip install --extra-index-url https://wheels.vtk.org .[cpu]
+          pip install .
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
           echo "all wheels = $wheels"
           if [ -n "$wheels" ]; then 
             for wheel in $wheels; do
-              pip install --extra-index-url https://wheels.vtk.org $wheel
+              pip install $wheel
             done
           fi
           pip list
@@ -143,12 +143,12 @@ jobs:
             if [ -d "$microservice" ]; then
               cd $microservice
               python -m venv venv
-              venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org -r requirements.txt
+              venv/$bin_folder/pip install -r requirements.txt
               wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
               echo "all wheels = $wheels"
               if [ -n "$wheels" ]; then 
                 for wheel in $wheels; do
-                  venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org $wheel
+                  venv/$bin_folder/pip install $wheel
                 done
               fi
               venv/$bin_folder/pip list
@@ -263,12 +263,12 @@ jobs:
             if [ -d "$microservice" ]; then
               cd $microservice
               python -m venv venv
-              venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org -r requirements.txt
+              venv/$bin_folder/pip install -r requirements.txt
               wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
               echo "all wheels = $wheels"
               if [ -n "$wheels" ]; then 
                 for wheel in $wheels; do
-                  venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org $wheel
+                  venv/$bin_folder/pip install $wheel
                 done
               fi
               venv/$bin_folder/pip list

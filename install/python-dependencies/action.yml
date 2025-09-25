@@ -45,7 +45,8 @@ runs:
         wheels=$(echo "${{ steps.result.outputs.wheels }}" | sed 's/\;/\ /g')
         echo "all wheels = $wheels"
         if [ -n "$wheels" ]; then 
-          dev_wheels=$(echo "$wheels" | tr ' ' '\n' | grep '0\.0\.0' || echo "")
+          # dev_wheels=$(echo "$wheels" | tr ' ' '\n' | grep '0\.0\.0' || echo "")
+          dev_wheels="$wheels"
           echo "dev wheels = $dev_wheels"
           if [ -n "$dev_wheels" ]; then 
             filtered_wheels=$(echo "$dev_wheels" | tr '\n' ' ' | sed 's/ $//')

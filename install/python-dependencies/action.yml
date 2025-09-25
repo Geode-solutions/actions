@@ -48,6 +48,7 @@ runs:
       uses: f3d-app/install-mesa-windows-action@v1
       with:
         path: ${{github.workspace}}
+        version: 25.0.7
       # run: |
       #   choco install 7zip.install
       #   Invoke-WebRequest -Uri "https://github.com/pal1000/mesa-dist-win/releases/download/25.2.1/mesa3d-25.2.1-release-msvc.7z" -OutFile "mesa.7z"

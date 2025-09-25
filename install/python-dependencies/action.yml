@@ -39,6 +39,9 @@ runs:
           echo "wheels=" >> $GITHUB_OUTPUT
         fi
       shell: bash
+    - name: Install OSMesa
+      if: ${{ runner.os == 'Linux' }}
+      run: sudo apt-get install libosmesa6-dev
     - name: Install dependencies
       run: |
         pip install --extra-index-url https://wheels.vtk.org .[cpu]

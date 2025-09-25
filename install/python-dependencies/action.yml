@@ -47,7 +47,7 @@ runs:
       if: ${{ runner.os == 'Windows' }}
       uses: f3d-app/install-mesa-windows-action@v1
       with:
-        path: ${{github.workspace}}/mesa
+        path: ${{github.workspace}}
       # run: |
       #   choco install 7zip.install
       #   Invoke-WebRequest -Uri "https://github.com/pal1000/mesa-dist-win/releases/download/25.2.1/mesa3d-25.2.1-release-msvc.7z" -OutFile "mesa.7z"
@@ -56,9 +56,9 @@ runs:
       # shell: pwsh
     - name: Install dependencies
       run: |
-        ls mesa
-        ls mesa/x64
-        echo "${{ github.workspace }}/mesa/x64" >> $GITHUB_PATH
+        ls 
+        ls x64
+        echo "${{ github.workspace }}/x64" >> $GITHUB_PATH
         pip install --extra-index-url https://wheels.vtk.org .[cpu]
         wheels=$(echo "${{ steps.result.outputs.wheels }}" | sed 's/\;/\ /g')
         echo "all wheels = $wheels"

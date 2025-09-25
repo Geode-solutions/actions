@@ -54,12 +54,12 @@ runs:
           if [ -d "$microservice" ]; then
             cd $microservice
             python -m venv venv
-            venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org -r requirements.txt
+            venv/$bin_folder/pip install -r requirements.txt
             wheels=$(echo "${{ steps.result.outputs.wheels }}" | sed 's/\;/\ /g')
             echo "all wheels = $wheels"
             if [ -n "$wheels" ]; then 
               for wheel in $wheels; do
-                venv/$bin_folder/pip install --extra-index-url https://wheels.vtk.org $wheel[cpu]
+                venv/$bin_folder/pip install $wheel
               done
             fi
             venv/$bin_folder/pip list

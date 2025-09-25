@@ -53,6 +53,7 @@ runs:
       shell: pwsh
     - name: Install dependencies
       run: |
+        echo "$PATH"
         pip install --extra-index-url https://wheels.vtk.org .[cpu]
         wheels=$(echo "${{ steps.result.outputs.wheels }}" | sed 's/\;/\ /g')
         echo "all wheels = $wheels"

@@ -38,15 +38,21 @@ runs:
             pip-compile -v --pre --upgrade $files_in --output-file $file_txt
           fi
           echo "Updating versions in $file_txt from $file_internal_in"
-          packages=$(grep -E '^(opengeode|geode|vease)' "$file_txt" | cut -d'=' -f1 || true)
+          packages=$(grep -E '^[^#].+==' "$file_txt" | cut -d'=' -f1 || true)
           for package in $packages; do
               echo "Package: $package"
-              if grep -q "^$package==" "$file_internal_in" 2> /dev/null; then
-                  pinned_version=$(grep "^$package==" "$file_internal_in" | cut -d'=' -f3)
-                  echo "Pinned version: $pinned_version"
-                  if [[ -n "$pinned_version" ]]; then
-                      continue
-                  fi
+              pinned_version=""
+              if grep -q "^$package==" "$file_internal_in" 2>/dev/null; then
+                pinned_version=$(grep "^$package==" "$file_internal_in" | cut -d'=' -f3 || true)
+                echo "Pinned version in $file_internal_in: $pinned_version"
+              fi
+              if [[ -z "$pinned_version" ]] && grep -q "^$package==" "$file_in" 2>/dev/null; then
+                pinned_version=$(grep "^$package==" "$file_in" | cut -d'=' -f3 || true)
+                echo "Pinned version in $file_in: $pinned_version"
+              fi
+              if [[ -n "$pinned_version" ]]; then
+                echo "Skipping $package (pinned version: $pinned_version)"
+                continue
               fi
               echo "Updating $package version in $file_txt"
               sed -i -E "s/^($package)(\[.*\])?==(.+)\.(.+)\.(.+)/\1\2==\3.*,>=\3.\4.\5/" "$file_txt"

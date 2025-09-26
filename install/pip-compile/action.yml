@@ -48,7 +48,7 @@ runs:
                   fi
               fi
               echo "Updating $package version in $file_txt"
-              sed -i -E "s/^($package)==(.+)\.(.+)\.(.+)/\1==\2\.*,>=\2\.\3\.\4/" "$file_txt"
+              sed -i -E "s/^($package)(\[.*\])?==(.+)\.(.+)\.(.+)/\1\2==\3.*,>=\3.\4.\5/" "$file_txt"
           done
           cat $file_txt
         done

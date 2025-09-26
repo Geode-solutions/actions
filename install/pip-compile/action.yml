@@ -40,9 +40,11 @@ runs:
           packages=$(grep -E '^(opengeode|geode|vease)' "$file_txt" | cut -d'=' -f1 || true)
           echo "Packages: $packages"
           for package in $packages; do
-              current_version=$(grep "^$package==" "$file_txt" | cut -d'=' -f3)
+              echo "Package: $package"
+              grep "^$package==" "$file_internal_in"
               if grep -q "^$package==" "$file_internal_in"; then
                   pinned_version=$(grep "^$package==" "$file_internal_in" | cut -d'=' -f3)
+                  echo "Pinned version: $pinned_version"
                   if [[ -n "$pinned_version" ]]; then
                       continue
                   fi

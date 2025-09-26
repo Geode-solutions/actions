@@ -37,12 +37,11 @@ runs:
           else
             pip-compile -v --pre --upgrade $files_in --output-file $file_txt
           fi
+          echo "Updating versions in $file_txt from $file_internal_in"
           packages=$(grep -E '^(opengeode|geode|vease)' "$file_txt" | cut -d'=' -f1 || true)
-          echo "Packages: $packages"
           for package in $packages; do
               echo "Package: $package"
-              grep "^$package==" "$file_internal_in"
-              if grep -q "^$package==" "$file_internal_in"; then
+              if grep -q "^$package==" "$file_internal_in" 2> /dev/null; then
                   pinned_version=$(grep "^$package==" "$file_internal_in" | cut -d'=' -f3)
                   echo "Pinned version: $pinned_version"
                   if [[ -n "$pinned_version" ]]; then

@@ -45,6 +45,8 @@ runs:
           echo "wheels=" >> $GITHUB_OUTPUT
         fi
       shell: bash
+    - name: Install OSMesa
+      uses: Geode-solutions/actions/install/osmesa@master
     - name: Install microservices
       run: |
         bin_folder=$([[ ${{ runner.os }} == 'Windows' ]] && echo "Scripts" || echo "bin")

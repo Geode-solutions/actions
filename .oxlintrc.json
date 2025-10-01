@@ -14,5 +14,31 @@
     "promise",
     "unicorn",
     "vitest"
+  ],
+  "rules": {
+    "unicorn/filename-case": [
+      "error",
+      {
+        "case": "snakeCase"
+      }
+    ],
+    "eslint/func-style": [
+      "error",
+      {
+        "style:": "declaration"
+      }
+    ],
+    "eslint/sort-keys": "off",
+    "eslint/no-ternary": "off"
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/components/*"
+      ],
+      "rules": {
+        "unicorn/filename-case": "PascalCase"
+      }
+    }
   ]
 }

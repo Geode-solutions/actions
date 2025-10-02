@@ -55,7 +55,7 @@ runs:
                 continue
               fi
               echo "Updating $package version in $file_txt"
-              perl -i -pe 's|^(\Q'"$package"'\E)==(\d+)\.(\d+)\.(\d+)$|\1==\2.*|' "$file_txt"
+              perl -i -pe 's|^(\Q'"$package"'\E)==(\d+)\.(\d+)\.(\d+)$|\1~=\2.0|' "$file_txt"
           done
           cat $file_txt
         done

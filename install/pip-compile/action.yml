@@ -41,21 +41,23 @@ runs:
           packages=$(grep -E '^[^#].+==' "$file_txt" | cut -d'=' -f1 || true)
           for package in $packages; do
               echo "Package: $package"
-              pinned_version=""
               if grep -q "^$package==" "$file_internal_in" 2>/dev/null; then
                 pinned_version=$(grep "^$package==" "$file_internal_in" | cut -d'=' -f3 || true)
                 echo "Pinned version in $file_internal_in: $pinned_version"
-              fi
-              if [[ -z "$pinned_version" ]] && grep -q "^$package==" "$file_in" 2>/dev/null; then
-                pinned_version=$(grep "^$package==" "$file_in" | cut -d'=' -f3 || true)
-                echo "Pinned version in $file_in: $pinned_version"
-              fi
-              if [[ -n "$pinned_version" ]]; then
-                echo "Skipping $package (pinned version: $pinned_version)"
                 continue
               fi
-              echo "Updating $package version in $file_txt"
-              perl -i -pe 's|^(\Q'"$package"'\E)==(\d+)\.\d+(?:\.\d+)?(?:[a-z]+[0-9]*)?$|\1~=\2.0|' "$file_txt"
+              if grep -q "^$package==" "$file_in" 2>/dev/null; then
+                pinned_version=$(grep "^$package==" "$file_in" | cut -d'=' -f3 || true)
+                echo "Pinned version in $file_in: $pinned_version"
+                continue
+              fi
+              if grep -q "^$package" "$file_internal_in" "$file_in" 2>/dev/null; then
+                echo "Updating $package version with minimal version"
+                perl -i -pe 's|^(\Q'"$package"'\E)==(\d+)\.(\d+)\.(\d+)(?:[a-z]+[0-9]*)?$|\1~=\2.\3,>=\2.\3.\4|' "$file_txt"
+                continue
+              fi
+              echo "Updating $package version"
+              perl -i -pe 's|^(\Q'"$package"'\E)==(\d+)\.(\d+)\.(\d+)(?:[a-z]+[0-9]*)?$|\1~=\2.\3|' "$file_txt"
           done
           cat $file_txt
         done

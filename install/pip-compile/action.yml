@@ -18,47 +18,28 @@ runs:
           echo "Current folder: $folder"
           file_in=$folder/requirements.in
           if [ ! -f "$file_in" ]; then 
+            echo "File $file_in not found"
             exit 1
           fi
           file_internal_in=$folder/requirements-internal.in
-          if [ ! -f "$file_in" ]; then 
+          if [ ! -f "$file_internal_in" ]; then 
+            echo "File $file_internal_in not found"
             exit 1
           fi
-          pip install pip-tools
           file_txt=$folder/requirements.txt
+          rm -f $file_txt
+          cp $file_in $file_txt
           if [ ${{ inputs.use_internal }} == "true" ]; then
-            files_in="$file_in $file_internal_in"
-          else
-            files_in="$file_in"
-          fi
-          echo $GITHUB_REF_NAME
-          if [ $GITHUB_REF_NAME == "master" ]; then
-            pip-compile -v --upgrade $files_in --output-file $file_txt
-          else
-            pip-compile -v --pre --upgrade $files_in --output-file $file_txt
-          fi
-          echo "Updating versions in $file_txt from $file_internal_in"
-          packages=$(grep -E '^[^#].+==' "$file_txt" | cut -d'=' -f1 || true)
-          for package in $packages; do
+            while IFS= read -r package; do
+              if [ -z "$package" ]; then
+                continue
+              fi
               echo "Package: $package"
-              if grep -q "^$package==" "$file_internal_in" 2>/dev/null; then
-                pinned_version=$(grep "^$package==" "$file_internal_in" | cut -d'=' -f3 || true)
-                echo "Pinned version in $file_internal_in: $pinned_version"
-                continue
-              fi
-              if grep -q "^$package==" "$file_in" 2>/dev/null; then
-                pinned_version=$(grep "^$package==" "$file_in" | cut -d'=' -f3 || true)
-                echo "Pinned version in $file_in: $pinned_version"
-                continue
-              fi
-              if grep -q "^$package" "$file_internal_in" "$file_in" 2>/dev/null; then
-                echo "Updating $package version with minimal version"
-                perl -i -pe 's|^(\Q'"$package"'\E)==(\d+)\.(\d+)\.(\d+)(?:[a-z]+[0-9]*)?$|\1~=\2.\3,>=\2.\3.\4|' "$file_txt"
-                continue
-              fi
-              echo "Updating $package version"
-              perl -i -pe 's|^(\Q'"$package"'\E)==(\d+)\.(\d+)\.(\d+)(?:[a-z]+[0-9]*)?$|\1~=\2.\3|' "$file_txt"
-          done
+              version=$(pip index versions --pre $package | grep $package | cut -d'(' -f2 | cut -d')' -f1| sed 's/\.[0-9]*$//')
+              echo "Version: $version"
+              echo "$package~=$version" >> $file_txt
+            done < "$file_internal_in"
+          fi
           cat $file_txt
         done
       shell: bash

@@ -32,7 +32,7 @@ runs:
           echo "" >> $file_txt
           if [ ${{ inputs.use_internal }} == "true" ]; then
             echo "Processing $file_internal_in"
-            echo "" >> $file_internal_in
+            [ "$(tail -c 1 $file_internal_in | wc -l)" -eq 0 ] && echo "" >> $file_internal_in
             while read -r package; do
               if [ -z "$package" ]; then
                 continue
@@ -44,7 +44,6 @@ runs:
               echo "Version: $version"
               echo "$package~=$version" >> $file_txt
             done < "$file_internal_in"
-            sed -i '$d' "$file_internal_in"
           fi
           echo "Final content of $file_txt:"
           cat $file_txt

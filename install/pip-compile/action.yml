@@ -30,6 +30,7 @@ runs:
           rm -f $file_txt
           cp $file_in $file_txt
           if [ ${{ inputs.use_internal }} == "true" ]; then
+            echo "Processing $file_internal_in"
             while IFS= read -r package; do
               echo "Package: $package"
               if [ -z "$package" ]; then

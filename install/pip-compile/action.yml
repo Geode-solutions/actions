@@ -38,7 +38,7 @@ runs:
                 continue
               fi
               echo "Package: $package"
-              full_version=$(pip index versions --pre $package | grep $package | cut -d'(' -f2 | cut -d')' -f1')
+              full_version=$(pip index versions --pre $package | grep $package | cut -d'(' -f2 | cut -d')' -f1)
               echo "Full version: $full_version"
               version=$(echo "$full_version" | sed -E 's/^([0-9]+\.[0-9]+).*/\1/')
               echo "Version: $version"

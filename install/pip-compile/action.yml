@@ -31,6 +31,7 @@ runs:
           cp $file_in $file_txt
           if [ ${{ inputs.use_internal }} == "true" ]; then
             while IFS= read -r package; do
+              echo "Package: $package"
               if [ -z "$package" ]; then
                 continue
               fi

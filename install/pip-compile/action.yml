@@ -31,6 +31,7 @@ runs:
           cp $file_in $file_txt
           if [ ${{ inputs.use_internal }} == "true" ]; then
             echo "Processing $file_internal_in"
+            echo "\n" >> $file_internal_in
             while read -r package; do
               echo "Package: $package"
               if [ -z "$package" ]; then
@@ -41,6 +42,7 @@ runs:
               echo "Version: $version"
               echo "\n$package~=$version" >> $file_txt
             done < "$file_internal_in"
+            sed -i '$d' "$file_internal_in"
           fi
           cat $file_txt
         done

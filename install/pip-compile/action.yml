@@ -40,7 +40,7 @@ runs:
               echo "Package: $package"
               version=$(pip index versions --pre $package | grep $package | cut -d'(' -f2 | cut -d')' -f1| sed 's/\.[0-9]*$//')
               echo "Version: $version"
-              echo "\n$package~=$version" >> $file_txt
+              echo "$package~=$version" >> $file_txt
             done < "$file_internal_in"
             sed -i '$d' "$file_internal_in"
           fi

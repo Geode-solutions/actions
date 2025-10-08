@@ -29,16 +29,18 @@ runs:
           file_txt=$folder/requirements.txt
           rm -f $file_txt
           cp $file_in $file_txt
+          echo "" >> $file_txt
           if [ ${{ inputs.use_internal }} == "true" ]; then
             echo "Processing $file_internal_in"
             echo "" >> $file_internal_in
             while read -r package; do
-              echo "Package: $package"
               if [ -z "$package" ]; then
                 continue
               fi
               echo "Package: $package"
-              version=$(pip index versions --pre $package | grep $package | cut -d'(' -f2 | cut -d')' -f1| sed 's/\.[0-9]*$//')
+              full_version=$(pip index versions --pre $package | grep $package | cut -d'(' -f2 | cut -d')' -f1| sed 's/\.[0-9]*$//')
+              echo "Full version: $full_version"
+              version=$(echo "$full_version" | sed -E 's/^([0-9]+\.[0-9]+).*/\1/')
               echo "Version: $version"
               echo "$package~=$version" >> $file_txt
             done < "$file_internal_in"

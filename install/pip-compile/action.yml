@@ -26,12 +26,15 @@ runs:
             echo "File $file_internal_in not found"
             exit 1
           fi
+          while read -r line; do
+            echo "DEBUG: Test read line: '$line'"
+          done < "$file_internal_in"
           file_txt=$folder/requirements.txt
           rm -f $file_txt
           cp $file_in $file_txt
           if [ ${{ inputs.use_internal }} == "true" ]; then
             echo "Processing $file_internal_in"
-            while IFS= read -r package; do
+            while read -r package; do
               echo "Package: $package"
               if [ -z "$package" ]; then
                 continue

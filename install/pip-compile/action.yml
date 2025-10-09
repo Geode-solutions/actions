@@ -29,7 +29,7 @@ runs:
           file_txt=$folder/requirements.txt
           rm -f $file_txt
           pip install pip-tools
-          pip-compile -v $file_in $file_txt
+          pip-compile -v $file_in --output-file $file_txt
           echo "" >> $file_txt
           if [ ${{ inputs.use_internal }} == "true" ]; then
             echo "Processing $file_internal_in"

@@ -48,11 +48,20 @@ runs:
       shell: bash
     - name: Install dependencies
       run: |
-        npm install --no-package-lock
+        cp package.json package.json.bak
         tarballs=$(echo "${{ steps.result.outputs.tarballs }}" | sed 's/\;/\ /g')
         echo "Tarballs = $tarballs"
         if [ -n "$tarballs" ]; then
           npm install --no-save $tarballs
         fi
+        overrides=$(jq -r '.dependencies | to_entries | map(select(.value | startswith("file:"))) | map({key: .key, value: .value}) | from_entries' package.json)
+        if [ -n "$overrides" ] && [ "$overrides" != "{}" ]; then
+          # Merge existing overrides (if any) with new overrides
+          jq --argjson newOverrides "$overrides" '.overrides = (.overrides // {}) * $newOverrides' package.json > package.json.tmp && mv package.json.tmp package.json
+          echo "Updated package.json with local file dependencies in overrides"
+        fi
+        rm -rf node_modules
+        npm install --no-package-lock
         npm list --depth=0 || true
+        mv package.json.bak package.json
       shell: bash

@@ -43,7 +43,7 @@ runs:
               echo "Full version: $full_version"
               major=$(echo "$full_version" | sed -E 's/^([0-9]+\.).*/\1/')
               echo "Major: $major"
-              echo "$package==$major*;>=$full_version" >> $file_txt
+              echo "$package==$major*,>=$full_version" >> $file_txt
             done < "$file_internal_in"
           fi
           echo "Final content of $file_txt:"

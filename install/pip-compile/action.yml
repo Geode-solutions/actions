@@ -31,16 +31,20 @@ runs:
           pip install pip-tools
           pip-compile -v $file_in --output-file $file_txt
           echo "" >> $file_txt
-          grep -Eo '^[A-Za-z0-9._-]+' $file_in | paste -sd '|' - > allowed.tmp
-          awk -v re="$(cat allowed.tmp)" '
-          /^[A-Za-z0-9._-]+==/ {
-            if ($0 ~ "^(" re ")==") print $0
-            next
-          }
-          { print }
-          ' $file_txt > requirements.new
-          mv requirements.new $file_txt
-          rm allowed.tmp
+          perl -MList::Util=any -ne '
+            BEGIN {
+              open my $fh, "<", "$file_in" or die $!;
+              @keep = map { /^([^\s=]+)/; $1 } <$fh>;
+              chomp @keep;
+            }
+            if (/^([^\s=]+)==/) {
+              $pkg = $1;
+              if (!any { $_ eq $pkg } @keep) {
+                s/^([^\s=]+)==/$1>=/;
+              }
+            }
+            print;
+          ' $file_txt > requirements.new && mv requirements.new $file_txt
           if [ ${{ inputs.use_internal }} == "true" ]; then
             echo "Processing $file_internal_in"
             [ "$(tail -c 1 $file_internal_in | wc -l)" -eq 0 ] && echo "" >> $file_internal_in

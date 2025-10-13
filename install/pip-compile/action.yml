@@ -40,7 +40,7 @@ runs:
               continue
             fi
             echo "Updating $package version"
-            perl -i -pe 's|^(\Q'"$package"'\E)==(\d+)\.(\d+)\.(\d+)(?:[a-z]+[0-9]*)?$|\1>=\2.\3|' "$file_txt"
+            perl -i -pe 's|^(\Q'"$package"'\E)==(\d+)\.(\d+)\.(\d+)(?:[a-z]+[0-9]*)?$|\1>=\2|' "$file_txt"
           done
           if [ ${{ inputs.use_internal }} == "true" ]; then
             echo "Processing $file_internal_in"

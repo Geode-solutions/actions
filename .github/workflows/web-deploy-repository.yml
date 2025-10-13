@@ -33,6 +33,9 @@ on:
       microservices:
         type: string
         default: "microservices"
+      use_registry:
+        type: boolean
+        default: false
     secrets:
       TOKEN:
         required: true
@@ -50,28 +53,13 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - uses: Geode-solutions/actions/get-release@master
-        id: wheels
-        with:
-          repository: ${{ inputs.repos }}
-          file: ".whl"
-          token: ${{ secrets.TOKEN }}
-          branch: ${{ inputs.branch }}
       - name: Install dependencies
-        run: |
-          pip install --pre .
-          wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
-          echo "all wheels = $wheels"
-          if [ -n "$wheels" ]; then 
-            for wheel in $wheels; do
-              pip install --pre $wheel
-            done
-          fi
-          pip list
-        shell: bash
+        uses: Geode-solutions/actions/install/python-dependencies@master
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+          use_registry: ${{ inputs.use_registry }}
       - name: Build
         run: |
           sed -i 's/version = "[0-9]*\.[0-9]*\.[0-9]*\(-rc\.[0-9]*\)\?"/version = "${{ inputs.version }}"/' pyproject.toml
@@ -105,12 +93,13 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - name: Install dependencies 
+      - name: Install dependencies
         uses: Geode-solutions/actions/install/node-dependencies@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
+          use_registry: ${{ inputs.use_registry }}
       - name: Build
         id: build
         run: |
@@ -152,19 +141,21 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - name: Install dependencies 
+      - name: Install dependencies
         uses: Geode-solutions/actions/install/node-dependencies@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-      - name: Install Microservices 
+          use_registry: ${{ inputs.use_registry }}
+      - name: Install Microservices
         uses: Geode-solutions/actions/install/microservices@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
           microservices: ${{ inputs.microservices }}
+          use_registry: ${{ inputs.use_registry }}
       - name: Install Azure Sign Tool
         uses: Geode-solutions/actions/install/azure-sign@master
       - name: Package

@@ -42,6 +42,7 @@ jobs:
       docker: false
       node: ${{ needs.config.outputs.node }}
       desktop: ${{ needs.config.outputs.desktop }}
+      use_registry: true
     secrets: inherit
 
   notify:

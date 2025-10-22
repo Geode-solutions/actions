@@ -37,6 +37,13 @@ jobs:
         run: |
           pip install black
           black .
+      - name: Json
+        run: |
+          if [ ! -f "package.json" ]; then
+            exit 0
+          fi
+          npm install
+          npm run json
       - uses: stefanzweifel/git-auto-commit-action@v5
         id: commit
         with:

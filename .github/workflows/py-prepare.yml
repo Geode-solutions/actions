@@ -4,6 +4,9 @@ on:
       use_internal:
         type: boolean
         default: false
+      branch:
+        type: string
+        default: ${{ github.ref_name }}
     outputs:
       changes_detected:
         description: "commit has been done"
@@ -22,6 +25,7 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
       - name: pip-compile
         uses: Geode-solutions/actions/install/pip-compile@master
         with:

@@ -14,6 +14,8 @@ concurrency:
 jobs:
   prepare:
     uses: Geode-solutions/actions/.github/workflows/py-prepare.yml@master
+    with:
+      branch: ${{ github.event.pull_request.head.ref }}
     secrets: inherit
 
   checkers:
@@ -60,7 +62,7 @@ jobs:
           target: "src"
           fail_level: "warning"
           reporter: github-pr-review
-    
+
   config:
     needs: prepare
     uses: Geode-solutions/actions/.github/workflows/py-config.yml@master

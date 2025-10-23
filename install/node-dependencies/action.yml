@@ -46,7 +46,7 @@ runs:
         elif [ "${{ inputs.branch }}" == "next" ]; then
           jq '.dependencies |= with_entries(if .value == "0.0.0" then .value = "next" else . end)' package.json > temp.json
         else
-          jq 'del(.dependencies | select(. == "0.0.0"))' package.json > temp.json
+          jq 'del(.dependencies | .[] | select(. == "0.0.0"))' package.json > temp.json
         fi
         mv temp.json package.json
         cat package.json

@@ -4,8 +4,6 @@ on:
       use_internal:
         type: boolean
         default: false
-      # repos:
-      #   type: string
       branch:
         type: string
         default: ${{ github.ref_name }}
@@ -47,22 +45,10 @@ jobs:
         id: json
         run: |
           if [ ! -f "package.json" ]; then
-            echo "json=true" >> $GITHUB_OUTPUT
-          else
-            echo "json=false" >> $GITHUB_OUTPUT
+            exit 0
           fi
-      # - name: Install dependencies
-      #   if: ${{ steps.json.outputs.json == 'true' }}
-      #   uses: Geode-solutions/actions/install/node-dependencies@master
-      #   with:
-      #     repos: ${{ inputs.repos }}
-      #     branch: ${{ inputs.branch }}
-      #     token: ${{ secrets.TOKEN }}
-      #     use_registry: false
-      # - name: Run tests
-      #   if: ${{ steps.json.outputs.json == 'true' }}
-      #   run: |
-      #     npm run build
+          npm install @geode/opengeodeweb-microservice@next
+          npm run build
       - uses: stefanzweifel/git-auto-commit-action@v5
         id: commit
         with:

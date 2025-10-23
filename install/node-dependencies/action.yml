@@ -41,8 +41,10 @@ runs:
         else
           echo "tarballs=" >> $GITHUB_OUTPUT
         fi
-        if [ "${{ inputs.branch }}" != "master" ]; then
-          jq '(.dependencies |= with_entries(if .value == "latest" then .value = "next" else . end)) | (.devDependencies |= with_entries(if .value == "latest" then .value = "next" else . end))' package.json > temp.json && mv temp.json package.json
+        if [ "${{ inputs.branch }}" == "master" ]; then
+          jq '.dependencies |= with_entries(if .value == "0.0.0" then .value = "latest" else . end)' package.json > temp.json && mv temp.json package.json
+        elif [ "${{ inputs.branch }}" == "next" ]; then
+          jq '.dependencies |= with_entries(if .value == "0.0.0" then .value = "next" else . end)' package.json > temp.json && mv temp.json package.json
         fi
         cat package.json
       shell: bash

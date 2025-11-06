@@ -37,7 +37,12 @@
         "**/components/*"
       ],
       "rules": {
-        "unicorn/filename-case": "PascalCase"
+        "unicorn/filename-case": [
+          "error",
+          {
+            "case": "PascalCase"
+          }
+        ]
       }
     }
   ]

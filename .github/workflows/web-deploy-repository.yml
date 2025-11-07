@@ -206,7 +206,7 @@ jobs:
             netlify deploy --prod --context production
           else
             echo "Deploying to branch ${{ inputs.branch }}"
-            netlify deploy --prod --context branch-deploy
+            netlify deploy --prod --context branch-deploy --alias ${{ inputs.branch }}
           fi
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}

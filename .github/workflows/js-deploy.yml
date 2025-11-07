@@ -42,6 +42,7 @@ jobs:
       docker: false
       node: ${{ needs.config.outputs.node }}
       desktop: ${{ needs.config.outputs.desktop }}
+      cloud: ${{ needs.config.outputs.cloud }}
       use_registry: true
     secrets: inherit
 

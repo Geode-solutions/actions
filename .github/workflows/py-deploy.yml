@@ -42,6 +42,7 @@ jobs:
       python: ${{ needs.config.outputs.python }}
       node: ${{ needs.config.outputs.node }}
       desktop: false
+      cloud: false
       use_registry: true
     secrets: inherit
 

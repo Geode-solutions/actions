@@ -199,7 +199,7 @@ jobs:
           use_registry: ${{ inputs.use_registry }}
       - name: Deploy to Netlify
         run: |
-          npm install netlify-cli
+          npm install -g netlify-cli
           netlify login
           if [ "${{ inputs.branch }}" == "master" ]; then
             netlify build

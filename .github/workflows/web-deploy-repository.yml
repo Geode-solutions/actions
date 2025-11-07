@@ -201,15 +201,7 @@ jobs:
         run: |
           npm install -g netlify-cli
           netlify login
-          if [ "${{ inputs.branch }}" == "master" ]; then
-            echo "Deploying to master branch"
-            netlify build
-            netlify deploy --no-build
-          else
-            echo "Deploying to branch ${{ inputs.branch }}"
-            netlify build --context ${{ inputs.branch }}
-            netlify deploy --no-build --alias ${{ inputs.branch }}
-          fi
+          netlify deploy --prod
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}

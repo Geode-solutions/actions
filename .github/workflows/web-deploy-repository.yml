@@ -197,18 +197,16 @@ jobs:
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
           use_registry: ${{ inputs.use_registry }}
-      - name: Package
-        run: |
-          npm run generate
       - name: Deploy to Netlify
-        uses: nwtgck/actions-netlify@v3
-        with:
-          publish-dir: .output/public
-          functions-dir: netlify/functions
-          production-branch: master
-          alias: ${{ github.head_ref }}
-          github-token: ${{ secrets.TOKEN }}
-          netlify-config-path: netlify.toml
+        run: |
+          npm install netlify-cli
+          netlify login
+          if [ "${{ inputs.branch }}" == "master" ]; then
+            netlify build
+          else
+            netlify build --context deploy-preview
+          fi
+          netlify deploy
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}

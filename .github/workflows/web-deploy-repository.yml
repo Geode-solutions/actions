@@ -203,12 +203,12 @@ jobs:
           netlify login
           if [ "${{ inputs.branch }}" == "master" ]; then
             echo "Deploying to master branch"
-            netlify build
+            DEBUG=* netlify build
           else
             echo "Deploying to branch ${{ inputs.branch }}"
-            netlify build --context branch-deploy
+            DEBUG=* netlify build --context branch:${{ inputs.branch }}
           fi
-          netlify deploy
+          DEBUG=* netlify deploy
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}

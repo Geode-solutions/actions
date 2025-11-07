@@ -203,9 +203,12 @@ jobs:
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v3
         with:
-          publish-dir: "./.output/public" # Nuxt 3 static output
+          publish-dir: .output/public
+          functions-dir: netlity/functions
+          production-branch: master
+          alias: ${{ github.head_ref }}
           github-token: ${{ secrets.TOKEN }}
-          netlify-config-path: ./netlify.toml # optional
+          netlify-config-path: netlify.toml
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}

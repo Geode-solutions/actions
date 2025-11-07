@@ -204,7 +204,7 @@ jobs:
           if [ "${{ inputs.branch }}" == "master" ]; then
             netlify build
           else
-            netlify build --context deploy-preview
+            netlify build --context branch-deploy
           fi
           netlify deploy
         env:

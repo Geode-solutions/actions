@@ -58,6 +58,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
+          pip-version: 25.2
       - name: Libraries
         id: libraries
         run: |

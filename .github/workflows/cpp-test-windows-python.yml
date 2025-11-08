@@ -58,7 +58,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-          pip-version: 25.2
       - name: Libraries
         id: libraries
         run: |
@@ -77,6 +76,7 @@ jobs:
           branch: ${{ inputs.branch }}
       - name: "pip-compile"
         run: |
+          pip install -U 'pip < 25.3'
           file=bindings/python/requirements.in
           if [ ! -f "$file" ]; then 
             exit 0

@@ -27,9 +27,6 @@ on:
       desktop:
         type: string
         required: true
-      cloud:
-        type: string
-        required: true
       upload:
         type: boolean
         default: true
@@ -181,36 +178,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash
-
-  release-cloud:
-    if: inputs.cloud == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: Geode-solutions/actions/install/checkout@master
-        with:
-          token: ${{ secrets.TOKEN }}
-      - name: Install dependencies
-        uses: Geode-solutions/actions/install/node-dependencies@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
-          use_registry: ${{ inputs.use_registry }}
-      - name: Deploy to Netlify
-        run: |
-          npm install -g netlify-cli
-          netlify login
-          if [ "${{ inputs.branch }}" == "master" ]; then
-            echo "Deploying to master branch"
-            netlify deploy --prod --context production
-          else
-            echo "Deploying to branch ${{ inputs.branch }}"
-            netlify deploy --context branch-deploy --alias ${{ inputs.branch }}
-          fi
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
 
   release-docker:
     if: inputs.docker == 'true'

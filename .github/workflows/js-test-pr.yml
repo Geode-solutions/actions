@@ -80,5 +80,4 @@ jobs:
       docker: false
       node: ${{ needs.config.outputs.node }}
       desktop: ${{ needs.config.outputs.desktop }}
-      cloud: false
     secrets: inherit

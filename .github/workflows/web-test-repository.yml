@@ -24,9 +24,6 @@ on:
       desktop:
         type: string
         required: true
-      # cloud:
-      #   type: boolean
-      #   required: true
       microservices:
         type: string
         default: "microservices"

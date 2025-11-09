@@ -76,6 +76,7 @@ jobs:
           branch: ${{ inputs.branch }}
       - name: "pip-compile"
         run: |
+          pip install -U 'pip < 25.3'
           file=bindings/python/requirements.in
           if [ ! -f "$file" ]; then 
             exit 0

@@ -67,7 +67,7 @@ jobs:
           system: win64
           save: false
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
           pip-version: 25.2

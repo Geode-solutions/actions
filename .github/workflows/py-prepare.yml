@@ -48,7 +48,7 @@ jobs:
             exit 0
           fi
           npm install --no-save @geode/opengeodeweb-microservice@next
-          npm run build
+          npm run json
       - uses: stefanzweifel/git-auto-commit-action@v5
         id: commit
         with:

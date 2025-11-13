@@ -187,6 +187,7 @@ jobs:
       upload: ${{ inputs.upload }}
     secrets:
       TOKEN: ${{secrets.TOKEN}}
+      LICENSE_TOKEN: ${{secrets.TOKEN}}
 
   notify:
     if: ${{ !failure() && !cancelled() }}

@@ -31,16 +31,9 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - uses: reviewdog/action-setup@v1
-      - name: oxlint
-        run: |
-          BASE_BRANCH=${{ github.event.pull_request.base.ref }}
-          echo "Base branch: $BASE_BRANCH"
-          git fetch origin $BASE_BRANCH:$BASE_BRANCH --depth=1
-          files=$(git diff --name-only $BASE_BRANCH ${{ github.sha }})
-          npx oxlint --config .oxlintrc.json --format unix $files | reviewdog -efm="%f:%l:%c: %m [%r]" -reporter=github-pr-review -fail-level=any -level=error
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: oxc-project/oxlint-action@latest
+        with:
+          config: .oxlintrc.json
 
   test-repository:
     needs: [prepare, config]

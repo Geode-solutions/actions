@@ -89,3 +89,4 @@ jobs:
         with:
           name: ${{ steps.config.outputs.repo }}-js-config
           path: ${{ steps.config.outputs.repo }}-js-config.json
+          overwrite: true

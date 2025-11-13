@@ -89,3 +89,4 @@ runs:
       with:
         name: playwright-desktop-${{ runner.os }}
         path: playwright-report/
+        overwrite: true

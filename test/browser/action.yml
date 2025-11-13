@@ -63,3 +63,4 @@ runs:
       with:
         name: playwright-browser-${{ runner.os }}
         path: playwright-report/
+        overwrite: true

@@ -1,0 +1,38 @@
+name: "Test Browser"
+
+inputs:
+  repos:
+    type: string
+  branch:
+    type: string
+  use_registry:
+    type: boolean
+    required: true
+  token:
+    type: string
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install dependencies
+      uses: Geode-solutions/actions/install/node-dependencies@master
+      with:
+        repos: ${{ inputs.repos }}
+        branch: ${{ inputs.branch }}
+        token: ${{ inputs.token }}
+        use_registry: true
+    - name: Install Playwright
+      uses: Geode-solutions/actions/install/playwright@master
+    - name: Test on Cloud
+      run: |
+        npm run test:e2e:cloud
+      shell: bash
+      env:
+        DEBUG: "pw:browser"
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-cloud-${{ runner.os }}
+        path: playwright-report/
+        overwrite: true

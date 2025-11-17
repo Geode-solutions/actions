@@ -21,6 +21,9 @@ on:
       browser:
         type: string
         required: true
+      cloud:
+        type: string
+        required: true
       desktop:
         type: string
         required: true
@@ -118,6 +121,23 @@ jobs:
           token: ${{ secrets.TOKEN }}
           microservices: ${{ inputs.microservices }}
           use_registry: ${{ inputs.use_registry }}
+
+  test-cloud:
+    if: inputs.cloud == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Test Cloud
+        uses: Geode-solutions/actions/test/cloud@master
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+          use_registry: true
 
   test-desktop:
     if: inputs.desktop == 'true'

@@ -17,7 +17,7 @@ jobs:
   skip:
     uses: Geode-solutions/actions/.github/workflows/skip-pr.yml@master
     secrets: inherit
-    
+
   config:
     needs: skip
     if: needs.skip.outputs.pr_found == 'false'
@@ -35,5 +35,6 @@ jobs:
       node: ${{ needs.config.outputs.node }}
       integration: false
       browser: false
+      cloud: false
       desktop: false
     secrets: inherit

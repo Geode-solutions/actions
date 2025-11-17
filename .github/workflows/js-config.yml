@@ -13,6 +13,8 @@ on:
         value: ${{ jobs.js-config.outputs.integration }}
       browser:
         value: ${{ jobs.js-config.outputs.browser }}
+      cloud:
+        value: ${{ jobs.js-config.outputs.cloud }}
       desktop:
         value: ${{ jobs.js-config.outputs.desktop }}
       microservices:
@@ -27,6 +29,7 @@ jobs:
       node: ${{ steps.config.outputs.node }}
       integration: ${{ steps.config.outputs.integration }}
       browser: ${{ steps.config.outputs.browser }}
+      cloud: ${{ steps.config.outputs.cloud }}
       desktop: ${{ steps.config.outputs.desktop }}
       microservices: ${{ steps.config.outputs.microservices }}
     steps:
@@ -46,6 +49,7 @@ jobs:
               node: true,
               integration: false,
               browser: false,
+              cloud: false,
               desktop: false,
               microservices: "microservices"
             };

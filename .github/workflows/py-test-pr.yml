@@ -79,6 +79,7 @@ jobs:
       node: ${{ needs.config.outputs.node }}
       integration: false
       browser: false
+      cloud: false
       desktop: false
     secrets: inherit
 

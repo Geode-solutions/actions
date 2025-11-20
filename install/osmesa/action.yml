@@ -5,7 +5,9 @@ runs:
   steps:
     - name: Install OSMesa
       if: ${{ runner.os == 'Linux' }}
-      run: sudo apt-get install libosmesa6-dev
+      run: |
+        sudo apt-get update
+        sudo apt-get install libosmesa6-dev
       shell: bash
     - name: Install OSMesa
       if: ${{ runner.os == 'Windows' }}

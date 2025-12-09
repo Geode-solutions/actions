@@ -72,6 +72,7 @@ jobs:
       upload: false
       python: false
       docker: false
+      cloud: false
       node: ${{ needs.config.outputs.node }}
       desktop: ${{ needs.config.outputs.desktop }}
     secrets: inherit

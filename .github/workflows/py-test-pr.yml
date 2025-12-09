@@ -106,4 +106,5 @@ jobs:
       node: ${{ needs.config.outputs.node }}
       docker: ${{ needs.config.outputs.docker }}
       desktop: false
+      cloud: false
     secrets: inherit

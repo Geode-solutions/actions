@@ -27,6 +27,9 @@ on:
       desktop:
         type: string
         required: true
+      cloud:
+        type: string
+        required: true
       upload:
         type: boolean
         default: true
@@ -188,6 +191,20 @@ jobs:
     secrets:
       TOKEN: ${{secrets.TOKEN}}
       LICENSE_TOKEN: ${{secrets.TOKEN}}
+
+  release-cloud:
+    if: inputs.cloud == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ secrets.TOKEN }}
+      - name: Publish
+        uses: netlify/actions/build@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
 
   notify:
     if: ${{ !failure() && !cancelled() }}

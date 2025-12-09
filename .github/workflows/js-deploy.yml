@@ -40,6 +40,7 @@ jobs:
       upload: true
       python: false
       docker: false
+      cloud: ${{ needs.config.outputs.cloud }}
       node: ${{ needs.config.outputs.node }}
       desktop: ${{ needs.config.outputs.desktop }}
       use_registry: true

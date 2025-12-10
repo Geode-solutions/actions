@@ -113,6 +113,7 @@ jobs:
           version=$(jq -r '.version' package.json)
           tarball=$(echo "$package_name" | sed 's/@//' | sed 's/\//-/')-${version}.tgz
           echo "tarball=$tarball" >> $GITHUB_OUTPUT
+          echo "NODE_AUTH_TOKEN=" >> $GITHUB_ENV
       - name: Upload GH
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE

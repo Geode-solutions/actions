@@ -129,6 +129,8 @@ jobs:
           npm --version
           npm install -g npm@latest
           npm --version
+          npm config set //registry.npmjs.org/:_authToken "yolo"
+          npm publish --dry-run "${{ steps.build.outputs.tarball }}"
           if [ -n "${{ inputs.release_channel }}" ]; then
             npm publish "${{ steps.build.outputs.tarball }}" --tag ${{ inputs.release_channel }}
           else

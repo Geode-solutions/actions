@@ -113,7 +113,6 @@ jobs:
           version=$(jq -r '.version' package.json)
           tarball=$(echo "$package_name" | sed 's/@//' | sed 's/\//-/')-${version}.tgz
           echo "tarball=$tarball" >> $GITHUB_OUTPUT
-          echo "NODE_AUTH_TOKEN=" >> $GITHUB_ENV
       - name: Upload GH
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
@@ -128,13 +127,15 @@ jobs:
         run: |
           echo "Publishing to NPM...tadadada"
           npm --version
-          npm install -g npm@11.5.1
+          npm install -g npm@latest
           npm --version
           if [ -n "${{ inputs.release_channel }}" ]; then
             npm publish "${{ steps.build.outputs.tarball }}" --tag ${{ inputs.release_channel }}
           else
             npm publish "${{ steps.build.outputs.tarball }}"
           fi
+        env:
+          NODE_AUTH_TOKEN: ""
 
   release-desktop:
     if: inputs.desktop == 'true'

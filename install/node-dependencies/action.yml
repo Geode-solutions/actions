@@ -22,7 +22,7 @@ runs:
     - uses: actions/setup-node@v6
       with:
         registry-url: "https://registry.npmjs.org"
-        node-version: 20
+        node-version: 22
     - uses: Geode-solutions/actions/get-release@master
       if: ${{ inputs.tarballs == '' && inputs.use_registry == 'false' }}
       id: tarballs

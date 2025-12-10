@@ -17,8 +17,6 @@ on:
     secrets:
       TOKEN:
         required: true
-      NPM_TOKEN:
-        required: false
 
 jobs:
   semantic-release:
@@ -39,4 +37,3 @@ jobs:
           dry_run: ${{ inputs.dry_run }}
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -127,7 +127,7 @@ jobs:
         run: |
           echo "Publishing to NPM...tadadada"
           npm --version
-          npm install -g npm@latest
+          npm install -g npm@11.6.0
           npm --version
           npm config set //registry.npmjs.org/:_authToken "yolo"
           if [ -n "${{ inputs.release_channel }}" ]; then

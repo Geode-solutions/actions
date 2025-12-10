@@ -130,9 +130,9 @@ jobs:
           npm install -g npm@latest
           npm --version
           if [ -n "${{ inputs.release_channel }}" ]; then
-            npm publish "${{ steps.build.outputs.tarball }}" --provenance --tag ${{ inputs.release_channel }}
+            npm publish "${{ steps.build.outputs.tarball }}" --verbose --tag ${{ inputs.release_channel }}
           else
-            npm publish "${{ steps.build.outputs.tarball }}" --provenance
+            npm publish "${{ steps.build.outputs.tarball }}" --verbose
           fi
         env:
           NODE_AUTH_TOKEN: ""

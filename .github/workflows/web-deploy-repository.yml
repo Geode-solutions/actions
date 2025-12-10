@@ -125,14 +125,13 @@ jobs:
       - name: Upload NPM
         if: inputs.upload
         run: |
-          echo "Publishing to NPM...tadadada"
           npm --version
           npm install -g npm@latest
           npm --version
           if [ -n "${{ inputs.release_channel }}" ]; then
-            npm publish "${{ steps.build.outputs.tarball }}" --verbose --tag ${{ inputs.release_channel }}
+            npm publish "${{ steps.build.outputs.tarball }}" --tag ${{ inputs.release_channel }}
           else
-            npm publish "${{ steps.build.outputs.tarball }}" --verbose
+            npm publish "${{ steps.build.outputs.tarball }}"
           fi
         env:
           NODE_AUTH_TOKEN: ""

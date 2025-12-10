@@ -129,12 +129,10 @@ jobs:
           npm --version
           npm install -g npm@latest
           npm --version
-          npm login --registry https://registry.npmjs.org
-          npm whoami
           if [ -n "${{ inputs.release_channel }}" ]; then
-            npm publish "${{ steps.build.outputs.tarball }}" --tag ${{ inputs.release_channel }}
+            npm publish "${{ steps.build.outputs.tarball }}" --provenance --tag ${{ inputs.release_channel }}
           else
-            npm publish "${{ steps.build.outputs.tarball }}"
+            npm publish "${{ steps.build.outputs.tarball }}" --provenance
           fi
         env:
           NODE_AUTH_TOKEN: ""

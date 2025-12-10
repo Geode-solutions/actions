@@ -130,8 +130,6 @@ jobs:
           else
             npm publish "${{ steps.build.outputs.tarball }}"
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   release-desktop:
     if: inputs.desktop == 'true'

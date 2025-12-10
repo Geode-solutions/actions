@@ -125,6 +125,7 @@ jobs:
       - name: Upload NPM
         if: inputs.upload
         run: |
+          echo "Publishing to NPM...tadadada"
           if [ -n "${{ inputs.release_channel }}" ]; then
             npm publish "${{ steps.build.outputs.tarball }}" --tag ${{ inputs.release_channel }}
           else

@@ -206,7 +206,7 @@ jobs:
       - name: Publish
         run: |
           zip -r site.zip .
-          curl -X POST -H "Authorization: Bearer ${{ secrets.NETLIFY_TOKEN }}" -data-binary @site.zip https://api.netlify.com/api/v1/sites/${{ secrets.NETLIFY_SITE_ID }}/builds?branch=${{ inputs.branch }}
+          curl -X POST https://api.netlify.com/api/v1/sites/${{ secrets.NETLIFY_SITE_ID }}/builds?branch=${{ inputs.branch }} -H "Authorization: Bearer ${{ secrets.NETLIFY_TOKEN }}" -H "Content-Type: application/zip" --data-binary @site.zip
 
   notify:
     if: ${{ !failure() && !cancelled() }}

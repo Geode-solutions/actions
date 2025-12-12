@@ -57,7 +57,7 @@ runs:
         tarballs=$(echo "${{ steps.result.outputs.tarballs }}" | sed 's/\;/\ /g')
         echo "Tarballs = $tarballs"
         if [ -n "$tarballs" ]; then
-          npm install --no-install $tarballs
+          npm install --force --no-install $tarballs
         fi
         overrides=$(jq -r '.dependencies | to_entries | map(select(.value | startswith("file:"))) | map({key: .key, value: .value}) | from_entries' package.json)
         if [ -n "$overrides" ] && [ "$overrides" != "{}" ]; then

@@ -62,6 +62,7 @@ jobs:
           target: "src"
           fail_level: "warning"
           reporter: github-pr-review
+          filter_mode: nofilter
 
   config:
     needs: prepare

@@ -144,7 +144,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-22.04, windows-latest]
     steps:
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master

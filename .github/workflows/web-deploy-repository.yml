@@ -223,6 +223,7 @@ jobs:
       - name: Release
         run: |
           name=$(jq -r '.name' package.json)
+          cd dist
           gh release upload ${{ inputs.release }} $name*.vext --clobber
         env:
           GITHUB_TOKEN: ${{ github.token }}

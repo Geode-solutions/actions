@@ -17,6 +17,8 @@ on:
         value: ${{ jobs.js-config.outputs.cloud }}
       desktop:
         value: ${{ jobs.js-config.outputs.desktop }}
+      extension:
+        value: ${{ jobs.js-config.outputs.extension }}
       microservices:
         value: ${{ jobs.js-config.outputs.microservices }}
     secrets:
@@ -31,6 +33,7 @@ jobs:
       browser: ${{ steps.config.outputs.browser }}
       cloud: ${{ steps.config.outputs.cloud }}
       desktop: ${{ steps.config.outputs.desktop }}
+      extension: ${{ steps.config.outputs.extension }}
       microservices: ${{ steps.config.outputs.microservices }}
     steps:
       - name: Checkout
@@ -51,6 +54,7 @@ jobs:
               browser: false,
               cloud: false,
               desktop: false,
+              extension: false,
               microservices: "microservices"
             };
             const fullRepo = '${{ inputs.repo }}'

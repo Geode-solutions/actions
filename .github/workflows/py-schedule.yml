@@ -30,6 +30,7 @@ jobs:
       browser: false
       cloud: false
       desktop: false
+      extension: false
       use_registry: true
     secrets: inherit
 

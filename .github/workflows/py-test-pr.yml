@@ -80,6 +80,7 @@ jobs:
       node: ${{ needs.config.outputs.node }}
       integration: false
       browser: false
+      extension: false
       cloud: false
       desktop: false
     secrets: inherit
@@ -107,5 +108,6 @@ jobs:
       node: ${{ needs.config.outputs.node }}
       docker: ${{ needs.config.outputs.docker }}
       desktop: false
+      extension: false
       cloud: false
     secrets: inherit

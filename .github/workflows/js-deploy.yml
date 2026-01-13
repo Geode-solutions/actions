@@ -43,6 +43,7 @@ jobs:
       cloud: ${{ needs.config.outputs.cloud }}
       node: ${{ needs.config.outputs.node }}
       desktop: ${{ needs.config.outputs.desktop }}
+      extension: ${{ needs.config.outputs.extension }}
       use_registry: true
     secrets: inherit
 

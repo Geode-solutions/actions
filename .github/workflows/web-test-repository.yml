@@ -27,6 +27,9 @@ on:
       desktop:
         type: string
         required: true
+      extension:
+        type: string
+        required: true
       microservices:
         type: string
         default: "microservices"
@@ -164,6 +167,27 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
+
+  # test-extension:
+  #   if: inputs.extension == 'true'
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       os: [ubuntu-22.04, windows-latest]
+  #   steps:
+  #     - name: Checkout
+  #       uses: Geode-solutions/actions/install/checkout@master
+  #       with:
+  #         token: ${{ secrets.TOKEN }}
+  #         branch: ${{ inputs.branch }}
+  #     - name: Test Extension
+  #       uses: Geode-solutions/actions/test/desktop@master
+  #       with:
+  #         repos: ${{ inputs.repos }}
+  #         branch: ${{ inputs.branch }}
+  #         token: ${{ secrets.TOKEN }}
+  #         use_registry: ${{ inputs.use_registry }}
+  #         microservices: ${{ inputs.microservices }}
 
   test-docker:
     if: inputs.docker == 'true'

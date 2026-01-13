@@ -41,6 +41,7 @@ jobs:
       docker: ${{ needs.config.outputs.docker }}
       python: ${{ needs.config.outputs.python }}
       node: ${{ needs.config.outputs.node }}
+      extension: false
       desktop: false
       cloud: false
       use_registry: true

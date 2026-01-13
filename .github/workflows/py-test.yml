@@ -37,4 +37,5 @@ jobs:
       browser: false
       cloud: false
       desktop: false
+      extension: false
     secrets: inherit

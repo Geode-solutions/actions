@@ -27,6 +27,9 @@ on:
       desktop:
         type: string
         required: true
+      extension:
+        type: string
+        required: true
       cloud:
         type: string
         required: true
@@ -181,6 +184,46 @@ jobs:
           name=$(jq -r '.name' package.json)
           cd release/${{ inputs.version }}
           gh release upload ${{ inputs.release }} $name* latest* --clobber
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+
+  release-extension:
+    if: inputs.extension == 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-latest]
+    steps:
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ secrets.TOKEN }}
+      - name: Install dependencies
+        uses: Geode-solutions/actions/install/node-dependencies@master
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+          use_registry: ${{ inputs.use_registry }}
+      - name: Install Microservices
+        uses: Geode-solutions/actions/install/microservices@master
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+          microservices: ${{ inputs.microservices }}
+          use_registry: ${{ inputs.use_registry }}
+      - name: Package
+        run: |
+          jq '.version = "${{ inputs.version }}"' package.json > temp && mv temp package.json
+          npm run build:microservices
+          npm run package
+        shell: bash
+      - name: Release
+        run: |
+          name=$(jq -r '.name' package.json)
+          gh release upload ${{ inputs.release }} $name*.vext latest* --clobber
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash

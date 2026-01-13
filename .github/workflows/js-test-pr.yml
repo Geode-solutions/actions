@@ -47,6 +47,7 @@ jobs:
       integration: ${{ needs.config.outputs.integration }}
       browser: ${{ needs.config.outputs.browser }}
       desktop: ${{ needs.config.outputs.desktop }}
+      extension: ${{ needs.config.outputs.extension }}
       cloud: false
       microservices: ${{ needs.config.outputs.microservices }}
     secrets: inherit
@@ -71,6 +72,7 @@ jobs:
       release_channel: ${{ needs.release.outputs.new_release_channel }}
       upload: false
       python: false
+      extension: ${{ needs.config.outputs.extension }}
       docker: false
       cloud: false
       node: ${{ needs.config.outputs.node }}

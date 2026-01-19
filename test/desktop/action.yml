@@ -53,11 +53,40 @@ runs:
         wheels: ${{ inputs.wheels }}
         microservices: ${{ inputs.microservices }}
         use_registry: ${{ inputs.use_registry }}
+    - name: Install Azure Sign Tool
+      uses: Geode-solutions/actions/install/azure-sign@master
+    - name: Install Playwright
+      uses: Geode-solutions/actions/install/playwright@master
     - name: Build
       run: |
         npm run build:microservices
+        npm run build:desktop
       shell: bash
-    - name: Test
+      env:
+        AZURE_KEY_VAULT_URI: ${{ inputs.AZURE_KEY_VAULT_URI }}
+        AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}
+        AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
+        AZURE_CLIENT_SECRET: ${{ inputs.AZURE_CLIENT_SECRET }}
+        AZURE_CERT_NAME: ${{ inputs.AZURE_CERT_NAME }}
+    - name: Test on Linux
+      if: runner.os == 'Linux'
       run: |
-        npm run test:extension
+        sudo chown root:root ./release/0.0.0/linux-unpacked/chrome-sandbox
+        sudo chmod 4755 ./release/0.0.0/linux-unpacked/chrome-sandbox
+        xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:e2e:desktop
       shell: bash
+      env:
+        DEBUG: "pw:browser"
+    - name: Test on Windows
+      if: runner.os == 'Windows'
+      run: |
+        npm run test:e2e:desktop
+      shell: bash
+      env:
+        DEBUG: "pw:browser"
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-desktop-${{ runner.os }}
+        path: playwright-report/
+        overwrite: true

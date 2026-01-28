@@ -20,47 +20,43 @@
     ],
     "eslint/func-style": ["error", "declaration"],
     "eslint/sort-keys": "off",
-    "eslint/no-ternary": "off",
+    "eslint/no-ternary": "off", // A utiliser pour des opérations simples
     "oxc/no-async-await": "off",
-    "oxc/no-rest-spread-properties": "off",
+    "oxc/no-rest-spread-properties": "off", // Enable if older browser support is needed
     "eslint/max-statements": ["warn", 20],
     "eslint/id-length": ["error", { "exceptions": ["x", "y", "z"], "min": 2 }],
-    "eslint/no-console": "warn",
-    "unicorn/numeric-separators-style": "off",
+    "eslint/no-console": "warn", // Disable for debugging. Disable later to not have browser logs
+    "unicorn/numeric-separators-style": "off", // 1_000 ou 1000 ?
+    "sort-imports": ["error", { "allowSeparatedGroups": true }],
     "eslint/no-magic-numbers": [
       "error",
       {
         "ignore": [-1, 0, 1, 2, 4],
         "ignoreArrayIndexes": true
       }
-    ],
-    "eslint/curly": "off",
-    "eslint/no-undefined": "off",
-    "unicorn/no-null": "warn",
+    ], // Utilisation des nombres pour comparer des valeurs etc
+    "eslint/curly": "off", // Quick statement in one line
+    "eslint/no-undefined": "off", // Conflict with unicorn/no-typeof-undefined which prefers direct undefined comparison
+    "unicorn/no-null": "warn", // A débattre ?
     "import/prefer-default-export": "off",
     "import/no-named-export": "off",
-    "unicorn/prefer-global-this": "off"
+    "unicorn/prefer-global-this": "off",
+    "import/unambiguous": "off"
   },
   "overrides": [
-    // {
-    //   "files": ["**/components/**"],
-    //   "rules": {
-    //     "unicorn/filename-case": [
-    //       "error",
-    //       {
-    //         "case": "pascalCase",
-    //       }
-    //     ]
-    //   }
-    // },
     {
-      "files": ["**/CreateAOI.vue", "**/CreateVOI.vue"],
+      "files": ["**/components/**"],
       "rules": {
-        "unicorn/filename-case": "off"
+        "unicorn/filename-case": [
+          "error",
+          {
+            "case": "pascalCase",
+          }
+        ]
       }
     },
     {
-      "files": ["**/vite.config.js"],
+      "files": ["**/vite.config.js", "**/plugins/**"],
       "rules": {
         "import/no-default-export": "off"
       }

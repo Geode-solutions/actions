@@ -7,42 +7,62 @@
     "style": "error",
     "restriction": "error"
   },
-  "plugins": [
-    "import",
-    "node",
-    "oxc",
-    "promise",
-    "unicorn",
-    "vitest"
-  ],
+  "plugins": ["import", "node", "oxc", "promise", "unicorn", "vue"],
   "rules": {
     "unicorn/filename-case": [
       "error",
       {
-        "case": "snakeCase"
+        "cases": {
+          "snakeCase": true,
+          "kebabCase": true
+        }
       }
     ],
-    "eslint/func-style": [
+    "eslint/func-style": ["error", "declaration"],
+    "eslint/sort-keys": "off",
+    "eslint/no-ternary": "off",
+    "oxc/no-async-await": "off",
+    "oxc/no-rest-spread-properties": "off",
+    "eslint/max-statements": ["warn", 20],
+    "eslint/id-length": ["error", { "exceptions": ["x", "y", "z"], "min": 2 }],
+    "eslint/no-console": "warn",
+    "unicorn/numeric-separators-style": "off",
+    "eslint/no-magic-numbers": [
       "error",
       {
-        "style:": "declaration"
+        "ignore": [-1, 0, 1, 2, 4],
+        "ignoreArrayIndexes": true
       }
     ],
-    "eslint/sort-keys": "off",
-    "eslint/no-ternary": "off"
+    "eslint/curly": "off",
+    "eslint/no-undefined": "off",
+    "unicorn/no-null": "warn",
+    "import/prefer-default-export": "off",
+    "import/no-named-export": "off",
+    "unicorn/prefer-global-this": "off"
   },
   "overrides": [
+    // {
+    //   "files": ["**/components/**"],
+    //   "rules": {
+    //     "unicorn/filename-case": [
+    //       "error",
+    //       {
+    //         "case": "pascalCase",
+    //       }
+    //     ]
+    //   }
+    // },
     {
-      "files": [
-        "**/components/*"
-      ],
+      "files": ["**/CreateAOI.vue", "**/CreateVOI.vue"],
       "rules": {
-        "unicorn/filename-case": [
-          "error",
-          {
-            "case": "PascalCase"
-          }
-        ]
+        "unicorn/filename-case": "off"
+      }
+    },
+    {
+      "files": ["**/vite.config.js"],
+      "rules": {
+        "import/no-default-export": "off"
       }
     }
   ]

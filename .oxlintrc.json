@@ -13,8 +13,7 @@
       "error",
       {
         "cases": {
-          "snakeCase": true,
-          "kebabCase": true
+          "snakeCase": true
         }
       }
     ],
@@ -28,20 +27,23 @@
     "eslint/no-console": "warn", // Disable for debugging. Disable later to not have browser logs
     "unicorn/numeric-separators-style": "off", // 1_000 ou 1000 ?
     "sort-imports": ["error", { "allowSeparatedGroups": true }],
-    "eslint/no-magic-numbers": [
-      "error",
-      {
-        "ignore": [-1, 0, 1, 2, 4],
-        "ignoreArrayIndexes": true
-      }
-    ], // Utilisation des nombres pour comparer des valeurs etc
     "eslint/curly": "off", // Quick statement in one line
     "eslint/no-undefined": "off", // Conflict with unicorn/no-typeof-undefined which prefers direct undefined comparison
     "unicorn/no-null": "warn", // A débattre ?
     "import/prefer-default-export": "off",
     "import/no-named-export": "off",
     "unicorn/prefer-global-this": "off",
-    "import/unambiguous": "off"
+    "import/unambiguous": "off",
+    "oxc/no-optional-chaining": "off",
+    "node/no-process-env": "off",
+    "capitalized-comments": "warn",
+    "eslint/no-magic-numbers": [
+      "error",
+      {
+        "ignore": [-1, 0, 1, 2, 4],
+        "ignoreArrayIndexes": true
+      }
+    ] // Utilisation des nombres pour comparer des valeurs etc
   },
   "overrides": [
     {
@@ -50,7 +52,7 @@
         "unicorn/filename-case": [
           "error",
           {
-            "case": "pascalCase",
+            "case": "PascalCase"
           }
         ]
       }

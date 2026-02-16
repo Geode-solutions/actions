@@ -7,12 +7,14 @@
     "style": "error",
     "restriction": "error"
   },
-  "plugins": ["import", "node", "oxc", "promise", "unicorn", "vitest"],
+  "plugins": ["import", "node", "oxc", "promise", "unicorn", "vue"],
   "rules": {
     "unicorn/filename-case": [
       "error",
       {
-        "case": "snakeCase"
+        "cases": {
+          "snakeCase": true
+        }
       }
     ],
     "eslint/func-style": ["error", "declaration"],
@@ -30,6 +32,7 @@
     "unicorn/no-null": "warn", // A débattre ?
     "import/prefer-default-export": "off",
     "import/no-named-export": "off",
+    "import/no-namespace": ["error", { "ignore": ["vuetify/*"]}],
     "unicorn/prefer-global-this": "off",
     "import/unambiguous": "off",
     "oxc/no-optional-chaining": "off",
@@ -40,18 +43,18 @@
     "unicorn/prefer-structured-clone": "off", // Pas compatible avec plugin Pinia ?
     "no-continue": "off",
     "max-params": ["warn", { "max": 4 }],
-    "import/no-namespace": ["error", { "ignore": ["vuetify/*"] }],
     "eslint/no-magic-numbers": [
       "error",
       {
-        "style:": "declaration"
+        "ignore": [-1, 0, 1, 2, 4],
+        "ignoreArrayIndexes": true
       }
     ],
     "vue/max-props": ["error", { "maxProps": 7 }]
   },
   "overrides": [
     {
-      "files": ["**/components/*"],
+      "files": ["app/components/**"],
       "rules": {
         "unicorn/filename-case": [
           "error",
@@ -59,6 +62,18 @@
             "case": "PascalCase"
           }
         ]
+      }
+    },
+    {
+      "files": ["*.js", "app/plugins/**"],
+      "rules": {
+        "import/no-default-export": "off"
+      }
+    },
+    {
+      "files": ["utils/**"],
+      "rules": {
+        "promise/prefer-await-to-callbacks": "off"
       }
     }
   ]

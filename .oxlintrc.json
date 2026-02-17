@@ -40,7 +40,10 @@
         "ignore": [-1, 0, 1, 2, 4],
         "ignoreArrayIndexes": true
       }
-    ]
+    ],
+    "vitest/require-hook": ["error", {
+      "allowedFunctionCalls": ["defineProps", "defineEmits", "defineModel", "ref", "computed", "reactive", "watch", "watchEffect", "onMounted", "onBeforeMount", "onBeforeUnmount", "onUnmounted", "useEventListener", "useMousePressed"]
+    }]
   },
   "overrides": [
     {
@@ -52,6 +55,18 @@
             "case": "PascalCase"
           }
         ]
+      }
+    },
+    {
+      "files": ["*.js", "app/plugins/**"],
+      "rules": {
+        "import/no-default-export": "off"
+      }
+    },
+    {
+      "files": ["utils/**"],
+      "rules": {
+        "promise/prefer-await-to-callbacks": "off"
       }
     }
   ]

@@ -7,14 +7,12 @@
     "style": "error",
     "restriction": "error"
   },
-  "plugins": ["import", "node", "oxc", "promise", "unicorn", "vitest"],
+  "plugins": ["import", "node", "oxc", "promise", "unicorn", "vitest", "vue"],
   "rules": {
     "unicorn/filename-case": [
       "error",
       {
-        "cases": {
-          "snakeCase": true
-        }
+        "case": "snakeCase"
       }
     ],
     "eslint/func-style": ["error", "declaration"],
@@ -23,13 +21,13 @@
     "oxc/no-async-await": "off",
     "oxc/no-rest-spread-properties": "off", // Enable if older browser support is needed
     "eslint/max-statements": ["warn", 20],
-    "eslint/id-length": ["error", { "exceptions": ["x", "y", "z", "i", "j", "k", "r", "g", "b"], "min": 2 }],
+    "eslint/id-length": ["error", { "exceptions": ["x", "y", "z", "i", "j", "k", "r", "g", "b"], "min": 3 }],
     "eslint/no-console": "warn", // Disable for debugging. Disable later to not have browser logs
     "sort-imports": ["error", { "allowSeparatedGroups": true }],
     "eslint/no-undefined": "off", // Conflict with unicorn/no-typeof-undefined which prefers direct undefined comparison
     "import/prefer-default-export": "off",
     "import/no-named-export": "off",
-    "import/no-namespace": ["error", { "ignore": ["vuetify/*"]}],
+    "import/no-namespace": ["error", { "ignore": ["vuetify/*"] }],
     "oxc/no-optional-chaining": "off",
     "node/no-process-env": "off",
     "capitalized-comments": "warn",
@@ -38,9 +36,10 @@
     "eslint/no-magic-numbers": [
       "error",
       {
-        "style": "declaration"
+        "ignore": [-1, 0, 1, 2, 4],
+        "ignoreArrayIndexes": true
       }
-    ],
+    ]
   },
   "overrides": [
     {
@@ -53,18 +52,6 @@
           }
         ]
       }
-    },
-    {
-      "files": ["*.js", "app/plugins/**"],
-      "rules": {
-        "import/no-default-export": "off"
-      }
-    },
-    {
-      "files": ["utils/**"],
-      "rules": {
-        "promise/prefer-await-to-callbacks": "off"
-      }
-    },
+    }
   ]
 }

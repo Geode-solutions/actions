@@ -28,6 +28,7 @@
     "import/prefer-default-export": "off",
     "import/no-named-export": "off",
     "import/no-namespace": ["error", { "ignore": ["vuetify/*"] }],
+    "vue/max-props": ["error", { "maxProps": 7 }],
     "oxc/no-optional-chaining": "off",
     "node/no-process-env": "off",
     "capitalized-comments": "warn",

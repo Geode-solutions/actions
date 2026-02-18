@@ -41,9 +41,7 @@
         "ignoreArrayIndexes": true
       }
     ],
-    "vitest/require-hook": ["error", {
-      "allowedFunctionCalls": ["defineProps", "defineEmits", "defineModel", "ref", "computed", "reactive", "watch", "watchEffect", "onMounted", "onBeforeMount", "onBeforeUnmount", "onUnmounted", "useEventListener", "useMousePressed", "defineExpose", "whenever"]
-    }]
+    "vitest/require-hook": "off"
   },
   "overrides": [
     {
@@ -67,6 +65,12 @@
       "files": ["utils/**"],
       "rules": {
         "promise/prefer-await-to-callbacks": "off"
+      }
+    },
+    {
+      "files": ["**/*.test.*"],
+      "rules": {
+        "vitest/require-hook": "error"
       }
     }
   ]

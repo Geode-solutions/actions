@@ -91,7 +91,6 @@ const main = async () => {
             : octokit.repos
                 .listReleases({ owner, repo, per_page: 100 })
                 .then((releases) => {
-                  console.log("Found releases:", releases.data)
                   if (github.context.payload.pull_request) {
                     const head_release = releases.data.find(
                       (r) =>

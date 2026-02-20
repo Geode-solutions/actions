@@ -1,4 +1,5 @@
 name: "Install microservices"
+description: "Install microservices dependencies"
 
 inputs:
   repos:

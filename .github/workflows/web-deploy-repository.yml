@@ -53,7 +53,7 @@ on:
 jobs:
   release-python:
     if: inputs.python == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
@@ -93,7 +93,7 @@ jobs:
 
   release-node:
     if: inputs.node == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
@@ -144,7 +144,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, windows-latest]
+        os: [ubuntu-22.04, windows-2022]
     steps:
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
@@ -193,7 +193,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, windows-latest]
+        os: [ubuntu-22.04, windows-2022]
     steps:
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
@@ -241,7 +241,7 @@ jobs:
 
   release-cloud:
     if: inputs.cloud == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Publish Next
         if: ${{ inputs.branch == 'next' }}

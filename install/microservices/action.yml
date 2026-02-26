@@ -51,22 +51,21 @@ runs:
     - name: Install microservices
       run: |
         bin_folder=$([[ ${{ runner.os }} == 'Windows' ]] && echo "Scripts" || echo "bin")
-        find "${{ inputs.microservices }}" -mindepth 1 -maxdepth 1 -type d -print0 |
-          xargs -0 -I{} -P 2 -n1 bash -c '
-            set -euo pipefail            
-            ms="{}"
-            microservice="$GITHUB_WORKSPACE/$ms"
-            echo "Processing: $microservice"
-            cd "$microservice"
+        for microservice in ${{ inputs.microservices }}/*/; do
+          microservice="$GITHUB_WORKSPACE/$microservice"
+          echo "microservice = $microservice"
+          if [ -d "$microservice" ]; then
+            cd $microservice
             python -m venv venv
-            ./venv/$bin_folder/pip install --pre -r requirements.txt            
-            wheels=$(echo "${{ steps.result.outputs.wheels }}" | sed "s/;/ /g")
-            echo "wheels = $wheels"            
-            if [ -n "$wheels" ]; then
+            venv/$bin_folder/pip install --pre -r requirements.txt
+            wheels=$(echo "${{ steps.result.outputs.wheels }}" | sed 's/\;/\ /g')
+            echo "all wheels = $wheels"
+            if [ -n "$wheels" ]; then 
               for wheel in $wheels; do
-                ./venv/'"$bin_folder"'/pip install --pre "$wheel"
+                venv/$bin_folder/pip install --pre $wheel
               done
-            fi            
-            ./venv/$bin_folder/pip list
-            echo "Done: $microservice"
+            fi
+            venv/$bin_folder/pip list
+          fi
+        done
       shell: bash

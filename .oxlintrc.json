@@ -45,18 +45,23 @@
   },
   "overrides": [
     {
-      "files": ["**/components/*"],
+      "files": ["**/*.vue", "tests/unit/components/**"],
       "rules": {
         "unicorn/filename-case": [
           "error",
           {
-            "case": "PascalCase"
+            "case": "pascalCase"
           }
-        ]
+        ],
+        "import/unambiguous": "warn"
       }
     },
     {
-      "files": ["app/plugins/**", "node_scripts/**", "server/**", "*.config.js"],
+      "files": [
+        "app/plugins/**",
+        "node_scripts/**",
+        "server/**",
+        "*.config.js",      ],
       "rules": {
         "import/no-default-export": "off",
         "unicorn/prefer-structured-clone": "off",
@@ -64,15 +69,11 @@
       }
     },
     {
-      "files": ["utils/**"],
+      "files": ["tests/**"],
       "rules": {
-        "promise/prefer-await-to-callbacks": "off"
-      }
-    },
-    {
-      "files": ["**/*.test.*"],
-      "rules": {
-        "vitest/require-hook": "error"
+        "vitest/require-hook": "off",
+        "eslint/init-declarations": "off",
+        "vitest/require-top-level-describe": "off"
       }
     }
   ]

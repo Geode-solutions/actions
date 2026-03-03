@@ -31,17 +31,15 @@
     "vue/max-props": ["error", { "maxProps": 8 }],
     "oxc/no-optional-chaining": "off",
     "node/no-process-env": "off",
-    "capitalized-comments": "warn",
     "no-continue": "off",
     "max-params": ["warn", { "max": 4 }],
     "eslint/no-magic-numbers": [
       "error",
       {
-        "ignore": [-1, 0, 1, 2, 4],
+        "ignore": [-1, 0, 1, 2, 3, 4],
         "ignoreArrayIndexes": true
       }
     ],
-    "vitest/require-hook": "off"
   },
   "overrides": [
     {
@@ -53,7 +51,6 @@
             "case": "pascalCase"
           }
         ],
-        "import/unambiguous": "warn"
       }
     },
     {
@@ -63,17 +60,7 @@
         "server/**",
         "*.config.js",      ],
       "rules": {
-        "import/no-default-export": "off",
-        "unicorn/prefer-structured-clone": "off",
-        "unicorn/require-post-message-target-origin": "off"
-      }
-    },
-    {
-      "files": ["tests/**"],
-      "rules": {
-        "vitest/require-hook": "off",
-        "eslint/init-declarations": "off",
-        "vitest/require-top-level-describe": "off"
+        "import/no-default-export": "off"
       }
     },
     {

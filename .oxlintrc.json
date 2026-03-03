@@ -32,6 +32,7 @@
     "oxc/no-optional-chaining": "off",
     "node/no-process-env": "off",
     "no-continue": "off",
+    "import/unambiguous": "off",
     "max-params": ["warn", { "max": 4 }],
     "eslint/no-magic-numbers": [
       "error",
@@ -64,10 +65,16 @@
       }
     },
     {
+      "files": ["tests/**"],
+      "rules": {
+        "vitest/require-hook": "off",
+        "vitest/no-hooks": "off"
+      }
+    },
+    {
       "files": ["**/preload.js"],
       "rules": {
-        "import/no-commonjs": "off",
-        "import/unambiguous": "off"
+        "import/no-commonjs": "off"
       }
     }
   ]

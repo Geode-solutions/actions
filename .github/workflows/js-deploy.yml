@@ -39,6 +39,7 @@ jobs:
       release_channel: ${{ needs.semantic-release.outputs.new_release_channel }}
       upload: true
       python: false
+      pyinstaller: false
       docker: false
       cloud: ${{ needs.config.outputs.cloud }}
       node: ${{ needs.config.outputs.node }}

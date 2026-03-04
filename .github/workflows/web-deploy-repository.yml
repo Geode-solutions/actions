@@ -21,6 +21,9 @@ on:
       python:
         type: string
         required: true
+      pyinstaller:
+        type: string
+        required: true
       node:
         type: string
         required: true
@@ -90,6 +93,32 @@ jobs:
         run: |
           python3 -m pip install twine==6.0.1
           python3 -m twine upload --repository pypi dist/* -u __token__ -p ${{ secrets.PYPI_TOKEN }}
+
+  release-pyinstaller:
+    if: inputs.pyinstaller == 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+    steps:
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Build pyinstaller
+        uses: Geode-solutions/actions/test/pyinstaller@master
+        with:
+          repos: ${{ inputs.repos }}
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+          use_registry: ${{ inputs.use_registry }}
+      - name: Release
+        run: |
+          gh release upload ${{ inputs.release }} pyinstaller_dir/* --clobber
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
 
   release-node:
     if: inputs.node == 'true'

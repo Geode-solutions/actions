@@ -106,6 +106,7 @@ jobs:
       release_channel: ${{ needs.release.outputs.new_release_channel }}
       upload: false
       python: ${{ needs.config.outputs.python }}
+      pyinstaller: ${{ needs.config.outputs.pyinstaller }}
       node: ${{ needs.config.outputs.node }}
       docker: ${{ needs.config.outputs.docker }}
       desktop: false

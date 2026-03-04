@@ -73,6 +73,7 @@ jobs:
       release_channel: ${{ needs.release.outputs.new_release_channel }}
       upload: false
       python: false
+      pyinstaller: false
       extension: ${{ needs.config.outputs.extension }}
       docker: false
       cloud: false

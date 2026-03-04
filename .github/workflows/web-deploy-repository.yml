@@ -245,10 +245,10 @@ jobs:
     steps:
       - name: Publish Next
         if: ${{ inputs.branch == 'next' }}
-        run: curl -X POST -d {} https://api.netlify.com/build_hooks/${{ secrets.NETLIFY_NEXT_HOOK }}
+        run: curl -X POST -d {} https://api.netlify.com/build_hooks/${{ secrets.NETLIFY_NEXT_HOOK }}?clear_cache=true
       - name: Publish Master
         if: ${{ inputs.branch == 'master' }}
-        run: curl -X POST -d {} https://api.netlify.com/build_hooks/${{ secrets.NETLIFY_MASTER_HOOK }}
+        run: curl -X POST -d {} https://api.netlify.com/build_hooks/${{ secrets.NETLIFY_MASTER_HOOK }}?clear_cache=true
 
   notify:
     if: ${{ !failure() && !cancelled() }}

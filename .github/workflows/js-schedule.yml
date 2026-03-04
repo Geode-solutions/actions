@@ -29,6 +29,7 @@ jobs:
       branch: ${{ inputs.branch }}
       docker: false
       python: false
+      pyinstaller: false
       node: ${{ needs.config.outputs.node }}
       integration: ${{ needs.config.outputs.integration }}
       browser: ${{ needs.config.outputs.browser }}

@@ -1,0 +1,35 @@
+name: "Test Pyinstaller"
+description: "Test Pyinstaller"
+
+inputs:
+  repos:
+    type: string
+  branch:
+    type: string
+  wheels:
+    type: string
+  use_registry:
+    type: boolean
+    required: true
+  token:
+    type: string
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install dependencies
+      uses: Geode-solutions/actions/install/python-dependencies@master
+      with:
+        repos: ${{ inputs.repos }}
+        branch: ${{ inputs.branch }}
+        wheels: ${{ inputs.wheels }}
+        token: ${{ inputs.token }}
+        use_registry: ${{ inputs.use_registry }}
+    - name: Build Pyinstaller
+      run: |
+        pip install pyinstaller
+        pyinstaller *.spec --distpath pyinstaller_dist
+      shell: bash
+      env:
+        GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

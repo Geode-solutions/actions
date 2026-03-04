@@ -13,6 +13,8 @@ on:
         value: ${{ jobs.py-config.outputs.python }}
       docker:
         value: ${{ jobs.py-config.outputs.docker }}
+      pyinstaller:
+        value: ${{ jobs.py-config.outputs.pyinstaller }}
     secrets:
       TOKEN:
         required: true
@@ -23,6 +25,7 @@ jobs:
       node: ${{ steps.config.outputs.node }}
       python: ${{ steps.config.outputs.python }}
       docker: ${{ steps.config.outputs.docker }}
+      pyinstaller: ${{ steps.config.outputs.pyinstaller }}
     steps:
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
@@ -39,7 +42,8 @@ jobs:
             const defaults = {
               node: true,
               python: true,
-              docker: false
+              docker: false,
+              pyinstaller: false
             };
             const fullRepo = '${{ inputs.repo }}'
             const repoName = fullRepo.split('/')[1];

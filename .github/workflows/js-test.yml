@@ -32,6 +32,7 @@ jobs:
       branch: ${{ github.ref_name }}
       docker: false
       python: false
+      pyinstaller: false
       node: ${{ needs.config.outputs.node }}
       integration: ${{ needs.config.outputs.integration }}
       browser: ${{ needs.config.outputs.browser }}

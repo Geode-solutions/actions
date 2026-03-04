@@ -12,6 +12,9 @@ on:
       python:
         type: string
         required: true
+      pyinstaller:
+        type: string
+        required: true
       node:
         type: string
         required: true
@@ -57,6 +60,26 @@ jobs:
           branch: ${{ inputs.branch }}
       - name: Test Python
         uses: Geode-solutions/actions/test/python@master
+        with:
+          repos: ${{ inputs.repos }}
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+          use_registry: ${{ inputs.use_registry }}
+
+  test-pyinstaller:
+    if: inputs.pyinstaller == 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+    steps:
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Test pyinstaller
+        uses: Geode-solutions/actions/test/pyinstaller@master
         with:
           repos: ${{ inputs.repos }}
           token: ${{ secrets.TOKEN }}

@@ -113,11 +113,14 @@ jobs:
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
           use_registry: ${{ inputs.use_registry }}
+      - name: Archive pyinstaller
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          filename: pyinstaller-${{ runner.os }}.zip
+          directory: pyinstaller_dist
       - name: Release
         run: |
-          cd pyinstaller_dist
-          zip pyinstaller-${{ runner.os }}.zip *
-          gh release upload ${{ inputs.release }} pyinstaller-${{ runner.os }}.zip --clobber
+          gh release upload ${{ inputs.release }} pyinstaller_dist/*.zip --clobber
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash

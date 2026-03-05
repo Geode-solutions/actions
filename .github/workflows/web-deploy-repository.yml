@@ -115,7 +115,9 @@ jobs:
           use_registry: ${{ inputs.use_registry }}
       - name: Release
         run: |
-          gh release upload ${{ inputs.release }} pyinstaller_dist/* --clobber
+          cd pyinstaller_dist
+          zip pyinstaller-${{ runner.os }}.zip *
+          gh release upload ${{ inputs.release }} pyinstaller-${{ runner.os }}.zip --clobber
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash

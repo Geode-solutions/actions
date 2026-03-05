@@ -36,7 +36,6 @@
     "import/unambiguous": "off",
     "max-params": ["warn", { "max": 4 }],
     "import/no-nodejs-modules": "off",
-    "import/no-relative-parent-imports": "warn", // Pour les imports relatifs et éviter de de créer des alias poour tous
     "eslint/no-magic-numbers": [
       "error",
       {

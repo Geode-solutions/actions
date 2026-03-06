@@ -1,4 +1,5 @@
 name: "Install Node dependencies"
+description: "Install Node dependencies"
 
 inputs:
   repos:
@@ -23,6 +24,7 @@ runs:
       with:
         registry-url: "https://registry.npmjs.org"
         node-version: 22
+        cache: npm
     - uses: Geode-solutions/actions/get-release@master
       if: ${{ inputs.tarballs == '' && inputs.use_registry == 'false' }}
       id: tarballs

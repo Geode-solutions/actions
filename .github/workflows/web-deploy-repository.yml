@@ -104,14 +104,15 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: pyinstaller-${{ runner.os }}
+          path: pyinstaller
       - name: Archive pyinstaller
         uses: thedoctor0/zip-release@0.7.5
         with:
           filename: pyinstaller-${{ runner.os }}.zip
-          directory: pyinstaller_dist
+          directory: pyinstaller
       - name: Release
         run: |
-          gh release upload ${{ inputs.release }} pyinstaller_dist/*.zip --clobber
+          gh release upload ${{ inputs.release }} pyinstaller/*.zip --clobber
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash

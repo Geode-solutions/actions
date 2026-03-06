@@ -112,9 +112,6 @@ jobs:
           directory: pyinstaller
       - name: Release
         run: |
-          ls
-          echo "pyinstaller"
-          ls pyinstaller
           gh release upload ${{ inputs.release }} pyinstaller/*.zip --clobber
         env:
           GITHUB_TOKEN: ${{ github.token }}

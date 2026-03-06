@@ -11,9 +11,16 @@ jobs:
       dry_run: true
     secrets: inherit
 
-  prepare:
+  sleep:
     needs: semantic-release
     if: needs.semantic-release.outputs.new_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for registry to update
+        run: sleep 1m
+
+  prepare:
+    needs: sleep
     uses: Geode-solutions/actions/.github/workflows/py-prepare.yml@master
     with:
       use_internal: true

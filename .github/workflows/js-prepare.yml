@@ -20,8 +20,6 @@ jobs:
     outputs:
       changes_detected: ${{ steps.commit.outputs.changes_detected }}
     steps:
-      - name: Wait for registry to update
-        run: sleep 1m
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:

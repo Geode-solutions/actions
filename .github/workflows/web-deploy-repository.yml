@@ -115,7 +115,7 @@ jobs:
           ls
           echo "pyinstaller"
           ls pyinstaller
-          gh release upload ${{ inputs.release }} pyinstaller-${{ runner.os }}.zip --clobber
+          gh release upload ${{ inputs.release }} pyinstaller/*.zip --clobber
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash

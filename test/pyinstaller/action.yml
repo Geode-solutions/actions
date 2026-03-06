@@ -31,5 +31,7 @@ runs:
         pip install pyinstaller
         pyinstaller *.spec --distpath pyinstaller_dist
       shell: bash
-      env:
-        GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+    - uses: actions/upload-artifact@v4
+      with:
+        name: pyinstaller-${{ runner.os }}
+        path: pyinstaller_dist

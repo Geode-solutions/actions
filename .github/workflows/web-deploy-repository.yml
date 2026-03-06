@@ -101,18 +101,9 @@ jobs:
       matrix:
         os: [ubuntu-22.04, windows-2022]
     steps:
-      - name: Checkout
-        uses: Geode-solutions/actions/install/checkout@master
+      - uses: actions/download-artifact@v4
         with:
-          token: ${{ secrets.TOKEN }}
-          branch: ${{ inputs.branch }}
-      - name: Build pyinstaller
-        uses: Geode-solutions/actions/test/pyinstaller@master
-        with:
-          repos: ${{ inputs.repos }}
-          token: ${{ secrets.TOKEN }}
-          branch: ${{ inputs.branch }}
-          use_registry: ${{ inputs.use_registry }}
+          name: pyinstaller-${{ runner.os }}
       - name: Archive pyinstaller
         uses: thedoctor0/zip-release@0.7.5
         with:

@@ -29,10 +29,12 @@ jobs:
     needs: prepare
     runs-on: ubuntu-latest
     container: ghcr.io/geode-solutions/ubuntu:master
+    env:
+      CC: /usr/bin/clang
+      CXX: /usr/bin/clang++
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
           token: ${{ secrets.TOKEN }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master

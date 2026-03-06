@@ -18,9 +18,10 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@v6
       with:
         python-version: 3.12
+        cache: pip
     - uses: Geode-solutions/actions/get-release@master
       if: ${{ inputs.wheels == '' && inputs.use_registry == 'false' }}
       id: wheels

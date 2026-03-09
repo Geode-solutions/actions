@@ -51,12 +51,21 @@ jobs:
           cd build
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
           cmake --build . -t third_party -j 2
-      - name: Tidy
-        uses: ZedThree/clang-tidy-review@master
+      - uses: cpp-linter/cpp-linter-action@v2
+        id: linter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          base_dir: ${{ env.base_dir }}
-          build_dir: build/${{ inputs.directory }}
-          config_file: .clang-tidy
+          style: ""
+          tidy-checks: ""
+          tidy-review: true
+          thread-comments: update
+          step-summary: true
+          no-lgtm: false
+          database: build/${{ inputs.directory }}
+      - name: Fail fast?!
+        if: steps.linter.outputs.checks-failed > 0
+        run: exit 1
 
   test-repository:
     needs: prepare

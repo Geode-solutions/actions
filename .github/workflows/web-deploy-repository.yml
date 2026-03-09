@@ -107,17 +107,27 @@ jobs:
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
       - uses: actions/download-artifact@v4
+        id: artifact
+        continue-on-error: true
         with:
           name: pyinstaller-${{ runner.os }}
-          path: pyinstaller
+          path: pyinstaller_dist
+      - name: Test pyinstaller
+        if: steps.artifact.outcome != 'success'
+        uses: Geode-solutions/actions/test/pyinstaller@master
+        with:
+          repos: ${{ inputs.repos }}
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+          use_registry: ${{ inputs.use_registry }}
       - name: Archive pyinstaller
         uses: thedoctor0/zip-release@0.7.5
         with:
           filename: pyinstaller-${{ runner.os }}.zip
-          directory: pyinstaller
+          directory: pyinstaller_dist
       - name: Release
         run: |
-          gh release upload ${{ inputs.release }} pyinstaller/*.zip --clobber
+          gh release upload ${{ inputs.release }} pyinstaller_dist/*.zip --clobber
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash

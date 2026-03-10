@@ -10,6 +10,8 @@ Checks: >
   -llvm-header-guard,
   -llvm-prefer-static-over-anonymous-namespace,
   -misc-no-recursion,
+  -misc-include-cleaner,
+  -misc-const-correctness,
   -modernize-use-trailing-return-type,
   -portability-avoid-pragma-once,
   -readability-redundant-access-specifiers,
@@ -60,5 +62,3 @@ CheckOptions:
     value: 10
   - key: readability-function-size.ParameterThreshold
     value: 4
-  - key: misc-include-cleaner.IgnoreHeaders
-    value: utility;cstddef;geode/.*_export\.hpp;geode/.*/common\.hpp;geode/basic/types\.hpp;geode/basic/assert\.hpp;

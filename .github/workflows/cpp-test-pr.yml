@@ -57,7 +57,7 @@ jobs:
         with:
           style: ""
           tidy-checks: ""
-          tidy-review: true
+          version: 22
           thread-comments: update
           step-summary: true
           no-lgtm: false

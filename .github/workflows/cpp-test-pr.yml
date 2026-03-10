@@ -46,7 +46,6 @@ jobs:
           system: ubuntu
       - name: Configure
         run: |
-          echo "base_dir=$(pwd)" >> $GITHUB_ENV
           mkdir -p build
           cd build
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..

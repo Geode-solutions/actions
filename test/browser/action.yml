@@ -1,6 +1,10 @@
 name: "Test Browser"
+description: "Test Browser"
 
 inputs:
+  name:
+    type: string
+    default: "results"
   repos:
     type: string
   branch:
@@ -61,6 +65,6 @@ runs:
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
-        name: playwright-browser-${{ runner.os }}
+        name: playwright-${{ inputs.name }}-browser-${{ runner.os }}
         path: playwright-report/
         overwrite: true

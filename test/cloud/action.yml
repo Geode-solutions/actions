@@ -1,6 +1,10 @@
-name: "Test Browser"
+name: "Test Cloud"
+description: "Test Cloud"
 
 inputs:
+  name:
+    type: string
+    default: "results"
   repos:
     type: string
   branch:
@@ -33,6 +37,6 @@ runs:
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
-        name: playwright-cloud-${{ runner.os }}
+        name: playwright-${{ inputs.name }}-cloud-${{ runner.os }}
         path: playwright-report/
         overwrite: true

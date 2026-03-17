@@ -29,10 +29,10 @@ runs:
         python-version: 3.12
     - uses: Geode-solutions/actions/get-release@master
       if: ${{ inputs.wheels == '' && inputs.use_registry == 'false' }}
-      id: pyinstaller
+      id: wheels
       with:
         repository: ${{ inputs.repos }}
-        file: "${{ runner.os }}.zip"
+        file: "pyinstaller-${{ runner.os }}.zip"
         token: ${{ inputs.token }}
         branch: ${{ inputs.branch }}
     - name: Get wheels

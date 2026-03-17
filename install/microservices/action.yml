@@ -23,11 +23,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: DEBUG
-      run: |
-        pwd
-        ls
-      shell: bash
     - name: Python setup
       uses: actions/setup-python@v5
       with:
@@ -50,17 +45,6 @@ runs:
         else
           echo "wheels=" >> $GITHUB_OUTPUT
         fi
-      shell: bash
-    - name: Install microservices
-      run: |
-        pwd
-        ls
-        IFS=';' read -ra paths <<< "${{ steps.result.outputs.wheels }}"
-        for path in "${paths[@]}"; do
-          echo "→ Trying to copy: $path"
-          ls $path
-          cp -v -- $path/* .
-        done
       shell: bash
     - name: Install OSMesa
       uses: Geode-solutions/actions/install/osmesa@master

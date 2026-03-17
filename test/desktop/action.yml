@@ -63,7 +63,6 @@ runs:
       uses: Geode-solutions/actions/install/playwright@master
     - name: Build
       run: |
-        npm run build:microservices
         npm run build:desktop
       shell: bash
       env:

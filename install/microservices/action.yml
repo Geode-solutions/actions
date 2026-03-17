@@ -50,15 +50,13 @@ runs:
       uses: Geode-solutions/actions/install/osmesa@master
     - name: Install microservices
       run: |
-        while IFS= read -r path || [ -n "$path" ]; do
-          echo "→ $path"          
+        IFS=';' read -ra paths <<< "${{ steps.result.outputs.wheels }}"
+        for path in "${paths[@]}"; do
+          echo "→ Trying to copy: $path"
           if [[ -f "$path" ]]; then
             cp -v -- "$path" .
-          elif [[ -d "$path" ]]; then
-            echo "  (directory → copying contents)"
-            cp -v -- "$path"/* .  2>/dev/null || true
           else
-            echo "  → not found or not regular file/dir"
+            echo "  → Not found or not a regular file, skipping"
           fi
-        done <<< "${{ steps.result.outputs.wheels }}"
+        done
       shell: bash

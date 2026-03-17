@@ -211,7 +211,6 @@ jobs:
       - name: Package
         run: |
           jq '.version = "${{ inputs.version }}"' package.json > temp && mv temp package.json
-          npm run build:microservices
           npm run package
         env:
           AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
@@ -258,7 +257,6 @@ jobs:
       - name: Package
         run: |
           jq '.version = "${{ inputs.version }}"' package.json > temp && mv temp package.json
-          npm run build:microservices
           npm run package
         shell: bash
       - name: Release

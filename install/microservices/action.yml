@@ -23,6 +23,11 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: DEBUG
+      run: |
+        pwd
+        ls
+      shell: bash
     - name: Python setup
       uses: actions/setup-python@v5
       with:

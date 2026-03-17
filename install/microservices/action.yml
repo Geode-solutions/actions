@@ -46,13 +46,14 @@ runs:
           echo "wheels=" >> $GITHUB_OUTPUT
         fi
       shell: bash
-    - name: Install OSMesa
-      uses: Geode-solutions/actions/install/osmesa@master
     - name: Install microservices
       run: |
         IFS=';' read -ra paths <<< "${{ steps.result.outputs.wheels }}"
         for path in "${paths[@]}"; do
           echo "→ Trying to copy: $path"
+          ls $path
           cp -v -- "$path/*" .
         done
       shell: bash
+    - name: Install OSMesa
+      uses: Geode-solutions/actions/install/osmesa@master

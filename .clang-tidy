@@ -5,6 +5,7 @@
 Checks: >
   *,
   -altera*,
+  -boost*,
   -fuchsia*,
   -llvmlibc*,
   -llvm-header-guard,

@@ -73,7 +73,9 @@
       "rules": {
         "vitest/require-hook": "off",
         "vitest/no-hooks": "off",
-        "vitest/no-importing-vitest-globals": "off"
+        "vitest/no-importing-vitest-globals": "off",
+        "max-lines-per-function": "off",
+        "max-statements": "off"
       }
     },
     {

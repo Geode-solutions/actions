@@ -29,10 +29,10 @@ runs:
         python-version: 3.12
     - uses: Geode-solutions/actions/get-release@master
       if: ${{ inputs.wheels == '' && inputs.use_registry == 'false' }}
-      id: wheels
+      id: pyinstaller
       with:
         repository: ${{ inputs.repos }}
-        file: ".whl"
+        file: "${{ runner.os }}.zip"
         token: ${{ inputs.token }}
         branch: ${{ inputs.branch }}
     - name: Get wheels
@@ -50,22 +50,11 @@ runs:
       uses: Geode-solutions/actions/install/osmesa@master
     - name: Install microservices
       run: |
-        bin_folder=$([[ ${{ runner.os }} == 'Windows' ]] && echo "Scripts" || echo "bin")
-        for microservice in ${{ inputs.microservices }}/*/; do
-          microservice="$GITHUB_WORKSPACE/$microservice"
-          echo "microservice = $microservice"
-          if [ -d "$microservice" ]; then
-            cd $microservice
-            python -m venv venv
-            venv/$bin_folder/pip install --pre -r requirements.txt
-            wheels=$(echo "${{ steps.result.outputs.wheels }}" | sed 's/\;/\ /g')
-            echo "all wheels = $wheels"
-            if [ -n "$wheels" ]; then 
-              for wheel in $wheels; do
-                venv/$bin_folder/pip install --pre $wheel
-              done
-            fi
-            venv/$bin_folder/pip list
-          fi
-        done
+        while IFS= read -r -d '' zipfile; do
+          ((count++))
+          filename=$(basename "$zipfile")
+          echo "Extracting: $filename"
+          unzip -o -q "$zipfile"
+        done < <(find . -maxdepth 1 -type f -iname "*.zip" -print0)
+        ls
       shell: bash

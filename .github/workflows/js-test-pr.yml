@@ -59,7 +59,7 @@ jobs:
     secrets: inherit
 
   release:
-    needs: [test-repository, semantic-commit]
+    needs: [test-repository, semantic-commit, oxlint]
     uses: Geode-solutions/actions/.github/workflows/dev-release.yml@master
 
   deploy-repository:

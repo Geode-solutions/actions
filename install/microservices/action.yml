@@ -52,7 +52,7 @@ runs:
         for path in "${paths[@]}"; do
           echo "→ Trying to copy: $path"
           ls $path
-          cp -v -- "$path/*" .
+          cp -v -- $path/* .
         done
       shell: bash
     - name: Install OSMesa

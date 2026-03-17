@@ -48,6 +48,8 @@ runs:
       shell: bash
     - name: Install microservices
       run: |
+        pwd
+        ls
         IFS=';' read -ra paths <<< "${{ steps.result.outputs.wheels }}"
         for path in "${paths[@]}"; do
           echo "→ Trying to copy: $path"

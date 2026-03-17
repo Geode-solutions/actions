@@ -50,11 +50,15 @@ runs:
       uses: Geode-solutions/actions/install/osmesa@master
     - name: Install microservices
       run: |
-        while IFS= read -r -d '' zipfile; do
-          ((count++))
-          filename=$(basename "$zipfile")
-          echo "Extracting: $filename"
-          unzip -o -q "$zipfile"
-        done < <(find . -maxdepth 1 -type f -iname "*.zip" -print0)
-        ls
+        while IFS= read -r path || [ -n "$path" ]; do
+          echo "→ $path"          
+          if [[ -f "$path" ]]; then
+            cp -v -- "$path" .
+          elif [[ -d "$path" ]]; then
+            echo "  (directory → copying contents)"
+            cp -v -- "$path"/* .  2>/dev/null || true
+          else
+            echo "  → not found or not regular file/dir"
+          fi
+        done <<< "${{ steps.result.outputs.wheels }}"
       shell: bash

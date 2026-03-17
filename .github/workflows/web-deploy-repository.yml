@@ -123,7 +123,7 @@ jobs:
       - name: Archive pyinstaller
         uses: thedoctor0/zip-release@0.7.5
         with:
-          filename: pyinstaller-${{ runner.os }}.zip
+          filename: ${{ github.event.repository.name }}-pyinstaller-${{ runner.os }}.zip
           directory: pyinstaller_dist
       - name: Release
         run: |

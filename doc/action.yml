@@ -1,17 +1,17 @@
-name: 'Generate doc'
-description: 'Create documentation using clang-doc'
+name: "Generate doc"
+description: "Create documentation using clang-doc"
 inputs:
-  directory: 
+  directory:
     required: true
-    default: '.'
+    default: "."
   base_directory:
     required: true
   token:
     required: true
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: "docker"
+  image: "Dockerfile"
   args:
     - ${{ inputs.directory }}
     - ${{ inputs.base_directory }}

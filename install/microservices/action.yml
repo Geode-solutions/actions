@@ -32,7 +32,7 @@ runs:
       id: wheels
       with:
         repository: ${{ inputs.repos }}
-        file: ".whl"
+        file: "pyinstaller-${{ runner.os }}.zip"
         token: ${{ inputs.token }}
         branch: ${{ inputs.branch }}
     - name: Get wheels
@@ -48,24 +48,3 @@ runs:
       shell: bash
     - name: Install OSMesa
       uses: Geode-solutions/actions/install/osmesa@master
-    - name: Install microservices
-      run: |
-        bin_folder=$([[ ${{ runner.os }} == 'Windows' ]] && echo "Scripts" || echo "bin")
-        for microservice in ${{ inputs.microservices }}/*/; do
-          microservice="$GITHUB_WORKSPACE/$microservice"
-          echo "microservice = $microservice"
-          if [ -d "$microservice" ]; then
-            cd $microservice
-            python -m venv venv
-            venv/$bin_folder/pip install --pre -r requirements.txt
-            wheels=$(echo "${{ steps.result.outputs.wheels }}" | sed 's/\;/\ /g')
-            echo "all wheels = $wheels"
-            if [ -n "$wheels" ]; then 
-              for wheel in $wheels; do
-                venv/$bin_folder/pip install --pre $wheel
-              done
-            fi
-            venv/$bin_folder/pip list
-          fi
-        done
-      shell: bash

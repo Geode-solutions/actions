@@ -39,8 +39,8 @@ jobs:
           else
             echo "folders=." >> $GITHUB_OUTPUT
           fi
-      - name: Prettier
-        run: npx prettier . --write
+      - name: oxfmt
+        run: npx oxfmt .
       - uses: stefanzweifel/git-auto-commit-action@v5
         id: commit
         with:

@@ -121,14 +121,15 @@ jobs:
           branch: ${{ inputs.branch }}
           use_registry: ${{ inputs.use_registry }}
       - name: Archive pyinstaller
+        if: steps.artifact.outcome != 'success'
         uses: thedoctor0/zip-release@0.7.5
         with:
           filename: ${{ github.event.repository.name }}-pyinstaller-${{ runner.os }}.zip
           directory: pyinstaller_dist
       - name: Release
         run: |
-          ls -l pyinstaller_dist 
-          gh release upload ${{ inputs.release }} pyinstaller_dist/*.zip --clobber
+          ls -l pyinstaller_dist
+          gh release upload ${{ inputs.release }} ${{ github.event.repository.name }}-pyinstaller-${{ runner.os }}.zip --clobber
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash

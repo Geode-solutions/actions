@@ -31,7 +31,12 @@ runs:
         pip install pyinstaller
         pyinstaller *.spec --distpath pyinstaller_dist
       shell: bash
+    - name: Archive pyinstaller
+      uses: thedoctor0/zip-release@0.7.5
+      with:
+        filename: ${{ github.event.repository.name }}-pyinstaller-${{ runner.os }}.zip
+        directory: pyinstaller_dist
     - uses: actions/upload-artifact@v4
       with:
         name: pyinstaller-${{ runner.os }}
-        path: pyinstaller_dist
+        path: ${{ github.event.repository.name }}-pyinstaller-${{ runner.os }}.zip

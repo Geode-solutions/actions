@@ -34,10 +34,9 @@ const download_asset = async (asset, token) => {
             console.log({ entry })
             if (entry.isDirectory) continue
             const full = path.join(process.env.GITHUB_WORKSPACE, entry.name)
-            const mode = (entry.attr >>> 16) >>> 0xffff
-            const permissions = mode & 0o777
-            const readable_mode = permissions.toString(8)
-            console.log({ full, readable_mode })
+            const mode = (entry.attr >>> 16) & 0o777
+            const readable_mode = mode.toString(8)
+            console.log({ full, mode, readable_mode })
             if (readable_mode) {
               fs.chmodSync(full, readable_mode)
             }

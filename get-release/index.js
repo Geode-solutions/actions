@@ -24,7 +24,7 @@ const download_asset = async (asset, token) => {
         const extension = asset.name.split(".").pop()
         if (extension == "zip") {
           console.log("Unzipping", asset.name)
-          const zip = new StreamZip({
+          const zip = new StreamZip.async({
             file: asset.name,
           })
           await zip.extract(null, process.env.GITHUB_WORKSPACE)
@@ -38,6 +38,7 @@ const download_asset = async (asset, token) => {
               fs.chmodSync(full, mode)
             }
           }
+          await zip.close()
           // const zip = new AdmZip(asset.name)
           // zip.extractAllTo(process.env.GITHUB_WORKSPACE)
           let extract_name = asset.name.slice(0, -4)

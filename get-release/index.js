@@ -28,16 +28,18 @@ const download_asset = async (asset, token) => {
           })
           const nb_files = await zip.extract(null, process.env.GITHUB_WORKSPACE)
           console.log({ nb_files })
-          const entries = await zip.entries()
-          for (const entry of Object.values(entries)) {
-            console.log({ entry })
-            if (entry.isDirectory) continue
-            const full = path.join(process.env.GITHUB_WORKSPACE, entry.name)
-            const mode = (entry.attr >>> 16) & 0o777
-            const readable_mode = mode.toString(8)
-            console.log({ full, mode, readable_mode })
-            if (readable_mode) {
-              fs.chmodSync(full, readable_mode)
+          if (process.platform == "linux") {
+            const entries = await zip.entries()
+            for (const entry of Object.values(entries)) {
+              console.log({ entry })
+              if (entry.isDirectory) continue
+              const full = path.join(process.env.GITHUB_WORKSPACE, entry.name)
+              const mode = (entry.attr >>> 16) & 0o777
+              const readable_mode = mode.toString(8)
+              console.log({ full, mode, readable_mode })
+              if (readable_mode) {
+                fs.chmodSync(full, readable_mode)
+              }
             }
           }
           await zip.close()

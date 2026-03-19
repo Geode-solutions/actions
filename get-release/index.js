@@ -5,7 +5,6 @@ import fs from "fs"
 import path from "path"
 import request from "request"
 import * as tar from "tar"
-// import AdmZip from "adm-zip"
 import StreamZip from "node-stream-zip"
 
 const download_asset = async (asset, token) => {
@@ -42,8 +41,6 @@ const download_asset = async (asset, token) => {
             }
           }
           await zip.close()
-          // const zip = new AdmZip(asset.name)
-          // zip.extractAllTo(process.env.GITHUB_WORKSPACE)
           let extract_name = asset.name.slice(0, -4)
           if (extract_name.endsWith("-private")) {
             extract_name = extract_name.slice(0, -8)

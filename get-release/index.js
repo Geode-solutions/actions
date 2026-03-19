@@ -34,7 +34,7 @@ const download_asset = async (asset, token) => {
             console.log({ entry })
             if (entry.isDirectory) continue
             const full = path.join(process.env.GITHUB_WORKSPACE, entry.name)
-            const mode = (entry.externalAttr >>> 16) & 0o777
+            const mode = (entry.attr >>> 16) & 0o777
             console.log({ full, mode })
             if (mode) {
               fs.chmodSync(full, mode)

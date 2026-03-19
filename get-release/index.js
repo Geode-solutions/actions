@@ -27,7 +27,8 @@ const download_asset = async (asset, token) => {
           const zip = new StreamZip.async({
             file: asset.name,
           })
-          await zip.extract(null, process.env.GITHUB_WORKSPACE)
+          const nb_files = await zip.extract(null, process.env.GITHUB_WORKSPACE)
+          console.log({ nb_files })
           for (const entry of Object.values(zip.entries())) {
             console.log({ entry })
             if (entry.isDirectory) continue

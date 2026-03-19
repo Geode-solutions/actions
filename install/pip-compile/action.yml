@@ -1,4 +1,5 @@
 name: "Install pip-compile"
+description: "Install pip-compile"
 
 inputs:
   folders:

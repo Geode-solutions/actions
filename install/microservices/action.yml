@@ -45,6 +45,7 @@ runs:
         else
           echo "wheels=" >> $GITHUB_OUTPUT
         fi
+        ls -l
       shell: bash
     - name: Install OSMesa
       uses: Geode-solutions/actions/install/osmesa@master

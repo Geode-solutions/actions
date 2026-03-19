@@ -29,7 +29,8 @@ const download_asset = async (asset, token) => {
           })
           const nb_files = await zip.extract(null, process.env.GITHUB_WORKSPACE)
           console.log({ nb_files })
-          for (const entry of Object.values(zip.entries())) {
+          const entries = await zip.entries()
+          for (const entry of Object.values(entries)) {
             console.log({ entry })
             if (entry.isDirectory) continue
             const full = path.join(process.env.GITHUB_WORKSPACE, entry.name)

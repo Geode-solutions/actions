@@ -39,9 +39,6 @@ on:
       upload:
         type: boolean
         default: true
-      microservices:
-        type: string
-        default: "microservices"
       use_registry:
         type: boolean
         default: false
@@ -206,8 +203,6 @@ jobs:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-          microservices: ${{ inputs.microservices }}
-          use_registry: ${{ inputs.use_registry }}
       - name: Install Azure Sign Tool
         uses: Geode-solutions/actions/install/azure-sign@master
       - name: Package
@@ -254,8 +249,6 @@ jobs:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-          microservices: ${{ inputs.microservices }}
-          use_registry: ${{ inputs.use_registry }}
       - name: Package
         run: |
           jq '.version = "${{ inputs.version }}"' package.json > temp && mv temp package.json

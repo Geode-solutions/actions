@@ -11,9 +11,7 @@ inputs:
     type: string
   tarballs:
     type: string
-  wheels:
-    type: string
-  microservices:
+  pyinstallers:
     type: string
   use_registry:
     type: boolean
@@ -54,9 +52,7 @@ runs:
         repos: ${{ inputs.repos }}
         branch: ${{ inputs.branch }}
         token: ${{ inputs.token }}
-        wheels: ${{ inputs.wheels }}
-        microservices: ${{ inputs.microservices }}
-        use_registry: ${{ inputs.use_registry }}
+        pyinstallers: ${{ inputs.pyinstallers }}
     - name: Install Azure Sign Tool
       uses: Geode-solutions/actions/install/azure-sign@master
     - name: Install Playwright

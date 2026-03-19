@@ -2,12 +2,20 @@
   "categories": {
     "correctness": "error",
     "suspicious": "error",
-    "pedantic": "warn",
+    "pedantic": "error",
     "perf": "error",
     "style": "error",
     "restriction": "error"
   },
-  "plugins": ["import", "node", "oxc", "promise", "unicorn", "vitest", "vue"],
+  "plugins": [
+    "import",
+    "node",
+    "oxc",
+    "promise",
+    "unicorn",
+    "vitest",
+    "vue"
+  ],
   "rules": {
     "unicorn/filename-case": [
       "error",
@@ -15,39 +23,103 @@
         "case": "snakeCase"
       }
     ],
-    "eslint/func-style": ["error", "declaration"],
+    "eslint/func-style": [
+      "error",
+      "declaration"
+    ],
     "eslint/sort-keys": "off",
     "eslint/no-ternary": "off", // A utiliser pour des opérations simples
     "unicorn/prefer-ternary": "off",
     "oxc/no-async-await": "off",
     "oxc/no-rest-spread-properties": "off", // Enable if older browser support is needed
-    "eslint/max-statements": ["warn", 20],
-    "eslint/id-length": ["error", { "exceptions": ["x", "y", "z", "i", "j", "k", "r", "g", "b", "id", "ID", "fs", "os", "_"], "min": 3 }],
+    "eslint/max-statements": [
+      "warn",
+      20
+    ],
+    "eslint/id-length": [
+      "error",
+      {
+        "exceptions": [
+          "x",
+          "y",
+          "z",
+          "i",
+          "j",
+          "k",
+          "r",
+          "g",
+          "b",
+          "id",
+          "ID",
+          "fs",
+          "os",
+          "_"
+        ],
+        "min": 3
+      }
+    ],
     "eslint/no-console": "warn", // Disable for debugging. Disable later to not have browser logs
-    "sort-imports": ["error", { "allowSeparatedGroups": true }],
+    "sort-imports": [
+      "error",
+      {
+        "allowSeparatedGroups": true
+      }
+    ],
     "eslint/no-undefined": "off", // Conflict with unicorn/no-typeof-undefined which prefers direct undefined comparison
     "import/prefer-default-export": "off",
     "import/no-named-export": "off",
-    "import/no-namespace": ["error", { "ignore": ["vuetify/*"] }],
-    "vue/max-props": ["error", { "maxProps": 8 }],
+    "import/no-namespace": [
+      "error",
+      {
+        "ignore": [
+          "vuetify/*"
+        ]
+      }
+    ],
+    "import/max-dependencies": [
+      "warn",
+      {
+        "max": 10
+      }
+    ],
+    "vue/max-props": [
+      "error",
+      {
+        "maxProps": 8
+      }
+    ],
     "oxc/no-optional-chaining": "off",
     "node/no-process-env": "off",
     "no-continue": "off",
     "vitest/require-hook": "off",
     "import/unambiguous": "off",
-    "max-params": ["warn", { "max": 4 }],
+    "max-params": [
+      "warn",
+      {
+        "max": 4
+      }
+    ],
     "import/no-nodejs-modules": "off",
     "eslint/no-magic-numbers": [
       "error",
       {
-        "ignore": [-1, 0, 1, 2, 3, 4],
+        "ignore": [
+          -1,
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
         "ignoreArrayIndexes": true
       }
     ],
   },
   "overrides": [
     {
-      "files": ["**/components/**"],
+      "files": [
+        "**/components/**"
+      ],
       "rules": {
         "unicorn/filename-case": [
           "error",
@@ -69,15 +141,21 @@
       }
     },
     {
-      "files": ["tests/**"],
+      "files": [
+        "tests/**"
+      ],
       "rules": {
         "vitest/require-hook": "off",
         "vitest/no-hooks": "off",
-        "vitest/no-importing-vitest-globals": "off"
+        "vitest/no-importing-vitest-globals": "off",
+        "max-lines-per-function": "off",
+        "max-statements": "off"
       }
     },
     {
-      "files": ["**/preload.js"],
+      "files": [
+        "**/preload.js"
+      ],
       "rules": {
         "import/no-commonjs": "off"
       }

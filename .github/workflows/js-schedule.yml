@@ -36,7 +36,6 @@ jobs:
       desktop: ${{ needs.config.outputs.desktop }}
       extension: ${{ needs.config.outputs.extension }}
       cloud: ${{ needs.config.outputs.cloud }}
-      microservices: ${{ needs.config.outputs.microservices }}
       use_registry: true
     secrets: inherit
 

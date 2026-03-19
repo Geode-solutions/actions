@@ -19,8 +19,6 @@ jobs:
   prepare:
     needs: config
     uses: Geode-solutions/actions/.github/workflows/js-prepare.yml@master
-    with:
-      microservices: ${{ needs.config.outputs.microservices }}
     secrets: inherit
 
   oxlint:
@@ -50,7 +48,6 @@ jobs:
       desktop: ${{ needs.config.outputs.desktop }}
       extension: ${{ needs.config.outputs.extension }}
       cloud: false
-      microservices: ${{ needs.config.outputs.microservices }}
     secrets: inherit
 
   semantic-commit:

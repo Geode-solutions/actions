@@ -1,4 +1,5 @@
 name: "Test Browser"
+description: "Test Browser"
 
 inputs:
   repos:
@@ -7,9 +8,7 @@ inputs:
     type: string
   tarballs:
     type: string
-  wheels:
-    type: string
-  microservices:
+  pyinstallers:
     type: string
   use_registry:
     type: boolean
@@ -50,9 +49,7 @@ runs:
         repos: ${{ inputs.repos }}
         branch: ${{ inputs.branch }}
         token: ${{ inputs.token }}
-        wheels: ${{ inputs.wheels }}
-        microservices: ${{ inputs.microservices }}
-        use_registry: ${{ inputs.use_registry }}
+        pyinstallers: ${{ inputs.pyinstallers }}
     - name: Test
       run: |
         npm run test:extension

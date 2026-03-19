@@ -1,4 +1,5 @@
 name: "Test Python"
+description: "Test Python"
 
 inputs:
   repos:

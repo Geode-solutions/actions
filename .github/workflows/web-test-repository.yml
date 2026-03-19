@@ -33,9 +33,6 @@ on:
       extension:
         type: string
         required: true
-      microservices:
-        type: string
-        default: "microservices"
       use_registry:
         type: boolean
         default: false
@@ -124,7 +121,6 @@ jobs:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-          microservices: ${{ inputs.microservices }}
           use_registry: ${{ inputs.use_registry }}
 
   test-browser:
@@ -145,7 +141,6 @@ jobs:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-          microservices: ${{ inputs.microservices }}
           use_registry: ${{ inputs.use_registry }}
 
   test-cloud:
@@ -184,7 +179,6 @@ jobs:
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
           use_registry: ${{ inputs.use_registry }}
-          microservices: ${{ inputs.microservices }}
           AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -210,7 +204,6 @@ jobs:
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
           use_registry: ${{ inputs.use_registry }}
-          microservices: ${{ inputs.microservices }}
 
   test-docker:
     if: inputs.docker == 'true'

@@ -5,7 +5,7 @@ import fs from "fs"
 import path from "path"
 import request from "request"
 import * as tar from "tar"
-import AdmZip from "adm-zip"
+import StreamZip from "node-stream-zip"
 
 const download_asset = async (asset, token) => {
   return new Promise((resolve) => {
@@ -19,12 +19,30 @@ const download_asset = async (asset, token) => {
       },
     })
       .pipe(fs.createWriteStream(asset.name))
-      .on("finish", function () {
+      .on("finish", async function () {
         const extension = asset.name.split(".").pop()
         if (extension == "zip") {
           console.log("Unzipping", asset.name)
-          const zip = new AdmZip(asset.name)
-          zip.extractAllTo(process.env.GITHUB_WORKSPACE)
+          const zip = new StreamZip.async({
+            file: asset.name,
+          })
+          const nb_files = await zip.extract(null, process.env.GITHUB_WORKSPACE)
+          console.log({ nb_files })
+          if (process.platform == "linux") {
+            const entries = await zip.entries()
+            for (const entry of Object.values(entries)) {
+              console.log({ entry })
+              if (entry.isDirectory) continue
+              const full = path.join(process.env.GITHUB_WORKSPACE, entry.name)
+              const mode = (entry.attr >>> 16) & 0o777
+              const readable_mode = mode.toString(8)
+              console.log({ full, mode, readable_mode })
+              if (readable_mode) {
+                fs.chmodSync(full, readable_mode)
+              }
+            }
+          }
+          await zip.close()
           let extract_name = asset.name.slice(0, -4)
           if (extract_name.endsWith("-private")) {
             extract_name = extract_name.slice(0, -8)

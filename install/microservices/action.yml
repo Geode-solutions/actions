@@ -8,14 +8,8 @@ inputs:
   branch:
     type: string
     required: true
-  wheels:
+  pyinstallers:
     type: string
-  microservices:
-    type: string
-    required: true
-  use_registry:
-    type: boolean
-    required: true
   token:
     type: string
     required: true
@@ -28,23 +22,24 @@ runs:
       with:
         python-version: 3.12
     - uses: Geode-solutions/actions/get-release@master
-      if: ${{ inputs.wheels == '' && inputs.use_registry == 'false' }}
-      id: wheels
+      if: ${{ inputs.pyinstallers == '' }}
+      id: pyinstallers
       with:
         repository: ${{ inputs.repos }}
         file: "pyinstaller-${{ runner.os }}.zip"
         token: ${{ inputs.token }}
         branch: ${{ inputs.branch }}
-    - name: Get wheels
+    - name: Get pyinstallers
       id: result
       run: |
-        if [ -n "${{ inputs.wheels }}" ]; then
-          echo "wheels=${{ inputs.wheels }}" >> $GITHUB_OUTPUT
-        elif [ -n "${{ steps.wheels.outputs.path }}" ]; then
-          echo "wheels=${{ steps.wheels.outputs.path }}" >> $GITHUB_OUTPUT
+        if [ -n "${{ inputs.pyinstallers }}" ]; then
+          echo "pyinstallers=${{ inputs.pyinstallers }}" >> $GITHUB_OUTPUT
+        elif [ -n "${{ steps.pyinstallers.outputs.path }}" ]; then
+          echo "pyinstallers=${{ steps.pyinstallers.outputs.path }}" >> $GITHUB_OUTPUT
         else
-          echo "wheels=" >> $GITHUB_OUTPUT
+          echo "pyinstallers=" >> $GITHUB_OUTPUT
         fi
+        ls -l
       shell: bash
     - name: Install OSMesa
       uses: Geode-solutions/actions/install/osmesa@master

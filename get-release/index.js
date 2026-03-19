@@ -5,7 +5,8 @@ import fs from "fs"
 import path from "path"
 import request from "request"
 import * as tar from "tar"
-import AdmZip from "adm-zip"
+// import AdmZip from "adm-zip"
+import StreamZip from "node-stream-zip"
 
 const download_asset = async (asset, token) => {
   return new Promise((resolve) => {
@@ -19,12 +20,26 @@ const download_asset = async (asset, token) => {
       },
     })
       .pipe(fs.createWriteStream(asset.name))
-      .on("finish", function () {
+      .on("finish", async function () {
         const extension = asset.name.split(".").pop()
         if (extension == "zip") {
           console.log("Unzipping", asset.name)
-          const zip = new AdmZip(asset.name)
-          zip.extractAllTo(process.env.GITHUB_WORKSPACE)
+          const zip = new StreamZip({
+            file: asset.name,
+          })
+          await zip.extract(null, process.env.GITHUB_WORKSPACE)
+          for (const entry of Object.values(zip.entries())) {
+            console.log({ entry })
+            if (entry.isDirectory) continue
+            const full = path.join(process.env.GITHUB_WORKSPACE, entry.name)
+            const mode = (entry.externalAttr >>> 16) & 0o777
+            console.log({ full, mode })
+            if (mode) {
+              fs.chmodSync(full, mode)
+            }
+          }
+          // const zip = new AdmZip(asset.name)
+          // zip.extractAllTo(process.env.GITHUB_WORKSPACE)
           let extract_name = asset.name.slice(0, -4)
           if (extract_name.endsWith("-private")) {
             extract_name = extract_name.slice(0, -8)
@@ -46,7 +61,7 @@ const download_asset = async (asset, token) => {
               console.log("Untar to:", extract_name)
               const result = path.join(
                 process.env.GITHUB_WORKSPACE,
-                extract_name
+                extract_name,
               )
               console.log("Result:", result)
               fs.unlinkSync(asset.name)
@@ -94,57 +109,57 @@ const main = async () => {
                   if (github.context.payload.pull_request) {
                     const head_release = releases.data.find(
                       (r) =>
-                        r.name === github.context.payload.pull_request.head.ref
+                        r.name === github.context.payload.pull_request.head.ref,
                     )
                     if (head_release) {
                       console.log(
                         "Found head release:",
                         head_release.name,
                         " for ",
-                        repo
+                        repo,
                       )
                       return head_release.id
                     }
                     const base_release = releases.data.find(
                       (r) =>
-                        r.name === github.context.payload.pull_request.base.ref
+                        r.name === github.context.payload.pull_request.base.ref,
                     )
                     if (base_release) {
                       console.log(
                         "Found base release:",
                         base_release.name,
                         " for ",
-                        repo
+                        repo,
                       )
                       return base_release.id
                     }
                   }
                   const branch_release = releases.data.find(
-                    (r) => r.name === branch
+                    (r) => r.name === branch,
                   )
                   if (branch_release) {
                     console.log(
                       "Found branch release:",
                       branch_release.name,
                       " for ",
-                      repo
+                      repo,
                     )
                     return branch_release.id
                   }
                   const base_release = releases.data.find(
-                    (r) => r.name === base
+                    (r) => r.name === base,
                   )
                   if (base_release) {
                     console.log(
                       "Found base release:",
                       base_release.name,
                       " for ",
-                      repo
+                      repo,
                     )
                     return base_release.id
                   }
                   const release = releases.data.find(
-                    (r) => r.name.startsWith("v") && r.name.includes("-rc.")
+                    (r) => r.name.startsWith("v") && r.name.includes("-rc."),
                   )
                   if (release) {
                     console.log("Found release:", release.name, " for ", repo)
@@ -154,7 +169,7 @@ const main = async () => {
                     "Found default release:",
                     releases.data[0].name,
                     " for ",
-                    repo
+                    repo,
                   )
                   return releases.data[0].id
                 })
@@ -163,7 +178,7 @@ const main = async () => {
               .listReleaseAssets({ owner, repo, release_id })
               .then(async (assets) => {
                 const filtered_assets = assets.data.filter((asset) =>
-                  asset.name.includes(file)
+                  asset.name.includes(file),
                 )
                 let results = []
                 for (let i = 0; i < filtered_assets.length; i++) {

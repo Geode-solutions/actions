@@ -34,10 +34,11 @@ const download_asset = async (asset, token) => {
             console.log({ entry })
             if (entry.isDirectory) continue
             const full = path.join(process.env.GITHUB_WORKSPACE, entry.name)
-            const mode = (entry.attr >>> 16) & 0o777
-            console.log({ full, mode })
-            if (mode) {
-              fs.chmodSync(full, mode)
+            const mode = (entry.attr >>> 16) >>> 0xffff
+            const permissions = mode & 0o777
+            console.log({ full, permissions })
+            if (permissions) {
+              fs.chmodSync(full, permissions)
             }
           }
           await zip.close()

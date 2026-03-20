@@ -6,7 +6,7 @@ import path from "path";
 import https from "https";
 import http from "http";
 import * as tar from "tar";
-import StreamZip from "node-stream-zip";
+import unzipper from "unzipper";
 
 const download_file = (url, dest, token) => {
   return new Promise((resolve, reject) => {

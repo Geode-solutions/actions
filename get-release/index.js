@@ -3,11 +3,10 @@ import github from "@actions/github";
 import { Octokit } from "@octokit/rest";
 import fs from "fs";
 import path from "path";
-import request from "request";
-import * as tar from "tar";
-import StreamZip from "node-stream-zip";
 import https from "https";
 import http from "http";
+import * as tar from "tar";
+import StreamZip from "node-stream-zip";
 
 const download_file = (url, dest, token) => {
   return new Promise((resolve, reject) => {
@@ -20,7 +19,6 @@ const download_file = (url, dest, token) => {
     };
 
     const handleResponse = (res) => {
-      // Follow redirects (GitHub asset downloads always redirect)
       if (res.statusCode === 302 || res.statusCode === 301) {
         const redirectModule = res.headers.location.startsWith("https") ? https : http;
         redirectModule.get(res.headers.location, handleResponse).on("error", reject);
@@ -71,7 +69,7 @@ const download_asset = async (asset, token) => {
     console.log("Unzip to:", extract_name);
     console.log("Result:", result);
     fs.unlinkSync(asset.name);
-    return result; // <-- return instead of resolve()
+    return result;
   } else if (extension == "gz") {
     console.log("Untaring", asset.name);
     await new Promise((resolve, reject) => {
@@ -85,10 +83,10 @@ const download_asset = async (asset, token) => {
     console.log("Untar to:", extract_name);
     console.log("Result:", result);
     fs.unlinkSync(asset.name);
-    return result; // <-- return instead of resolve()
+    return result;
   } else {
     console.log("Downloading", asset.name);
-    return path.join(process.env.GITHUB_WORKSPACE, asset.name); // <-- return instead of resolve()
+    return path.join(process.env.GITHUB_WORKSPACE, asset.name);
   }
 };
 
@@ -96,16 +94,17 @@ const main = async () => {
   try {
     const repos = core.getInput("repository");
     if (repos.length) {
-      let promises = [];
       const file = core.getInput("file", { required: true });
       const token = core.getInput("token");
       const branch = core.getInput("branch");
       const base = core.getInput("base");
       const octokit = new Octokit({ auth: token });
-      repos.split(";").forEach((owner_repo) => {
-        if (!owner_repo.length) {
-          return;
-        }
+
+      const results = [];
+
+      for (const owner_repo of repos.split(";")) {
+        if (!owner_repo.length) continue;
+
         const owner_repo_array = owner_repo.split("/");
         let owner = "Geode-solutions";
         let repo = owner_repo_array[0];
@@ -113,79 +112,73 @@ const main = async () => {
           owner = owner_repo_array[0];
           repo = owner_repo_array[1];
         }
-        let promise = new Promise(function (resolve) {
-          console.log("Looking for repository:", repo);
-          const query = branch.includes("master")
-            ? octokit.repos.getLatestRelease({ owner, repo }).then((release) => release.data.id)
-            : octokit.repos.listReleases({ owner, repo, per_page: 100 }).then((releases) => {
-                if (github.context.payload.pull_request) {
-                  const head_release = releases.data.find(
-                    (r) => r.name === github.context.payload.pull_request.head.ref,
-                  );
-                  if (head_release) {
-                    console.log("Found head release:", head_release.name, " for ", repo);
-                    return head_release.id;
-                  }
-                  const base_release = releases.data.find(
-                    (r) => r.name === github.context.payload.pull_request.base.ref,
-                  );
-                  if (base_release) {
-                    console.log("Found base release:", base_release.name, " for ", repo);
-                    return base_release.id;
-                  }
+
+        console.log("Looking for repository:", repo);
+
+        const release_id = await (branch.includes("master")
+          ? octokit.repos.getLatestRelease({ owner, repo }).then((r) => r.data.id)
+          : octokit.repos.listReleases({ owner, repo, per_page: 100 }).then((releases) => {
+              if (github.context.payload.pull_request) {
+                const head_release = releases.data.find(
+                  (r) => r.name === github.context.payload.pull_request.head.ref,
+                );
+                if (head_release) {
+                  console.log("Found head release:", head_release.name, " for ", repo);
+                  return head_release.id;
                 }
-                const branch_release = releases.data.find((r) => r.name === branch);
-                if (branch_release) {
-                  console.log("Found branch release:", branch_release.name, " for ", repo);
-                  return branch_release.id;
-                }
-                const base_release = releases.data.find((r) => r.name === base);
+                const base_release = releases.data.find(
+                  (r) => r.name === github.context.payload.pull_request.base.ref,
+                );
                 if (base_release) {
                   console.log("Found base release:", base_release.name, " for ", repo);
                   return base_release.id;
                 }
-                const release = releases.data.find(
-                  (r) => r.name.startsWith("v") && r.name.includes("-rc."),
-                );
-                if (release) {
-                  console.log("Found release:", release.name, " for ", repo);
-                  return release.id;
-                }
-                console.log("Found default release:", releases.data[0].name, " for ", repo);
-                return releases.data[0].id;
-              });
-          query.then((release_id) => {
-            octokit.repos.listReleaseAssets({ owner, repo, release_id }).then(async (assets) => {
-              const filtered_assets = assets.data.filter((asset) => asset.name.includes(file));
-              let results = [];
-              for (let i = 0; i < filtered_assets.length; i++) {
-                console.log("Asset name:", filtered_assets[i].name);
-                const result = await download_asset(filtered_assets[i], token);
-                results.push(result);
               }
-              resolve(results);
-            });
-          });
+              const branch_release = releases.data.find((r) => r.name === branch);
+              if (branch_release) {
+                console.log("Found branch release:", branch_release.name, " for ", repo);
+                return branch_release.id;
+              }
+              const base_release = releases.data.find((r) => r.name === base);
+              if (base_release) {
+                console.log("Found base release:", base_release.name, " for ", repo);
+                return base_release.id;
+              }
+              const release = releases.data.find(
+                (r) => r.name.startsWith("v") && r.name.includes("-rc."),
+              );
+              if (release) {
+                console.log("Found release:", release.name, " for ", repo);
+                return release.id;
+              }
+              console.log("Found default release:", releases.data[0].name, " for ", repo);
+              return releases.data[0].id;
+            }));
+
+        const assets = await octokit.repos.listReleaseAssets({ owner, repo, release_id });
+        const filtered_assets = assets.data.filter((asset) => asset.name.includes(file));
+        const repo_results = [];
+        for (const asset of filtered_assets) {
+          console.log("Asset name:", asset.name);
+          const result = await download_asset(asset, token);
+          repo_results.push(result);
+        }
+        results.push(repo_results);
+      }
+
+      let result = "";
+      results.forEach((output) => {
+        output.forEach((f) => {
+          result += f + ";";
         });
-        promises.push(promise);
       });
-      Promise.all(promises).then((outputs) => {
-        let result = "";
-        outputs.forEach((output) => {
-          console.log("Output:", output);
-          output.forEach((file) => {
-            result += file + ";";
-          });
-        });
-        result = result.slice(0, -1);
-        core.setOutput("path", result);
-        console.log("Final result:", result);
-      });
+      result = result.slice(0, -1);
+      core.setOutput("path", result);
+      console.log("Final result:", result);
     }
   } catch (error) {
     core.setFailed(error.message);
   }
 };
 
-// Call the main function to run the action
 main();

@@ -19,18 +19,38 @@ const download_file = (url, dest, token) => {
     };
 
     const handleResponse = (res) => {
+      console.log("Response status:", res.statusCode);
+      console.log("Response URL:", res.headers.location || url);
+
       if (res.statusCode === 302 || res.statusCode === 301) {
-        const redirectModule = res.headers.location.startsWith("https") ? https : http;
-        redirectModule.get(res.headers.location, handleResponse).on("error", reject);
+        const redirectUrl = res.headers.location;
+        console.log("Redirecting to:", redirectUrl);
+        const redirectModule = redirectUrl.startsWith("https") ? https : http;
+        redirectModule.get(redirectUrl, handleResponse).on("error", reject);
         return;
       }
       if (res.statusCode !== 200) {
         reject(new Error(`Download failed with status ${res.statusCode}`));
         return;
       }
+      let bytes = 0;
       const writer = fs.createWriteStream(dest);
+      res.on("data", (chunk) => {
+        bytes += chunk.length;
+      });
       res.pipe(writer);
-      writer.on("finish", () => writer.close(resolve));
+      writer.on("finish", () => {
+        console.log(`Downloaded ${bytes} bytes to ${dest}`);
+        const stat = fs.statSync(dest);
+        console.log(`File size on disk: ${stat.size} bytes`);
+        // Print first 4 bytes - should be 50 4B 03 04 for a valid ZIP
+        const fd = fs.openSync(dest, "r");
+        const buf = Buffer.alloc(4);
+        fs.readSync(fd, buf, 0, 4, 0);
+        fs.closeSync(fd);
+        console.log("First 4 bytes (should be 50 4B 03 04 for ZIP):", buf.toString("hex"));
+        writer.close(resolve);
+      });
       writer.on("error", reject);
     };
 

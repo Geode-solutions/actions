@@ -42,23 +42,21 @@ const download_file = (url, dest, token) => {
 
 const download_asset = async (asset, token) => {
   await download_file(asset.url, asset.name, token);
+
   const extension = asset.name.split(".").pop();
+
   if (extension == "zip") {
     console.log("Unzipping", asset.name);
-    const zip = new StreamZip.async({
-      file: asset.name,
-    });
+    const zip = new StreamZip.async({ file: asset.name });
     const nb_files = await zip.extract(null, process.env.GITHUB_WORKSPACE);
     console.log({ nb_files });
     if (process.platform == "linux") {
       const entries = await zip.entries();
       for (const entry of Object.values(entries)) {
-        console.log({ entry });
         if (entry.isDirectory) continue;
         const full = path.join(process.env.GITHUB_WORKSPACE, entry.name);
         const mode = (entry.attr >>> 16) & 0o777;
         const readable_mode = mode.toString(8);
-        console.log({ full, mode, readable_mode });
         if (readable_mode) {
           fs.chmodSync(full, readable_mode);
         }
@@ -69,30 +67,28 @@ const download_asset = async (asset, token) => {
     if (extract_name.endsWith("-private")) {
       extract_name = extract_name.slice(0, -8);
     }
-    console.log("Unzip to:", extract_name);
     const result = path.join(process.env.GITHUB_WORKSPACE, extract_name);
+    console.log("Unzip to:", extract_name);
     console.log("Result:", result);
     fs.unlinkSync(asset.name);
-    resolve(result);
+    return result; // <-- return instead of resolve()
   } else if (extension == "gz") {
     console.log("Untaring", asset.name);
-    fs.createReadStream(asset.name)
-      .pipe(tar.x())
-      .on("close", function () {
-        let extract_name = asset.name.slice(0, -7);
-        if (extract_name.endsWith("-private")) {
-          extract_name = extract_name.slice(0, -8);
-        }
-        console.log("Untar to:", extract_name);
-        const result = path.join(process.env.GITHUB_WORKSPACE, extract_name);
-        console.log("Result:", result);
-        fs.unlinkSync(asset.name);
-        resolve(result);
-      });
+    await new Promise((resolve, reject) => {
+      fs.createReadStream(asset.name).pipe(tar.x()).on("close", resolve).on("error", reject);
+    });
+    let extract_name = asset.name.slice(0, -7);
+    if (extract_name.endsWith("-private")) {
+      extract_name = extract_name.slice(0, -8);
+    }
+    const result = path.join(process.env.GITHUB_WORKSPACE, extract_name);
+    console.log("Untar to:", extract_name);
+    console.log("Result:", result);
+    fs.unlinkSync(asset.name);
+    return result; // <-- return instead of resolve()
   } else {
     console.log("Downloading", asset.name);
-    const result = path.join(process.env.GITHUB_WORKSPACE, asset.name);
-    resolve(result);
+    return path.join(process.env.GITHUB_WORKSPACE, asset.name); // <-- return instead of resolve()
   }
 };
 

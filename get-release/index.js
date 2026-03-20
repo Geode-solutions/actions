@@ -7,6 +7,7 @@ import https from "https";
 import http from "http";
 import * as tar from "tar";
 import unzipper from "unzipper";
+import { execSync } from "child_process";
 
 const download_file = (url, dest, token) => {
   return new Promise((resolve, reject) => {
@@ -64,34 +65,27 @@ const download_asset = async (asset, token) => {
   const extension = asset.name.split(".").pop();
   if (extension == "zip") {
     console.log("Unzipping", asset.name);
-    await new Promise((resolve, reject) => {
-      fs.createReadStream(asset.name)
-        .pipe(unzipper.Extract({ path: process.env.GITHUB_WORKSPACE }))
-        .on("close", resolve)
-        .on("error", reject);
-    });
+    const destPath = process.env.GITHUB_WORKSPACE;
 
-    if (process.platform == "linux") {
-      // chmod handling — unzipper doesn't preserve permissions, walk extracted files
-      const setPermissions = (dir) => {
-        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-          const full = path.join(dir, entry.name);
-          if (entry.isDirectory()) {
-            setPermissions(full);
-          } else {
-            fs.chmodSync(full, 0o755);
-          }
-        }
-      };
+    if (process.platform == "win32") {
+      execSync(
+        `powershell -Command "Expand-Archive -Force -Path '${asset.name}' -DestinationPath '${destPath}'"`,
+        { stdio: "inherit" },
+      );
+    } else {
+      execSync(`unzip -o "${asset.name}" -d "${destPath}"`, { stdio: "inherit" });
+      // Restore executable permissions on linux
       let extract_name = asset.name.slice(0, -4);
       if (extract_name.endsWith("-private")) extract_name = extract_name.slice(0, -8);
-      const extract_dir = path.join(process.env.GITHUB_WORKSPACE, extract_name);
-      if (fs.existsSync(extract_dir)) setPermissions(extract_dir);
+      const extract_dir = path.join(destPath, extract_name);
+      if (fs.existsSync(extract_dir)) {
+        execSync(`chmod -R 755 "${extract_dir}"`);
+      }
     }
 
     let extract_name = asset.name.slice(0, -4);
     if (extract_name.endsWith("-private")) extract_name = extract_name.slice(0, -8);
-    const result = path.join(process.env.GITHUB_WORKSPACE, extract_name);
+    const result = path.join(destPath, extract_name);
     console.log("Unzip to:", extract_name);
     console.log("Result:", result);
     fs.unlinkSync(asset.name);

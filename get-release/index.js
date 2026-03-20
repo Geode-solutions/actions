@@ -62,29 +62,35 @@ const download_asset = async (asset, token) => {
   await download_file(asset.url, asset.name, token);
 
   const extension = asset.name.split(".").pop();
-
   if (extension == "zip") {
     console.log("Unzipping", asset.name);
-    const zip = new StreamZip.async({ file: asset.name });
-    const nb_files = await zip.extract(null, process.env.GITHUB_WORKSPACE);
-    console.log({ nb_files });
+    await new Promise((resolve, reject) => {
+      fs.createReadStream(asset.name)
+        .pipe(unzipper.Extract({ path: process.env.GITHUB_WORKSPACE }))
+        .on("close", resolve)
+        .on("error", reject);
+    });
+
     if (process.platform == "linux") {
-      const entries = await zip.entries();
-      for (const entry of Object.values(entries)) {
-        if (entry.isDirectory) continue;
-        const full = path.join(process.env.GITHUB_WORKSPACE, entry.name);
-        const mode = (entry.attr >>> 16) & 0o777;
-        const readable_mode = mode.toString(8);
-        if (readable_mode) {
-          fs.chmodSync(full, readable_mode);
+      // chmod handling — unzipper doesn't preserve permissions, walk extracted files
+      const setPermissions = (dir) => {
+        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+          const full = path.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            setPermissions(full);
+          } else {
+            fs.chmodSync(full, 0o755);
+          }
         }
-      }
+      };
+      let extract_name = asset.name.slice(0, -4);
+      if (extract_name.endsWith("-private")) extract_name = extract_name.slice(0, -8);
+      const extract_dir = path.join(process.env.GITHUB_WORKSPACE, extract_name);
+      if (fs.existsSync(extract_dir)) setPermissions(extract_dir);
     }
-    await zip.close();
+
     let extract_name = asset.name.slice(0, -4);
-    if (extract_name.endsWith("-private")) {
-      extract_name = extract_name.slice(0, -8);
-    }
+    if (extract_name.endsWith("-private")) extract_name = extract_name.slice(0, -8);
     const result = path.join(process.env.GITHUB_WORKSPACE, extract_name);
     console.log("Unzip to:", extract_name);
     console.log("Result:", result);

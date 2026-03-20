@@ -2,20 +2,20 @@
   "name": "get-release",
   "version": "1.0.0",
   "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "type": "module",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.0",
     "@octokit/rest": "^21.1.1",
-    "node-stream-zip": "^1.15.0",
     "request": "^2.88.2",
-    "tar": "^7.4.3"
+    "tar": "^7.4.3",
+    "unzipper": "^0.12.3"
   }
 }

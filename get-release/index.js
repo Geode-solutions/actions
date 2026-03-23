@@ -1,5 +1,4 @@
 import * as tar from "tar";
-import AdmZip from "adm-zip";
 import { Octokit } from "@octokit/rest";
 import core from "@actions/core";
 import { execSync } from "node:child_process";
@@ -49,6 +48,21 @@ async function download_asset(asset, token) {
           console.log("Result:", result);
           fs.unlinkSync(asset.name);
           resolve(result);
+        } else if (extension == "gz") {
+          console.log("Untaring", asset.name);
+          fs.createReadStream(asset.name)
+            .pipe(tar.x())
+            .on("close", function () {
+              let extract_name = asset.name.slice(0, -7);
+              if (extract_name.endsWith("-private")) {
+                extract_name = extract_name.slice(0, -8);
+              }
+              console.log("Untar to:", extract_name);
+              const result = path.join(process.env.GITHUB_WORKSPACE, extract_name);
+              console.log("Result:", result);
+              fs.unlinkSync(asset.name);
+              resolve(result);
+            });
         } else {
           console.log("Downloading", asset.name);
           const result = path.join(process.env.GITHUB_WORKSPACE, asset.name);

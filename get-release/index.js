@@ -1,6 +1,7 @@
 import * as tar from "tar";
 import { Octokit } from "@octokit/rest";
 import core from "@actions/core";
+import { execSync } from "node:child_process";
 import fs from "node:fs";
 import github from "@actions/github";
 import path from "node:path";

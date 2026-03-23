@@ -9,6 +9,7 @@ import request from "request";
 
 async function download_asset(asset, token) {
   return new Promise((resolve) => {
+    const writeStream = fs.createWriteStream(asset.name);
     request({
       url: asset.url,
       method: "GET",
@@ -17,70 +18,57 @@ async function download_asset(asset, token) {
         Authorization: "Bearer " + token,
         "User-Agent": "",
       },
-    })
-      .pipe(fs.createWriteStream(asset.name))
-      .on("finish", async function () {
-        const extension = asset.name.split(".").pop();
-        if (extension == "zip") {
-          console.log("Unzipping", asset.name);
-          const destPath = process.env.GITHUB_WORKSPACE;
+    }).pipe(writeStream);
+    writeStream.on("close", function () {
+      const extension = asset.name.split(".").pop();
+      if (extension == "zip") {
+        console.log("Unzipping", asset.name);
+        const destPath = process.env.GITHUB_WORKSPACE;
 
-          if (process.platform == "win32") {
-            const maxRetries = 3;
-            let attempt = 0;
-            while (attempt < maxRetries) {
-              try {
-                execSync(
-                  `powershell -Command "Expand-Archive -Force -LiteralPath '${asset.name}' -DestinationPath '${destPath}'"`,
-                  { stdio: "inherit" },
-                );
-                break;
-              } catch (e) {
-                attempt++;
-                if (attempt === maxRetries) throw e;
-                console.log(`Expand-Archive failed (attempt ${attempt}), retrying in 2s...`);
-                await new Promise((r) => setTimeout(r, 2000));
-              }
-            }
-          } else {
-            execSync(`unzip -o "${asset.name}" -d "${destPath}"`, { stdio: "inherit" });
-            // Restore executable permissions on linux
-            let extract_name = asset.name.slice(0, -4);
-            if (extract_name.endsWith("-private")) extract_name = extract_name.slice(0, -8);
-            const extract_dir = path.join(destPath, extract_name);
-            if (fs.existsSync(extract_dir)) {
-              execSync(`chmod -R 755 "${extract_dir}"`);
-            }
-          }
-
+        if (process.platform == "win32") {
+          execSync(
+            `powershell -Command "Expand-Archive -Force -Path '${asset.name}' -DestinationPath '${destPath}'"`,
+            { stdio: "inherit" },
+          );
+        } else {
+          execSync(`unzip -o "${asset.name}" -d "${destPath}"`, { stdio: "inherit" });
+          // Restore executable permissions on linux
           let extract_name = asset.name.slice(0, -4);
           if (extract_name.endsWith("-private")) extract_name = extract_name.slice(0, -8);
-          const result = path.join(destPath, extract_name);
-          console.log("Unzip to:", extract_name);
-          console.log("Result:", result);
-          fs.unlinkSync(asset.name);
-          resolve(result);
-        } else if (extension == "gz") {
-          console.log("Untaring", asset.name);
-          fs.createReadStream(asset.name)
-            .pipe(tar.x())
-            .on("close", function () {
-              let extract_name = asset.name.slice(0, -7);
-              if (extract_name.endsWith("-private")) {
-                extract_name = extract_name.slice(0, -8);
-              }
-              console.log("Untar to:", extract_name);
-              const result = path.join(process.env.GITHUB_WORKSPACE, extract_name);
-              console.log("Result:", result);
-              fs.unlinkSync(asset.name);
-              resolve(result);
-            });
-        } else {
-          console.log("Downloading", asset.name);
-          const result = path.join(process.env.GITHUB_WORKSPACE, asset.name);
-          resolve(result);
+          const extract_dir = path.join(destPath, extract_name);
+          if (fs.existsSync(extract_dir)) {
+            execSync(`chmod -R 755 "${extract_dir}"`);
+          }
         }
-      });
+
+        let extract_name = asset.name.slice(0, -4);
+        if (extract_name.endsWith("-private")) extract_name = extract_name.slice(0, -8);
+        const result = path.join(destPath, extract_name);
+        console.log("Unzip to:", extract_name);
+        console.log("Result:", result);
+        fs.unlinkSync(asset.name);
+        resolve(result);
+      } else if (extension == "gz") {
+        console.log("Untaring", asset.name);
+        fs.createReadStream(asset.name)
+          .pipe(tar.x())
+          .on("close", function () {
+            let extract_name = asset.name.slice(0, -7);
+            if (extract_name.endsWith("-private")) {
+              extract_name = extract_name.slice(0, -8);
+            }
+            console.log("Untar to:", extract_name);
+            const result = path.join(process.env.GITHUB_WORKSPACE, extract_name);
+            console.log("Result:", result);
+            fs.unlinkSync(asset.name);
+            resolve(result);
+          });
+      } else {
+        console.log("Downloading", asset.name);
+        const result = path.join(process.env.GITHUB_WORKSPACE, asset.name);
+        resolve(result);
+      }
+    });
   });
 }
 

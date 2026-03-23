@@ -1,4 +1,5 @@
 import * as tar from "tar";
+import AdmZip from "adm-zip";
 import { Octokit } from "@octokit/rest";
 import core from "@actions/core";
 import { execSync } from "node:child_process";
@@ -23,29 +24,18 @@ async function download_asset(asset, token) {
         const extension = asset.name.split(".").pop();
         if (extension == "zip") {
           console.log("Unzipping", asset.name);
-          const destPath = process.env.GITHUB_WORKSPACE;
-
-          if (process.platform == "win32") {
-            execSync(
-              `powershell -Command "Expand-Archive -Force -Path '${asset.name}' -DestinationPath '${destPath}'"`,
-              { stdio: "inherit" },
-            );
-          } else {
-            execSync(`unzip -o "${asset.name}" -d "${destPath}"`, { stdio: "inherit" });
-            // Restore executable permissions on linux
-            let extract_name = asset.name.slice(0, -4);
-            if (extract_name.endsWith("-private")) extract_name = extract_name.slice(0, -8);
-            const extract_dir = path.join(destPath, extract_name);
-            if (fs.existsSync(extract_dir)) {
-              execSync(`chmod -R 755 "${extract_dir}"`);
-            }
-          }
-
+          const zip = new AdmZip(asset.name);
+          zip.extractAllTo(process.env.GITHUB_WORKSPACE);
           let extract_name = asset.name.slice(0, -4);
-          if (extract_name.endsWith("-private")) extract_name = extract_name.slice(0, -8);
-          const result = path.join(destPath, extract_name);
+          if (extract_name.endsWith("-private")) {
+            extract_name = extract_name.slice(0, -8);
+          }
           console.log("Unzip to:", extract_name);
+          const result = path.join(process.env.GITHUB_WORKSPACE, extract_name);
           console.log("Result:", result);
+          if (process.platform == "linux" && fs.existsSync(result)) {
+            execSync(`chmod -R 755 "${result}"`);
+          }
           fs.unlinkSync(asset.name);
           resolve(result);
         } else if (extension == "gz") {

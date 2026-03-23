@@ -24,7 +24,6 @@ async function download_asset(asset, token) {
       if (extension == "zip") {
         console.log("Unzipping", asset.name);
         const destPath = process.env.GITHUB_WORKSPACE;
-
         if (process.platform == "win32") {
           execSync(
             `powershell -Command "Expand-Archive -Force -Path '${asset.name}' -DestinationPath '${destPath}'"`,
@@ -32,15 +31,7 @@ async function download_asset(asset, token) {
           );
         } else {
           execSync(`unzip -o "${asset.name}" -d "${destPath}"`, { stdio: "inherit" });
-          // Restore executable permissions on linux
-          let extract_name = asset.name.slice(0, -4);
-          if (extract_name.endsWith("-private")) extract_name = extract_name.slice(0, -8);
-          const extract_dir = path.join(destPath, extract_name);
-          if (fs.existsSync(extract_dir)) {
-            execSync(`chmod -R 755 "${extract_dir}"`);
-          }
         }
-
         let extract_name = asset.name.slice(0, -4);
         if (extract_name.endsWith("-private")) extract_name = extract_name.slice(0, -8);
         const result = path.join(destPath, extract_name);

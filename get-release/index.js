@@ -19,17 +19,29 @@ async function download_asset(asset, token) {
       },
     })
       .pipe(fs.createWriteStream(asset.name))
-      .on("finish", function () {
+      .on("finish", async function () {
         const extension = asset.name.split(".").pop();
         if (extension == "zip") {
           console.log("Unzipping", asset.name);
           const destPath = process.env.GITHUB_WORKSPACE;
 
           if (process.platform == "win32") {
-            execSync(
-              `powershell -Command "Expand-Archive -Force -Path '${asset.name}' -DestinationPath '${destPath}'"`,
-              { stdio: "inherit" },
-            );
+            const maxRetries = 3;
+            let attempt = 0;
+            while (attempt < maxRetries) {
+              try {
+                execSync(
+                  `powershell -Command "Expand-Archive -Force -LiteralPath '${asset.name}' -DestinationPath '${destPath}'"`,
+                  { stdio: "inherit" },
+                );
+                break;
+              } catch (e) {
+                attempt++;
+                if (attempt === maxRetries) throw e;
+                console.log(`Expand-Archive failed (attempt ${attempt}), retrying in 2s...`);
+                await new Promise((r) => setTimeout(r, 2000));
+              }
+            }
           } else {
             execSync(`unzip -o "${asset.name}" -d "${destPath}"`, { stdio: "inherit" });
             // Restore executable permissions on linux

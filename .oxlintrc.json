@@ -120,7 +120,8 @@
         "vitest/no-importing-vitest-globals": "off",
         "max-lines-per-function": "off",
         "max-statements": "off",
-        "vitest/prefer-to-be": "off"
+        "vitest/prefer-to-be": "off",
+        "vitest/no-confusing-set-timeout": "off" 
       }
     },
     {

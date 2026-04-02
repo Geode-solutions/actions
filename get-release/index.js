@@ -7,7 +7,7 @@ import github from "@actions/github";
 import path from "node:path";
 import request from "request";
 
-async function download_asset(asset, token) {
+async function download_asset(asset, token, destPath) {
   return new Promise((resolve) => {
     const writeStream = fs.createWriteStream(asset.name);
     request({
@@ -23,7 +23,6 @@ async function download_asset(asset, token) {
       const extension = asset.name.split(".").pop();
       if (extension == "zip") {
         console.log("Unzipping", asset.name);
-        const destPath = process.env.GITHUB_WORKSPACE;
         if (process.platform == "win32") {
           execSync(
             `powershell -Command "Expand-Archive -Force -Path '${asset.name}' -DestinationPath '${destPath}'"`,
@@ -66,6 +65,7 @@ async function download_asset(asset, token) {
 const main = async () => {
   try {
     const repos = core.getInput("repository");
+    const directory = core.getInput("directory");
     if (repos.length) {
       let promises = [];
       const file = core.getInput("file", { required: true });
@@ -131,7 +131,7 @@ const main = async () => {
               let results = [];
               for (let i = 0; i < filtered_assets.length; i++) {
                 console.log("Asset name:", filtered_assets[i].name);
-                const result = await download_asset(filtered_assets[i], token);
+                const result = await download_asset(filtered_assets[i], token, directory);
                 results.push(result);
               }
               resolve(results);

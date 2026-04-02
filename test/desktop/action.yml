@@ -66,6 +66,7 @@ runs:
         repository: ${{ github.repository}}
         file: "_${{ runner.os == 'Linux' && 'linux' || 'win32'}}.zip"
         token: ${{ inputs.token }}
+        directory: desktop_app
     - name: Install Playwright
       uses: Geode-solutions/actions/install/playwright@master
     - name: Build
@@ -87,7 +88,7 @@ runs:
         xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:e2e:desktop
       shell: bash
       env:
-        DESKTOP_EXECUTABLE_PATH: ${{ steps.desktop.outputs.path }}
+        DESKTOP_EXECUTABLE_PATH: desktop_app
         DEBUG: "pw:browser"
     - name: Test on Windows
       if: runner.os == 'Windows'
@@ -95,7 +96,7 @@ runs:
         npm run test:e2e:desktop
       shell: bash
       env:
-        DESKTOP_EXECUTABLE_PATH: ${{ steps.desktop.outputs.path }}
+        DESKTOP_EXECUTABLE_PATH: desktop_app
         DEBUG: "pw:browser"
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}

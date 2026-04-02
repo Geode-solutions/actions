@@ -18,6 +18,10 @@ inputs:
     description: "base name"
     required: false
     default: ""
+  directory:
+    description: "directory name"
+    required: false
+    default: "."
 outputs:
   path:
     description: "path of the extracted asset"

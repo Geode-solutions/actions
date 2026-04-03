@@ -39,7 +39,6 @@ runs:
   using: "composite"
   steps:
     - name: Install dependencies
-      if: ${{ inputs.use_registry == 'false' }}
       uses: Geode-solutions/actions/install/node-dependencies@master
       with:
         repos: ${{ inputs.repos }}

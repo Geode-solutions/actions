@@ -21,7 +21,7 @@ inputs:
   directory:
     description: "directory name"
     required: false
-    default: "."
+    default: ${{ github.workspace }}
 outputs:
   path:
     description: "path of the extracted asset"

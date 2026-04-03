@@ -63,10 +63,10 @@ runs:
       uses: Geode-solutions/actions/get-release@master
       id: desktop
       with:
-        repository: ${{ github.repository}}
+        repository: ${{ github.repository }}
         file: "_${{ runner.os == 'Linux' && 'linux' || 'win32'}}.zip"
         token: ${{ inputs.token }}
-        directory: desktop_app
+        directory: "${{ github.workspace }}/desktop_app"
     - name: Install Playwright
       uses: Geode-solutions/actions/install/playwright@master
     - name: Build
@@ -83,12 +83,14 @@ runs:
     - name: Test on Linux
       if: runner.os == 'Linux'
       run: |
-        sudo chown root:root ./release/0.0.0/linux-unpacked/chrome-sandbox
-        sudo chmod 4755 ./release/0.0.0/linux-unpacked/chrome-sandbox
+        if [ -f "./release/0.0.0/linux-unpacked/chrome-sandbox" ]; then
+          sudo chown root:root ./release/0.0.0/linux-unpacked/chrome-sandbox
+          sudo chmod 4755 ./release/0.0.0/linux-unpacked/chrome-sandbox
+        fi
         xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:e2e:desktop
       shell: bash
       env:
-        DESKTOP_EXECUTABLE_PATH: desktop_app
+        DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"
         DEBUG: "pw:browser"
     - name: Test on Windows
       if: runner.os == 'Windows'
@@ -96,7 +98,7 @@ runs:
         npm run test:e2e:desktop
       shell: bash
       env:
-        DESKTOP_EXECUTABLE_PATH: desktop_app
+        DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"
         DEBUG: "pw:browser"
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}

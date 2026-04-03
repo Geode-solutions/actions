@@ -50,6 +50,8 @@ runs:
         branch: ${{ inputs.branch }}
         token: ${{ inputs.token }}
         pyinstallers: ${{ inputs.pyinstallers }}
+    - name: Install OSMesa
+      uses: Geode-solutions/actions/install/osmesa@master
     - name: Test
       run: |
         npm run test:extension

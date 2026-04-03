@@ -203,6 +203,8 @@ jobs:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
+      - name: Install OSMesa
+        uses: Geode-solutions/actions/install/osmesa@master
       - name: Install Azure Sign Tool
         uses: Geode-solutions/actions/install/azure-sign@master
       - name: Package
@@ -249,6 +251,8 @@ jobs:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
+      - name: Install OSMesa
+        uses: Geode-solutions/actions/install/osmesa@master
       - name: Package
         run: |
           jq '.version = "${{ inputs.version }}"' package.json > temp && mv temp package.json

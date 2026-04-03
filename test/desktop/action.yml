@@ -54,6 +54,8 @@ runs:
         branch: ${{ inputs.branch }}
         token: ${{ inputs.token }}
         pyinstallers: ${{ inputs.pyinstallers }}
+    - name: Install OSMesa
+      uses: Geode-solutions/actions/install/osmesa@master
     - name: Install Azure Sign Tool
       if: ${{ inputs.use_registry == 'false' }}
       uses: Geode-solutions/actions/install/azure-sign@master

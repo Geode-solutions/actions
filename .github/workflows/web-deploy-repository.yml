@@ -169,8 +169,6 @@ jobs:
         if: inputs.upload
         run: |
           npm --version
-          npm install -g npm@latest
-          npm --version
           if [ -n "${{ inputs.release_channel }}" ]; then
             npm publish "${{ steps.build.outputs.tarball }}" --tag ${{ inputs.release_channel }}
           else

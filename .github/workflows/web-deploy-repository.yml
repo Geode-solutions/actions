@@ -190,7 +190,14 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
+      - uses: actions/download-artifact@v4
+        id: artifact
+        continue-on-error: true
+        with:
+          name: desktop-${{ runner.os }}
+          path: release/0.0.0
       - name: Install dependencies
+        if: steps.artifact.outcome != 'success'
         uses: Geode-solutions/actions/install/node-dependencies@master
         with:
           repos: ${{ inputs.repos }}
@@ -198,16 +205,17 @@ jobs:
           token: ${{ secrets.TOKEN }}
           use_registry: ${{ inputs.use_registry }}
       - name: Install Microservices
+        if: steps.artifact.outcome != 'success'
         uses: Geode-solutions/actions/install/microservices@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-      - name: Install OSMesa
-        uses: Geode-solutions/actions/install/osmesa@master
       - name: Install Azure Sign Tool
+        if: steps.artifact.outcome != 'success'
         uses: Geode-solutions/actions/install/azure-sign@master
       - name: Package
+        if: steps.artifact.outcome != 'success'
         run: |
           jq '.version = "${{ inputs.version }}"' package.json > temp && mv temp package.json
           npm run package
@@ -251,8 +259,6 @@ jobs:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
-      - name: Install OSMesa
-        uses: Geode-solutions/actions/install/osmesa@master
       - name: Package
         run: |
           jq '.version = "${{ inputs.version }}"' package.json > temp && mv temp package.json

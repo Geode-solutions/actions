@@ -102,6 +102,13 @@ runs:
         DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"
         DEBUG: "pw:browser"
     - uses: actions/upload-artifact@v4
+      with:
+        name: desktop-${{ runner.os }}
+        path: |
+          release/0.0.0/*.zip
+          release/0.0.0/*.AppImage
+          release/0.0.0/*.exe
+    - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
         name: playwright-${{ inputs.name }}-desktop-${{ runner.os }}

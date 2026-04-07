@@ -47,17 +47,31 @@ runs:
         tarballs: ${{ inputs.tarballs }}
         use_registry: ${{ inputs.use_registry }}
     - name: Install Microservices
+      if: ${{ inputs.use_registry == 'false' }}
       uses: Geode-solutions/actions/install/microservices@master
       with:
         repos: ${{ inputs.repos }}
         branch: ${{ inputs.branch }}
         token: ${{ inputs.token }}
         pyinstallers: ${{ inputs.pyinstallers }}
+    - name: Install OSMesa
+      uses: Geode-solutions/actions/install/osmesa@master
     - name: Install Azure Sign Tool
+      if: ${{ inputs.use_registry == 'false' }}
       uses: Geode-solutions/actions/install/azure-sign@master
+    - name: Install desktop app
+      if: ${{ inputs.use_registry == 'true' }}
+      uses: Geode-solutions/actions/get-release@master
+      id: desktop
+      with:
+        repository: ${{ github.repository }}
+        file: "_${{ runner.os == 'Linux' && 'linux' || 'win32'}}.zip"
+        token: ${{ inputs.token }}
+        directory: "${{ github.workspace }}/desktop_app"
     - name: Install Playwright
       uses: Geode-solutions/actions/install/playwright@master
     - name: Build
+      if: ${{ inputs.use_registry == 'false' }}
       run: |
         npm run build:desktop
       shell: bash
@@ -70,11 +84,14 @@ runs:
     - name: Test on Linux
       if: runner.os == 'Linux'
       run: |
-        sudo chown root:root ./release/0.0.0/linux-unpacked/chrome-sandbox
-        sudo chmod 4755 ./release/0.0.0/linux-unpacked/chrome-sandbox
+        if [ -f "./release/0.0.0/linux-unpacked/chrome-sandbox" ]; then
+          sudo chown root:root ./release/0.0.0/linux-unpacked/chrome-sandbox
+          sudo chmod 4755 ./release/0.0.0/linux-unpacked/chrome-sandbox
+        fi
         xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:e2e:desktop
       shell: bash
       env:
+        DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"
         DEBUG: "pw:browser"
     - name: Test on Windows
       if: runner.os == 'Windows'
@@ -82,7 +99,16 @@ runs:
         npm run test:e2e:desktop
       shell: bash
       env:
+        DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"
         DEBUG: "pw:browser"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: desktop-${{ runner.os }}
+        path: |
+          release/0.0.0/*.zip
+          release/0.0.0/*.AppImage
+          release/0.0.0/*.exe
+          release/0.0.0/latest*
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:

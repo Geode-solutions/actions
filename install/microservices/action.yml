@@ -41,5 +41,3 @@ runs:
         fi
         ls -l
       shell: bash
-    - name: Install OSMesa
-      uses: Geode-solutions/actions/install/osmesa@master

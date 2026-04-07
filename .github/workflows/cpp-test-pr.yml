@@ -33,7 +33,7 @@ jobs:
       CC: /usr/bin/clang
       CXX: /usr/bin/clang++
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           token: ${{ secrets.TOKEN }}
       - name: Install dependencies

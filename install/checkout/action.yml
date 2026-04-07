@@ -31,21 +31,21 @@ runs:
     - run: |
         echo "${{ steps.branch.outputs.branch }}"
       shell: bash
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       if: steps.branch.outputs.branch == 'true'
       with:
         fetch-depth: 0
         repository: ${{ inputs.repo }}
         token: ${{ inputs.token }}
         ref: refs/heads/${{ inputs.branch }}
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       if: steps.branch.outputs.branch == 'false' && inputs.base != ''
       with:
         fetch-depth: 0
         repository: ${{ inputs.repo }}
         token: ${{ inputs.token }}
         ref: refs/heads/${{ inputs.base }}
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       if: steps.branch.outputs.branch == 'false' && inputs.base == ''
       with:
         fetch-depth: 0

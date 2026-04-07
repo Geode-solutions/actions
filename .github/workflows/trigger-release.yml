@@ -22,7 +22,7 @@ jobs:
           skip_dirty_check: true
           commit_message: "fix(Package): trigger new release"
           commit_options: "--allow-empty"
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.TOKEN }}
           script: |

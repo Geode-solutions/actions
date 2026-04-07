@@ -30,7 +30,7 @@ jobs:
           curl -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.oxlintrc.json\?ref\=master > .oxlintrc.json
       - name: oxfmt
         run: npx oxfmt .
-      - uses: stefanzweifel/git-auto-commit-action@v5
+      - uses: stefanzweifel/git-auto-commit-action@v7
         id: commit
         with:
           commit_message: Apply prepare changes

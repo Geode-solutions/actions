@@ -103,7 +103,7 @@ jobs:
         with:
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         id: artifact
         continue-on-error: true
         with:
@@ -191,7 +191,7 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         id: artifact
         continue-on-error: true
         with:

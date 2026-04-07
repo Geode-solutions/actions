@@ -101,7 +101,7 @@ runs:
       env:
         DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"
         DEBUG: "pw:browser"
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: desktop-${{ runner.os }}
         path: |
@@ -109,7 +109,7 @@ runs:
           release/0.0.0/*.AppImage
           release/0.0.0/*.exe
           release/0.0.0/latest*
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
       with:
         name: playwright-${{ inputs.name }}-desktop-${{ runner.os }}

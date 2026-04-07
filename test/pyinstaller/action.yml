@@ -36,7 +36,7 @@ runs:
       with:
         filename: ${{ github.event.repository.name }}-pyinstaller-${{ runner.os }}.zip
         directory: pyinstaller_dist
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: pyinstaller-${{ runner.os }}
         path: pyinstaller_dist/*.zip

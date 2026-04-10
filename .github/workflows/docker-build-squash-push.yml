@@ -28,16 +28,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.TOKEN }}
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GOOGLE_CLOUD_KEY }}
       - name: Log in to Google Artifact Registry
         uses: docker/login-action@v3
         with:
           registry: europe-west9-docker.pkg.dev
-          username: oauth2accesstoken
-          password: ${{ steps.auth.outputs.access_token }}
+          username: _json_key
+          password: ${{ secrets.GOOGLE_CLOUD_KEY }}
       - name: Build docker
         uses: Geode-solutions/actions/build/docker@master
         id: docker

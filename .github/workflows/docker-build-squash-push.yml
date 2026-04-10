@@ -44,7 +44,9 @@ jobs:
         run: docker push ${{ steps.docker.outputs.image }}
       - name: Tag and push to Google Artifact Registry
         run: |
-          GAR_FULL_IMAGE="europe-west9-docker.pkg.dev/${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}/${{ github.event.repository.name }}/${{ github.event.repository.name }}:${{ inputs.tag }}"
+          REPO=${{ github.event.repository.name }}
+          repo=${REPO,,}
+          GAR_FULL_IMAGE="europe-west9-docker.pkg.dev/${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}/$repo/$repo:${{ inputs.tag }}"
           echo "Tagging image for GAR: $GAR_FULL_IMAGE"
           docker tag ${{ steps.docker.outputs.image }} $GAR_FULL_IMAGE
           docker push $GAR_FULL_IMAGE

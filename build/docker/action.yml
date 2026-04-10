@@ -1,4 +1,5 @@
 name: "Test Docker"
+description: "Test Docker"
 
 inputs:
   tag:

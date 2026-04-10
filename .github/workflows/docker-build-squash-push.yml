@@ -4,14 +4,15 @@ on:
       tag:
         type: string
         required: true
-      upload:
-        type: boolean
-        default: true
     secrets:
       TOKEN:
         required: true
       LICENSE_TOKEN:
         required: false
+      GOOGLE_CLOUD_KEY:
+        required: true
+      GOOGLE_CLOUD_PROJECT_ID:
+        required: true
 
 jobs:
   build-docker:
@@ -21,20 +22,35 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - name: GithubPackages Login
-        if: inputs.upload
+      - name: GitHub Packages Login (GHCR)
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.TOKEN }}
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CLOUD_KEY }}
+      - name: Log in to Google Artifact Registry
+        uses: docker/login-action@v3
+        with:
+          registry: europe-west9-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
       - name: Build docker
         uses: Geode-solutions/actions/build/docker@master
         id: docker
         with:
           tag: ${{ inputs.tag }}
-          upload: ${{ inputs.upload }}
           license_token: ${{ secrets.LICENSE_TOKEN }}
       - name: Push Docker image to ghcr.io
-        if: inputs.upload
         run: docker push ${{ steps.docker.outputs.image }}
+      - name: Tag and push to Google Artifact Registry
+        run: |
+          FULL_IMAGE="${{ steps.docker.outputs.image }}"
+          IMAGE_WITH_TAG="${FULL_IMAGE##*/}"
+          GAR_FULL_IMAGE="europe-west9-docker.pkg.dev/${{ secrets.GAR_PROJECT_ID }}/$IMAGE_WITH_TAG"
+          echo "Tagging image for GAR: $GAR_FULL_IMAGE"
+          docker tag ${{ steps.docker.outputs.image }} $GAR_FULL_IMAGE
+          docker push $GAR_FULL_IMAGE

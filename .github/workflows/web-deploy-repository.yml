@@ -278,7 +278,11 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/docker-build-squash-push.yml@master
     with:
       tag: ${{ github.ref_name || 'test' }}
-    secrets: inherit
+    secrets: 
+      TOKEN: ${{secrets.TOKEN}}
+      LICENSE_TOKEN: ${{secrets.TOKEN}}
+      GOOGLE_CLOUD_KEY: ${{secrets.GOOGLE_CLOUD_KEY}}
+      GOOGLE_CLOUD_PROJECT_ID: ${{secrets.GOOGLE_CLOUD_PROJECT_ID}}
 
   release-cloud:
     if: inputs.cloud == 'true'

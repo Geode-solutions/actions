@@ -32,6 +32,7 @@ jobs:
       - uses: oxc-project/oxlint-action@latest
         with:
           config: .oxlintrc.json
+          all-files: true
 
   test-repository:
     needs: [prepare, config]

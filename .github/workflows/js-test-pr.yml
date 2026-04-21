@@ -29,9 +29,12 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - uses: oxc-project/oxlint-action@latest
-        with:
-          config: .oxlintrc.json
+      - name: Oxlint
+        run: npx oxlint@latest --no-error-on-unmatched-pattern --config .oxlintrc.json --format github
+      # - uses: oxc-project/oxlint-action@latest
+      #   with:
+      #     config: .oxlintrc.json
+      #     all-files: true
 
   test-repository:
     needs: [prepare, config]

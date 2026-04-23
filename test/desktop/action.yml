@@ -65,6 +65,7 @@ runs:
       id: desktop
       with:
         repository: ${{ github.repository }}
+        branch: ${{ inputs.branch }}
         file: "_${{ runner.os == 'Linux' && 'linux' || 'win32'}}.zip"
         token: ${{ inputs.token }}
         directory: "${{ github.workspace }}/desktop_app"

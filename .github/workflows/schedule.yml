@@ -178,7 +178,7 @@ jobs:
           echo $shares
           Foreach($share in $shares.split(";")){
             if(Test-Path -Path $share) {
-              Copy-Item -Path $share\* -Destination share -Recurse
+              Copy-Item -Path $share\* -Destination share -Recurse -Force
             }
           }
           ctest --output-on-failure -j 2 -LE unstable

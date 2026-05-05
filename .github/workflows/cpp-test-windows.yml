@@ -70,7 +70,7 @@ jobs:
           echo $shares
           Foreach($share in $shares.split(";")){
             if(Test-Path -Path $share) {
-              Copy-Item -Path $share\* -Destination share -Recurse
+              Copy-Item -Path $share\* -Destination share -Recurse -Force
             }
           }
           cmake --build . -j 2

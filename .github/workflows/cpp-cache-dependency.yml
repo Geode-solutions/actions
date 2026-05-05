@@ -137,7 +137,7 @@ jobs:
         with:
           keys: ${{ inputs.keys }}
           system: win64
-      - uses: TheMrMilchmann/setup-msvc-dev@v3
+      - uses: TheMrMilchmann/setup-msvc-dev@v4
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           arch: x64

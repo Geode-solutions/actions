@@ -274,17 +274,15 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash
       - uses: 'google-github-actions/auth@v3'
-        if: inputs.upload
+        if: inputs.branch == 'master'
         with:
           credentials_json: '${{ secrets.GOOGLE_CLOUD_KEY }}'
       - uses: google-github-actions/upload-cloud-storage@v3
-        if: inputs.upload
+        if: inputs.branch == 'master'
         with:
           path: '.'
           glob: '${{ env.extension }}*.vext'
           destination: 'vease_extensions'
-          headers: |-
-            x-goog-meta-branch: ${{ inputs.branch }}
 
   release-docker:
     if: inputs.docker == 'true' && inputs.upload

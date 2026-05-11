@@ -274,9 +274,11 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash
       - uses: 'google-github-actions/auth@v3'
+        if: inputs.upload
         with:
           credentials_json: '${{ secrets.GOOGLE_CLOUD_KEY }}'
       - uses: google-github-actions/upload-cloud-storage@v3
+        if: inputs.upload
         with:
           path: '.'
           glob: '${{ env.extension }}*.vext'

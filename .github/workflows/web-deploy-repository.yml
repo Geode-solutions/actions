@@ -268,10 +268,19 @@ jobs:
       - name: Release
         run: |
           name=$(jq -r '.name' package.json)
+          echo "extension=$name" >> $GITHUB_ENV
           gh release upload ${{ inputs.release }} $name*.vext --clobber
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash
+      - uses: 'google-github-actions/auth@v3'
+        with:
+          credentials_json: '${{ secrets.GOOGLE_CLOUD_KEY }}'
+      - uses: google-github-actions/upload-cloud-storage@v3
+        with:
+          path: '.'
+          glob: '${{ env.extension }}*.vext'
+          destination: 'vease_extensions'
 
   release-docker:
     if: inputs.docker == 'true' && inputs.upload

@@ -283,6 +283,8 @@ jobs:
           path: '.'
           glob: '${{ env.extension }}*.vext'
           destination: 'vease_extensions'
+          headers: |-
+            x-goog-meta-branch: ${{ inputs.branch }}
 
   release-docker:
     if: inputs.docker == 'true' && inputs.upload

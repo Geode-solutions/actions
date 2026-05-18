@@ -266,23 +266,44 @@ jobs:
           npm run package
         shell: bash
       - name: Release
+        id: release
         run: |
           name=$(jq -r '.name' package.json)
-          echo "extension=$name" >> $GITHUB_ENV
+          echo "extension=$name" >> $GITHUB_OUTPUT
           gh release upload ${{ inputs.release }} $name*.vext --clobber
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash
-      - uses: 'google-github-actions/auth@v3'
-        if: inputs.branch == 'master'
+      - name: Upload to Google Cloud
+        uses: 'google-github-actions/auth@v3'
+        if: inputs.branch != 'master'
         with:
           credentials_json: '${{ secrets.GOOGLE_CLOUD_KEY }}'
-      - uses: google-github-actions/upload-cloud-storage@v3
-        if: inputs.branch == 'master'
+      - name: Upload to Google Cloud Storage
+        uses: google-github-actions/upload-cloud-storage@v3
+        if: inputs.branch != 'master'
         with:
           path: '.'
-          glob: '${{ env.extension }}*.vext'
+          glob: '${{ steps.release.outputs.extension }}*.vext'
           destination: 'vease_extensions'
+      - name: Update to Google Cloud Firestore
+        if: inputs.branch != 'master'
+        run: |
+          README_CONTENT=$(cat README.md | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
+          curl -X PATCH "https://firestore.googleapis.com/v1/projects/${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}/databases/vease/documents/projects/extensions/${{ steps.release.outputs.extension }}" \
+            -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "fields": {
+                "readme": {
+                  "stringValue": '"$README_CONTENT"'
+                },
+                "version": {
+                  "stringValue": "${{ inputs.version }}"
+                }
+              }
+            }'
+        shell: bash
 
   release-docker:
     if: inputs.docker == 'true' && inputs.upload

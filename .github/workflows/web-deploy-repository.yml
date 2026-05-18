@@ -292,7 +292,7 @@ jobs:
         if: inputs.branch != 'master' && runner.os == 'Linux'
         run: |
           README_CONTENT=$(cat README.md | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
-          curl -X PATCH "https://firestore.googleapis.com/v1/projects/${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}/databases/vease/documents/projects/extensions/${{ steps.release.outputs.extension }}" \
+          curl -X PATCH "https://firestore.googleapis.com/v1/projects/${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}/databases/vease/documents/extensions/${{ steps.release.outputs.extension }}" \
             -H "Authorization: Bearer ${{ steps.auth.outputs.access_token }}" \
             -H "Content-Type: application/json" \
             -d '{

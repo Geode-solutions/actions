@@ -277,8 +277,10 @@ jobs:
       - name: Upload to Google Cloud
         uses: 'google-github-actions/auth@v3'
         if: inputs.branch != 'master'
+        id: auth
         with:
           credentials_json: '${{ secrets.GOOGLE_CLOUD_KEY }}'
+          token_format: 'access_token'
       - name: Upload to Google Cloud Storage
         uses: google-github-actions/upload-cloud-storage@v3
         if: inputs.branch != 'master'
@@ -287,11 +289,11 @@ jobs:
           glob: '${{ steps.release.outputs.extension }}*.vext'
           destination: 'vease_extensions'
       - name: Update to Google Cloud Firestore
-        if: inputs.branch != 'master'
+        if: inputs.branch != 'master' && runner.os == 'Linux'
         run: |
           README_CONTENT=$(cat README.md | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
           curl -X PATCH "https://firestore.googleapis.com/v1/projects/${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}/databases/vease/documents/projects/extensions/${{ steps.release.outputs.extension }}" \
-            -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+            -H "Authorization: Bearer ${{ steps.auth.outputs.access_token }}" \
             -H "Content-Type: application/json" \
             -d '{
               "fields": {
@@ -337,5 +339,6 @@ jobs:
         release-node,
         release-docker,
         release-desktop,
+        release-extension
       ]
     secrets: inherit

@@ -103,6 +103,9 @@ jobs:
         with:
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
+      - name: Update version number
+        run: |
+          sed -i 's/version = "[0-9]*\.[0-9]*\.[0-9]*\(-rc\.[0-9]*\)\?"/version = "${{ inputs.version }}"/' pyproject.toml
       - uses: actions/download-artifact@v8
         id: artifact
         continue-on-error: true

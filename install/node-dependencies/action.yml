@@ -67,6 +67,6 @@ runs:
           echo "Updated package.json with local file dependencies in overrides"
         fi
         npm install --force --no-package-lock
-        npm list --depth=0 || true
+        npm list || true
         mv package.json.bak package.json
       shell: bash

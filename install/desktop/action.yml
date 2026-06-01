@@ -1,0 +1,25 @@
+name: "Install Desktop"
+description: "Install Desktop"
+
+inputs:
+  repo:
+    type: string
+    default: ${{ github.repository }}
+  branch:
+    type: string
+  token:
+    type: string
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install desktop app
+      uses: Geode-solutions/actions/get-release@master
+      id: desktop
+      with:
+        repository: ${{ inputs.repo }}
+        branch: ${{ inputs.branch }}
+        file: "_${{ runner.os == 'Linux' && 'linux' || 'win32'}}.zip"
+        token: ${{ inputs.token }}
+        directory: "${{ github.workspace }}/desktop_app"

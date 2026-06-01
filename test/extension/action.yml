@@ -52,7 +52,16 @@ runs:
         pyinstallers: ${{ inputs.pyinstallers }}
     - name: Install OSMesa
       uses: Geode-solutions/actions/install/osmesa@master
+    - name: Install desktop app
+      uses: Geode-solutions/actions/install/desktop@master
+      with:
+        repo: Geode-solutions/Vease
+        branch: ${{ inputs.branch }}
+        token: ${{ inputs.token }}
     - name: Test
       run: |
+        npm run package
         npm run test:extension
       shell: bash
+      env:
+        DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"

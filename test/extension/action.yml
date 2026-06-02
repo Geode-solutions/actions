@@ -60,9 +60,20 @@ runs:
         token: ${{ inputs.token }}
     - name: Install Playwright
       uses: Geode-solutions/actions/install/playwright@master
-    - name: Test
+    - name: Build
       run: |
         npm run package
+      shell: bash
+    - name: Test
+      if: runner.os == 'Linux'
+      run: |
+        xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:extension
+      shell: bash
+      env:
+        DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"
+        DEBUG: "pw:browser"
+    - name: Test
+      run: |
         npm run test:extension
       shell: bash
       env:

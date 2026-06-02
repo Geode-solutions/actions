@@ -64,7 +64,7 @@ runs:
       run: |
         npm run package
       shell: bash
-    - name: Test
+    - name: Test on Linux
       if: runner.os == 'Linux'
       run: |
         xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:extension
@@ -72,7 +72,8 @@ runs:
       env:
         DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"
         DEBUG: "pw:browser"
-    - name: Test
+    - name: Test on Windows
+      if: runner.os == 'Windows'
       run: |
         npm run test:extension
       shell: bash

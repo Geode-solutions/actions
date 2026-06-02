@@ -58,6 +58,8 @@ runs:
         repo: Geode-solutions/Vease
         branch: ${{ inputs.branch }}
         token: ${{ inputs.token }}
+    - name: Install Playwright
+      uses: Geode-solutions/actions/install/playwright@master
     - name: Test
       run: |
         npm run package
@@ -65,3 +67,10 @@ runs:
       shell: bash
       env:
         DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"
+        DEBUG: "pw:browser"
+    - uses: actions/upload-artifact@v7
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-${{ inputs.name }}-extension-${{ runner.os }}
+        path: playwright-report/
+        overwrite: true

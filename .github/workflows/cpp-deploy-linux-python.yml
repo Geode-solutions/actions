@@ -41,11 +41,12 @@ jobs:
     container: "ghcr.io/geode-solutions/rhel:master"
     strategy:
       matrix:
-        python: ["3.9", "3.10", "3.11", "3.12"]
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
         exclude:
-          - python: ${{ inputs.light && '3.9' || 'dummy' }}
           - python: ${{ inputs.light && '3.10' || 'dummy' }}
           - python: ${{ inputs.light && '3.11' || 'dummy' }}
+          - python: ${{ inputs.light && '3.12' || 'dummy' }}
+          - python: ${{ inputs.light && '3.13' || 'dummy' }}
     env:
       CC: /opt/rh/gcc-toolset-12/root/usr/bin/gcc
       CXX: /opt/rh/gcc-toolset-12/root/usr/bin/g++

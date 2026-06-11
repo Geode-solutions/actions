@@ -33,7 +33,7 @@ jobs:
     container: "ghcr.io/geode-solutions/rhel:master"
     strategy:
       matrix:
-        python: ["3.12"]
+        python: ["3.14"]
     env:
       CC: /opt/rh/gcc-toolset-12/root/usr/bin/gcc
       CXX: /opt/rh/gcc-toolset-12/root/usr/bin/g++

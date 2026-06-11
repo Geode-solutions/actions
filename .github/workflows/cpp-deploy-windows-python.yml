@@ -40,11 +40,12 @@ jobs:
     runs-on: windows-2022
     strategy:
       matrix:
-        python: ["3.9", "3.10", "3.11", "3.12"]
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
         exclude:
-          - python: ${{ inputs.light && '3.9' || 'dummy' }}
           - python: ${{ inputs.light && '3.10' || 'dummy' }}
           - python: ${{ inputs.light && '3.11' || 'dummy' }}
+          - python: ${{ inputs.light && '3.12' || 'dummy' }}
+          - python: ${{ inputs.light && '3.13' || 'dummy' }}
     steps:
       - name: Get info
         id: info

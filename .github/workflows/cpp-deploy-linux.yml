@@ -35,8 +35,8 @@ jobs:
       matrix:
         include:
           - system: rhel
-            cc: /opt/rh/gcc-toolset-12/root/usr/bin/gcc
-            cxx: /opt/rh/gcc-toolset-12/root/usr/bin/g++
+            cc: /opt/rh/gcc-toolset-14/root/usr/bin/gcc
+            cxx: /opt/rh/gcc-toolset-14/root/usr/bin/g++
           - system: ubuntu
             cc: /usr/bin/clang
             cxx: /usr/bin/clang++

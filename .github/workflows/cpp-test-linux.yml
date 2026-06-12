@@ -80,6 +80,7 @@ jobs:
           mkdir -p build
           cd build
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+          cmake --build . --verbose
           cmake --build . -t third_party
           cd ${{ inputs.directory }}
           cmake --build . -t essential

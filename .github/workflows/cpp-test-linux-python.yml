@@ -106,7 +106,7 @@ jobs:
           cmake --build .
           cd ${{ inputs.directory }}
           echo "Python testing"
-          ctest --output-on-failure -R '-py-' -j 2
+          ctest --output-on-failure -R py -j 2
           echo "LD_LIBRARY_PATH=" >> $GITHUB_ENV
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

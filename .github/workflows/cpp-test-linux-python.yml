@@ -47,6 +47,17 @@ jobs:
         with:
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
+      - name: Compile
+        run: |
+          mkdir -p build
+          cd build
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=OFF -DPYTHON_VERSION:STRING=${{ matrix.python }} ..
+          cmake --build . --verbose
+          cd ${{ inputs.directory }}
+          ctest --output-on-failure -R -py- -j 2
+          echo "LD_LIBRARY_PATH=" >> $GITHUB_ENV
+        env:
+          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
@@ -61,7 +72,7 @@ jobs:
         run: |
           new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/lib64\:/g')
           echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
-          echo "PATH2=/opt/python/${{ steps.info.outputs.tag }}/bin:$PATH" >> $GITHUB_ENV
+          echo "PATH=/opt/python/${{ steps.info.outputs.tag }}/bin:$PATH" >> $GITHUB_ENV
       - uses: Geode-solutions/actions/get-release@master
         if: ${{ !inputs.wheels_from_pypi }}
         id: wheels

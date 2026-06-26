@@ -71,6 +71,7 @@ runs:
       shell: bash
       env:
         DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"
+        GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
         DEBUG: "pw:browser"
     - name: Test on Windows
       if: runner.os == 'Windows'
@@ -79,6 +80,7 @@ runs:
       shell: bash
       env:
         DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"
+        GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
         DEBUG: "pw:browser"
     - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}

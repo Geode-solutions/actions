@@ -43,6 +43,7 @@ runs:
         repository: ${{ inputs.repo }}
         token: ${{ inputs.token }}
         ref: refs/heads/${{ inputs.branch }}
+        clean: false
     - uses: actions/checkout@v6
       if: steps.branch.outputs.branch == 'false' && inputs.base != ''
       with:
@@ -50,9 +51,11 @@ runs:
         repository: ${{ inputs.repo }}
         token: ${{ inputs.token }}
         ref: refs/heads/${{ steps.branch.outputs.checkout_branch }}
+        clean: false
     - uses: actions/checkout@v6
       if: steps.branch.outputs.branch == 'false' && inputs.base == ''
       with:
         fetch-depth: 0
         repository: ${{ inputs.repo }}
         token: ${{ inputs.token }}
+        clean: false

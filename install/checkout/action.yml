@@ -21,9 +21,14 @@ runs:
         if gh api repos/${{ inputs.repo }}/branches/${{ inputs.branch }} --silent; then
           echo "found branch ${{ inputs.branch }}"
           echo 'branch=true' >> $GITHUB_OUTPUT
+         elif gh api repos/${{ inputs.repo }}/branches/${{ inputs.base_branch }} --silent; then
+          echo "base branch found: ${{ inputs.base_branch }}"
+          echo "branch=false" >> "$GITHUB_OUTPUT"
+          echo "checkout_branch=${{ inputs.base_branch }}" >> "$GITHUB_OUTPUT"
         else
-          echo "branch not found, checking base branch"
-          echo 'branch=false' >> $GITHUB_OUTPUT
+          echo "base branch not found"
+          echo "branch=false" >> "$GITHUB_OUTPUT"
+          echo "checkout_branch=next" >> "$GITHUB_OUTPUT"
         fi
       shell: bash
       env:

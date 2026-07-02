@@ -21,10 +21,10 @@ runs:
         if gh api repos/${{ inputs.repo }}/branches/${{ inputs.branch }} --silent; then
           echo "found branch ${{ inputs.branch }}"
           echo 'branch=true' >> $GITHUB_OUTPUT
-         elif gh api repos/${{ inputs.repo }}/branches/${{ inputs.base_branch }} --silent; then
-          echo "base branch found: ${{ inputs.base_branch }}"
+         elif gh api repos/${{ inputs.repo }}/branches/${{ inputs.base }} --silent; then
+          echo "base branch found: ${{ inputs.base }}"
           echo "branch=false" >> "$GITHUB_OUTPUT"
-          echo "checkout_branch=${{ inputs.base_branch }}" >> "$GITHUB_OUTPUT"
+          echo "checkout_branch=${{ inputs.base }}" >> "$GITHUB_OUTPUT"
         else
           echo "base branch not found"
           echo "branch=false" >> "$GITHUB_OUTPUT"
@@ -49,7 +49,7 @@ runs:
         fetch-depth: 0
         repository: ${{ inputs.repo }}
         token: ${{ inputs.token }}
-        ref: refs/heads/${{ inputs.base }}
+        ref: refs/heads/${{ steps.branch.outputs.checkout_branch }}
     - uses: actions/checkout@v6
       if: steps.branch.outputs.branch == 'false' && inputs.base == ''
       with:

@@ -1,4 +1,5 @@
 name: "Checkout"
+description: "Checkout"
 
 inputs:
   branch:
@@ -8,6 +9,8 @@ inputs:
   repo:
     type: string
     default: ${{ github.repository }}
+  path:
+    type: string
   token:
     type: string
     required: true
@@ -43,7 +46,7 @@ runs:
         repository: ${{ inputs.repo }}
         token: ${{ inputs.token }}
         ref: refs/heads/${{ inputs.branch }}
-        clean: false
+        path: ${{ inputs.path }}
     - uses: actions/checkout@v6
       if: steps.branch.outputs.branch == 'false' && inputs.base != ''
       with:
@@ -51,11 +54,11 @@ runs:
         repository: ${{ inputs.repo }}
         token: ${{ inputs.token }}
         ref: refs/heads/${{ steps.branch.outputs.checkout_branch }}
-        clean: false
+        path: ${{ inputs.path }}
     - uses: actions/checkout@v6
       if: steps.branch.outputs.branch == 'false' && inputs.base == ''
       with:
         fetch-depth: 0
         repository: ${{ inputs.repo }}
         token: ${{ inputs.token }}
-        clean: false
+        path: ${{ inputs.path }}

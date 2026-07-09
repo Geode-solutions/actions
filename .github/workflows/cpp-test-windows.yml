@@ -75,6 +75,6 @@ jobs:
           }
           cmake --build . -j 2
           cmake --build . -t install
-          ctest --output-on-failure --no-tests=error -j 2 -LE unstable
+          ctest --output-on-failure --no-tests=error -j 2 -L essential
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

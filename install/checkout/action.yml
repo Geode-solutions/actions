@@ -38,6 +38,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.token }}
     - run: |
         echo "${{ steps.branch.outputs.branch }}"
+        git config --global url."https://x-access-token:${{ inputs.TOKEN }}@github.com/".insteadOf "https://github.com/"
       shell: bash
     - uses: actions/checkout@v6
       if: steps.branch.outputs.branch == 'true'

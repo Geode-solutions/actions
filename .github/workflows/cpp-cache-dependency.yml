@@ -72,13 +72,6 @@ jobs:
         with:
           path: build/install
           key: ${{ matrix.system }}-${{ steps.info.outputs.key  }}
-      - uses: Geode-solutions/actions/get-release@master
-        if: steps.cache.outputs.cache-hit != 'true'
-        id: license
-        with:
-          repository: open-license-manager
-          file: "-${{ env.name }}-private.tar.gz"
-          token: ${{ secrets.TOKEN }}
       - name: Get dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         uses: Geode-solutions/actions/get-caches@master
@@ -90,7 +83,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=${{ inputs.shared }} -DCMAKE_PREFIX_PATH="${{ steps.license.outputs.path }};$GITHUB_WORKSPACE/prefix" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_INSTALL_PREFIX:PATH="install" ..
+          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=${{ inputs.shared }} -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/prefix" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_INSTALL_PREFIX:PATH="install" ..
           cmake --build .
           cmake --build . -t install
 
@@ -124,13 +117,6 @@ jobs:
         with:
           path: build/install
           key: win64-${{ steps.info.outputs.key  }}
-      - uses: Geode-solutions/actions/get-release@master
-        if: steps.cache.outputs.cache-hit != 'true'
-        id: license
-        with:
-          repository: open-license-manager
-          file: "-${{ env.name }}-private.zip"
-          token: ${{ secrets.TOKEN }}
       - name: Get dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         uses: Geode-solutions/actions/get-caches@master
@@ -146,7 +132,7 @@ jobs:
         run: |
           if(!(test-path build)) { mkdir build }
           cd build
-          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=${{ inputs.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.license.outputs.path }};${{ github.workspace }}/prefix" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_INSTALL_PREFIX:PATH="install" ..
+          cmake -G "Ninja" ${{ inputs.extra }} -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=${{ inputs.shared }} -DCMAKE_PREFIX_PATH:PATH="${{ github.workspace }}/prefix" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_INSTALL_PREFIX:PATH="install" ..
           cmake --build . -j 2
           if(!$?) { cmake --build . -j 1 }
           cmake --build . -t install

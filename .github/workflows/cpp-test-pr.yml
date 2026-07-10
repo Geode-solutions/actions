@@ -33,7 +33,8 @@ jobs:
       CC: /usr/bin/clang
       CXX: /usr/bin/clang++
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
       - name: Install dependencies

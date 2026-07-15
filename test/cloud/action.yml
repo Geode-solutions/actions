@@ -12,6 +12,12 @@ inputs:
   use_registry:
     type: boolean
     required: true
+  email:
+    type: string
+    required: true
+  password:
+    type: string
+    required: true
   token:
     type: string
     required: true
@@ -34,6 +40,8 @@ runs:
       shell: bash
       env:
         DEBUG: "pw:browser"
+        GEODE_USER_EMAIL: ${{ inputs.email }}
+        GEODE_USER_PASSWORD: ${{ inputs.password }}
     - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
       with:

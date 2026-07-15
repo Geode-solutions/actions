@@ -158,6 +158,8 @@ jobs:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
+          email: ${{ secrets.GEODE_USER_EMAIL }}
+          password: ${{ secrets.GEODE_USER_PASSWORD }}
           use_registry: true
 
   test-desktop:

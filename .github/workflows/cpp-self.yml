@@ -1,0 +1,79 @@
+on:
+  workflow_call:
+    inputs:
+      name:
+        type: string
+        required: true
+      directory:
+        type: string
+        default: "."
+      repos:
+        type: string
+      branch:
+        type: string
+        default: "master"
+    secrets:
+      TOKEN:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  test-repository:
+    runs-on: self-hosted
+    env:
+      CC: /usr/bin/clang
+      CXX: /usr/bin/clang++
+    steps:
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Install dependencies
+        uses: Geode-solutions/actions/install/cpp-dependencies@master
+        id: repos
+        with:
+          repos: ${{ inputs.repos }}
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+          system: ${{ matrix.system }}
+      - name: Libraries
+        id: libraries
+        run: |
+          new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/lib\:/g')/lib
+          echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
+      - name: Compile
+        run: |
+          mkdir -p build
+          cd build
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+          cmake --build . -t third_party
+          cd ${{ inputs.directory }}
+          cmake --build . -t essential
+          cmake --build . -t install
+        env:
+          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+      - name: Test
+        run: |
+          rm -rf $GITHUB_WORKSPACE/build/${{ inputs.directory }}/bin
+          mkdir -p test
+          cd test
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
+          cmake --build .
+          ctest --output-on-failure --no-tests=error -j 2 -L essential
+        env:
+          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ always() && needs.test-repository.result == 'failure' }}
+    needs: test-repository
+    steps:
+      - name: Notify slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

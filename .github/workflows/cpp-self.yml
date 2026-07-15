@@ -37,7 +37,7 @@ jobs:
           repos: ${{ inputs.repos }}
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-          system: ${{ matrix.system }}
+          system: ubuntu
       - name: Libraries
         id: libraries
         run: |

@@ -1,4 +1,5 @@
 name: "Install C++ dependencies"
+description: "Install C++ dependencies"
 
 inputs:
   repos:

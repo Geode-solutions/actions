@@ -48,20 +48,9 @@ jobs:
           mkdir -p build
           cd build
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
-          cmake --build . -t third_party
-          cd ${{ inputs.directory }}
-          cmake --build . -t essential
-          cmake --build . -t install
-        env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
-      - name: Test
-        run: |
-          rm -rf $GITHUB_WORKSPACE/build/${{ inputs.directory }}/bin
-          mkdir -p test
-          cd test
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
           cmake --build .
-          ctest --output-on-failure --no-tests=error -j 2 -L essential
+          cd ${{ inputs.directory }}
+          ctest --output-on-failure --no-tests=error -j -L local
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
 

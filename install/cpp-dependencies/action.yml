@@ -24,12 +24,12 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - if: ${{ inputs.save }}
+    - if: ${{ inputs.save && runner.environment == 'github-hosted' }}
       uses: actions/cache@v4
       with:
         path: build/third_party
         key: ${{ inputs.system }}-${{ hashFiles('cmake/Configure**.cmake') }}
-    - if: ${{ !inputs.save }}
+    - if: ${{ !inputs.save && runner.environment == 'github-hosted' }}
       uses: actions/cache/restore@v4
       with:
         path: build/third_party

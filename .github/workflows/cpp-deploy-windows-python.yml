@@ -86,7 +86,7 @@ jobs:
           if [ ! -f "$file" ]; then 
             exit 0
           fi
-          pip install pip-tools
+          pip install pip-tools typing_extensions
           echo $GITHUB_REF_NAME
           if [ $GITHUB_REF_NAME == "master" ]; then
             pip-compile -v --upgrade $file

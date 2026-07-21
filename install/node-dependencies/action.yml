@@ -24,6 +24,9 @@ runs:
       with:
         registry-url: "https://registry.npmjs.org"
         node-version: 22
+    - name: Update npm to latest
+      run: npm install -g npm@latest
+      shell: bash
     - uses: Geode-solutions/actions/get-release@master
       if: ${{ inputs.tarballs == '' && inputs.use_registry == 'false' }}
       id: tarballs

@@ -61,7 +61,7 @@ runs:
         tarballs=$(echo "${{ steps.result.outputs.tarballs }}" | sed 's/\;/\ /g')
         echo "Tarballs = $tarballs"
         if [ -n "$tarballs" ]; then
-          npm install --allow-git=all --force $tarballs
+          npm install --force $tarballs
         fi
         overrides=$(jq -r '.dependencies | to_entries | map(select(.value | startswith("file:"))) | map({key: .key, value: .value}) | from_entries' package.json)
         if [ -n "$overrides" ] && [ "$overrides" != "{}" ]; then
@@ -69,7 +69,7 @@ runs:
           jq --argjson newOverrides "$overrides" '.overrides = (.overrides // {}) * $newOverrides' package.json > package.json.tmp && mv package.json.tmp package.json
           echo "Updated package.json with local file dependencies in overrides"
         fi
-        npm install --allow-git=all --force --no-package-lock
+        npm install --force --no-package-lock
         npm list --all || true
         mv package.json.bak package.json
       shell: bash

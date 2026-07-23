@@ -67,6 +67,11 @@ jobs:
           branch: ${{ inputs.branch }}
           system: ${{ matrix.system }}
           save: false
+      - name: Libraries
+        id: libraries
+        run: |
+          new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/${{ steps.info.outputs.lib }}\:/g')/${{ steps.info.outputs.lib }}
+          echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
       - name: Generate package
         run: |
           mkdir -p build

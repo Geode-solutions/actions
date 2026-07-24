@@ -50,7 +50,7 @@ jobs:
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
           cmake --build .
           cd ${{ inputs.directory }}
-          ctest --output-on-failure --no-tests=error -j -L local
+          ctest --output-on-failure --stop-on-failure --no-tests=error -j -L local
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
 

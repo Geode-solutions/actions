@@ -93,6 +93,6 @@ jobs:
           cd test
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
           cmake --build .
-          ctest --output-on-failure --no-tests=error -j 2 -L essential
+          ctest --output-on-failure --stop-on-failure --no-tests=error -j 2 -L essential
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

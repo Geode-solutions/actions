@@ -6,6 +6,7 @@ on:
         default: ${{ github.repository }}
       branch:
         type: string
+        default: ${{ github.ref_name }}
     outputs:
       node:
         value: ${{ jobs.js-config.outputs.node }}

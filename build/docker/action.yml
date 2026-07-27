@@ -24,9 +24,9 @@ runs:
     - name: Build Docker image
       run: |
         if [ "${{ inputs.license_token }}" != '' ]; then
-          docker build -t ${{ steps.image.outputs.IMAGE }} --build-arg TOKEN=${{ inputs.license_token }} .
+          docker build -t ${{ steps.image.outputs.IMAGE }} --build-arg TOKEN=${{ inputs.license_token }} --build-arg BRANCH=${{ inputs.tag }} .
         else
-          docker build -t ${{ steps.image.outputs.IMAGE }} .
+          docker build -t ${{ steps.image.outputs.IMAGE }} --build-arg BRANCH=${{ inputs.tag }} .
         fi
       shell: bash
     - name: Squash Docker image

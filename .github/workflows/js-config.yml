@@ -19,6 +19,8 @@ on:
         value: ${{ jobs.js-config.outputs.desktop }}
       extension:
         value: ${{ jobs.js-config.outputs.extension }}
+      docker:
+        value: ${{ jobs.js-config.outputs.docker }}
     secrets:
       TOKEN:
         required: true
@@ -32,6 +34,7 @@ jobs:
       cloud: ${{ steps.config.outputs.cloud }}
       desktop: ${{ steps.config.outputs.desktop }}
       extension: ${{ steps.config.outputs.extension }}
+      docker: ${{ steps.config.outputs.docker }}
     steps:
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
@@ -51,7 +54,8 @@ jobs:
               browser: false,
               cloud: false,
               desktop: false,
-              extension: false
+              extension: false,
+              docker: false
             };
             const fullRepo = '${{ inputs.repo }}'
             const repoName = fullRepo.split('/')[1];

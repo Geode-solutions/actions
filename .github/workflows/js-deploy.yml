@@ -40,7 +40,7 @@ jobs:
       upload: true
       python: false
       pyinstaller: false
-      docker: false
+      docker: ${{ needs.config.outputs.docker }}
       cloud: ${{ needs.config.outputs.cloud }}
       node: ${{ needs.config.outputs.node }}
       desktop: ${{ needs.config.outputs.desktop }}

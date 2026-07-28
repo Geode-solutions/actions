@@ -42,7 +42,7 @@ jobs:
     with:
       repos: ${{ inputs.repos }}
       branch: ${{ github.event.pull_request.head.ref }}
-      docker: false
+      docker: ${{ needs.config.outputs.docker }}
       python: false
       pyinstaller: false
       node: ${{ needs.config.outputs.node }}

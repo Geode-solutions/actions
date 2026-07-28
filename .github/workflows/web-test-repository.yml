@@ -220,5 +220,5 @@ jobs:
         uses: Geode-solutions/actions/build/docker@master
         id: docker
         with:
-          tag: test
+          tag: next
           license_token: ${{ secrets.TOKEN }}

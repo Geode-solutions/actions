@@ -42,6 +42,7 @@ runs:
         DEBUG: "pw:browser"
         GEODE_USER_EMAIL: ${{ inputs.email }}
         GEODE_USER_PASSWORD: ${{ inputs.password }}
+        PW_TEST_SCREENSHOT_NO_FONTS_READY: 1
     - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
       with:

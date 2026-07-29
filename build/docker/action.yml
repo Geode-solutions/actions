@@ -29,8 +29,3 @@ runs:
           docker build -t ${{ steps.image.outputs.IMAGE }} --build-arg BRANCH=${{ inputs.tag }} .
         fi
       shell: bash
-    - name: Squash Docker image
-      run: |
-        pip install docker-squash
-        docker-squash ${{ steps.image.outputs.IMAGE }} -t ${{ steps.image.outputs.IMAGE }}
-      shell: bash

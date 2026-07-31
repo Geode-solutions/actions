@@ -30,7 +30,7 @@ jobs:
     with:
       repos: ${{ inputs.repos }}
       branch: ${{ github.ref_name }}
-      docker: ${{ needs.config.outputs.docker }}
+      docker: false
       python: false
       pyinstaller: false
       node: ${{ needs.config.outputs.node }}

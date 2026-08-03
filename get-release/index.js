@@ -7,19 +7,6 @@ import github from "@actions/github";
 import path from "node:path";
 import request from "request";
 
-function runWithRetry(cmd, options, retries = 5, delayMs = 1000) {
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      execSync(cmd, options);
-      return;
-    } catch (err) {
-      if (attempt === retries) throw err;
-      console.log(`Attempt ${attempt} failed, retrying in ${delayMs}ms...`);
-      execSync(`powershell -Command "Start-Sleep -Milliseconds ${delayMs}"`);
-    }
-  }
-}
-
 async function download_asset(asset, token, destPath) {
   return new Promise((resolve) => {
     const writeStream = fs.createWriteStream(asset.name);
@@ -37,7 +24,7 @@ async function download_asset(asset, token, destPath) {
       if (extension == "zip") {
         console.log("Unzipping", asset.name);
         if (process.platform == "win32") {
-          runWithRetry(
+          execSync(
             `powershell -Command "Expand-Archive -Force -ErrorAction Stop -Path '${asset.name}' -DestinationPath '${destPath}'"`,
             { stdio: "inherit" },
           );

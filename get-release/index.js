@@ -7,6 +7,24 @@ import github from "@actions/github";
 import path from "node:path";
 import request from "request";
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function unlinkWithRetry(filePath, retries = 6, delayMs = 500) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      fs.unlinkSync(filePath);
+      return;
+    } catch (err) {
+      const busy = err.code === "EBUSY" || err.code === "EPERM";
+      if (!busy || i === retries - 1) throw err;
+      console.log(`File busy (${filePath}), retrying in ${delayMs}ms... (${i + 1}/${retries})`);
+      await sleep(delayMs);
+    }
+  }
+}
+
 async function download_asset(asset, token, destPath) {
   return new Promise((resolve) => {
     const writeStream = fs.createWriteStream(asset.name);
@@ -19,7 +37,7 @@ async function download_asset(asset, token, destPath) {
         "User-Agent": "",
       },
     }).pipe(writeStream);
-    writeStream.on("close", function () {
+    writeStream.on("close", async function () {
       const extension = asset.name.split(".").pop();
       if (extension == "zip") {
         console.log("Unzipping", asset.name);
@@ -36,7 +54,7 @@ async function download_asset(asset, token, destPath) {
         const result = path.join(destPath, extract_name);
         console.log("Unzip to:", extract_name);
         console.log("Result:", result);
-        fs.unlinkSync(asset.name);
+        await unlinkWithRetry(asset.name);
         resolve(result);
       } else if (extension == "gz") {
         console.log("Untaring", asset.name);

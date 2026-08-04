@@ -35,7 +35,7 @@ function withExtractionLock(fn) {
   return run;
 }
 
-async function extractArchiveWithRetry(zipName, destPath, retries = 6, delayMs = 1000) {
+async function extractArchiveWithRetry(zipName, destPath, retries = 10, baseDelayMs = 2000) {
   return withExtractionLock(async () => {
     for (let i = 0; i < retries; i++) {
       try {
@@ -58,10 +58,13 @@ async function extractArchiveWithRetry(zipName, destPath, retries = 6, delayMs =
           stderrText.includes("being used by another process") ||
           stderrText.includes("cannot access the file") ||
           stderrText.includes("Cannot remove item") ||
-          stderrText.includes("Cannot find path") || // new: TOCTOU race on -Force cleanup
+          stderrText.includes("Cannot find path") ||
           stderrText.includes("does not exist");
 
         if (!lockLike || i === retries - 1) throw err;
+
+        // exponential backoff, capped at 15s per wait
+        const delayMs = Math.min(baseDelayMs * 2 ** i, 15000);
         console.log(
           `Extraction of ${zipName} hit a transient error, retrying in ${delayMs}ms... (${i + 1}/${retries})`,
         );

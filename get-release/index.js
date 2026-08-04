@@ -33,18 +33,24 @@ async function extractArchiveWithRetry(zipName, destPath, retries = 6, delayMs =
       if (process.platform === "win32") {
         execSync(
           `powershell -Command "Expand-Archive -Force -ErrorAction Stop -Path '${zipName}' -DestinationPath '${destPath}'"`,
-          { stdio: "inherit" },
+          { stdio: ["inherit", "inherit", "pipe"] }, // capture stderr only
         );
       } else {
-        execSync(`unzip -o "${zipName}" -d "${destPath}"`, { stdio: "inherit" });
+        execSync(`unzip -o "${zipName}" -d "${destPath}"`, {
+          stdio: ["inherit", "inherit", "pipe"],
+        });
       }
       return; // success
     } catch (err) {
-      const msg = err.message || "";
+      const stderrText = err.stderr ? err.stderr.toString() : "";
+      // still print it, since stdio no longer auto-inherits stderr to the console
+      if (stderrText) console.error(stderrText);
+
       const lockLike =
-        msg.includes("being used by another process") ||
-        msg.includes("cannot access the file") ||
-        msg.includes("Cannot remove item");
+        stderrText.includes("being used by another process") ||
+        stderrText.includes("cannot access the file") ||
+        stderrText.includes("Cannot remove item");
+
       if (!lockLike || i === retries - 1) throw err;
       console.log(
         `Extraction of ${zipName} hit a file lock, retrying in ${delayMs}ms... (${i + 1}/${retries})`,

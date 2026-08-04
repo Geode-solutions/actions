@@ -60,22 +60,7 @@ async function extractArchiveWithRetry(zipName, destPath, retries = 10, baseDela
       return;
     } catch (err) {
       const stderrText = err.stderr ? err.stderr.toString() : "";
-      if (stderrText) console.error(stderrText);
-
-      const lockLike =
-        stderrText.includes("being used by another process") ||
-        stderrText.includes("cannot access the file") ||
-        stderrText.includes("Cannot remove item") ||
-        stderrText.includes("Cannot find path") ||
-        stderrText.includes("does not exist");
-
-      if (!lockLike || i === retries - 1) throw err;
-
-      // exponential backoff, capped at 15s per wait
-      const delayMs = Math.min(baseDelayMs * 2 ** i, 15000);
-      console.log(
-        `Extraction of ${zipName} hit a transient error, retrying in ${delayMs}ms... (${i + 1}/${retries})`,
-      );
+      console.error(stderrText);
       await sleep(delayMs);
     }
   }
@@ -164,6 +149,7 @@ function main() {
           const query = branch.includes("master")
             ? octokit.repos.getLatestRelease({ owner, repo }).then((release) => release.data.id)
             : octokit.repos.listReleases({ owner, repo, per_page: 100 }).then((releases) => {
+                console.log("pull_request:", github.context.payload.pull_request);
                 if (github.context.payload.pull_request) {
                   const head_release = releases.data.find(
                     (r) => r.name === github.context.payload.pull_request.head.ref,

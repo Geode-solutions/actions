@@ -44,51 +44,41 @@ async function unlinkWithRetry(filePath, retries = 6, delayMs = 500) {
   }
 }
 
-let extractionQueue = Promise.resolve();
-
-function withExtractionLock(fn) {
-  const run = extractionQueue.then(fn, fn); // run after previous settles, even on error
-  extractionQueue = run.catch(() => {}); // don't let one failure break the chain
-  return run;
-}
-
 async function extractArchiveWithRetry(zipName, destPath, retries = 10, baseDelayMs = 2000) {
-  return withExtractionLock(async () => {
-    for (let i = 0; i < retries; i++) {
-      try {
-        if (process.platform === "win32") {
-          execSync(
-            `powershell -Command "Expand-Archive -Force -ErrorAction Stop -Path '${zipName}' -DestinationPath '${destPath}'"`,
-            { stdio: ["inherit", "inherit", "pipe"] },
-          );
-        } else {
-          execSync(`unzip -o "${zipName}" -d "${destPath}"`, {
-            stdio: ["inherit", "inherit", "pipe"],
-          });
-        }
-        return;
-      } catch (err) {
-        const stderrText = err.stderr ? err.stderr.toString() : "";
-        if (stderrText) console.error(stderrText);
-
-        const lockLike =
-          stderrText.includes("being used by another process") ||
-          stderrText.includes("cannot access the file") ||
-          stderrText.includes("Cannot remove item") ||
-          stderrText.includes("Cannot find path") ||
-          stderrText.includes("does not exist");
-
-        if (!lockLike || i === retries - 1) throw err;
-
-        // exponential backoff, capped at 15s per wait
-        const delayMs = Math.min(baseDelayMs * 2 ** i, 15000);
-        console.log(
-          `Extraction of ${zipName} hit a transient error, retrying in ${delayMs}ms... (${i + 1}/${retries})`,
+  for (let i = 0; i < retries; i++) {
+    try {
+      if (process.platform === "win32") {
+        execSync(
+          `powershell -Command "Expand-Archive -Force -ErrorAction Stop -Path '${zipName}' -DestinationPath '${destPath}'"`,
+          { stdio: ["inherit", "inherit", "pipe"] },
         );
-        await sleep(delayMs);
+      } else {
+        execSync(`unzip -o "${zipName}" -d "${destPath}"`, {
+          stdio: ["inherit", "inherit", "pipe"],
+        });
       }
+      return;
+    } catch (err) {
+      const stderrText = err.stderr ? err.stderr.toString() : "";
+      if (stderrText) console.error(stderrText);
+
+      const lockLike =
+        stderrText.includes("being used by another process") ||
+        stderrText.includes("cannot access the file") ||
+        stderrText.includes("Cannot remove item") ||
+        stderrText.includes("Cannot find path") ||
+        stderrText.includes("does not exist");
+
+      if (!lockLike || i === retries - 1) throw err;
+
+      // exponential backoff, capped at 15s per wait
+      const delayMs = Math.min(baseDelayMs * 2 ** i, 15000);
+      console.log(
+        `Extraction of ${zipName} hit a transient error, retrying in ${delayMs}ms... (${i + 1}/${retries})`,
+      );
+      await sleep(delayMs);
     }
-  });
+  }
 }
 
 async function download_asset(asset, token, destPath) {
@@ -110,7 +100,6 @@ async function download_asset(asset, token, destPath) {
         if (extension == "zip") {
           console.log("Unzipping", asset.name);
           await extractArchiveWithRetry(asset.name, destPath);
-
           let extract_name = asset.name.slice(0, -4);
           if (extract_name.endsWith("-private")) extract_name = extract_name.slice(0, -8);
           const result = path.join(destPath, extract_name);
@@ -147,7 +136,7 @@ async function download_asset(asset, token, destPath) {
   });
 }
 
-const main = async () => {
+function main() {
   try {
     excludeWorkspaceFromDefender();
     const repos = core.getInput("repository");
@@ -242,7 +231,7 @@ const main = async () => {
   } catch (error) {
     core.setFailed(error.message);
   }
-};
+}
 
 // Call the main function to run the action
 main();

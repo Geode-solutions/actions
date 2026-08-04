@@ -19,14 +19,43 @@ async function unlinkWithRetry(filePath, retries = 6, delayMs = 500) {
     } catch (err) {
       const busy = err.code === "EBUSY" || err.code === "EPERM";
       if (!busy || i === retries - 1) throw err;
-      console.log(`File busy (${filePath}), retrying in ${delayMs}ms... (${i + 1}/${retries})`);
+      console.log(
+        `File busy (${filePath}), retrying delete in ${delayMs}ms... (${i + 1}/${retries})`,
+      );
+      await sleep(delayMs);
+    }
+  }
+}
+
+async function extractArchiveWithRetry(zipName, destPath, retries = 6, delayMs = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      if (process.platform === "win32") {
+        execSync(
+          `powershell -Command "Expand-Archive -Force -ErrorAction Stop -Path '${zipName}' -DestinationPath '${destPath}'"`,
+          { stdio: "inherit" },
+        );
+      } else {
+        execSync(`unzip -o "${zipName}" -d "${destPath}"`, { stdio: "inherit" });
+      }
+      return; // success
+    } catch (err) {
+      const msg = err.message || "";
+      const lockLike =
+        msg.includes("being used by another process") ||
+        msg.includes("cannot access the file") ||
+        msg.includes("Cannot remove item");
+      if (!lockLike || i === retries - 1) throw err;
+      console.log(
+        `Extraction of ${zipName} hit a file lock, retrying in ${delayMs}ms... (${i + 1}/${retries})`,
+      );
       await sleep(delayMs);
     }
   }
 }
 
 async function download_asset(asset, token, destPath) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const writeStream = fs.createWriteStream(asset.name);
     request({
       url: asset.url,
@@ -37,46 +66,47 @@ async function download_asset(asset, token, destPath) {
         "User-Agent": "",
       },
     }).pipe(writeStream);
+
     writeStream.on("close", async function () {
-      const extension = asset.name.split(".").pop();
-      if (extension == "zip") {
-        console.log("Unzipping", asset.name);
-        if (process.platform == "win32") {
-          execSync(
-            `powershell -Command "Expand-Archive -Force -ErrorAction Stop -Path '${asset.name}' -DestinationPath '${destPath}'"`,
-            { stdio: "inherit" },
-          );
+      try {
+        const extension = asset.name.split(".").pop();
+        if (extension == "zip") {
+          console.log("Unzipping", asset.name);
+          await extractArchiveWithRetry(asset.name, destPath);
+
+          let extract_name = asset.name.slice(0, -4);
+          if (extract_name.endsWith("-private")) extract_name = extract_name.slice(0, -8);
+          const result = path.join(destPath, extract_name);
+          console.log("Unzip to:", extract_name);
+          console.log("Result:", result);
+          await unlinkWithRetry(asset.name);
+          resolve(result);
+        } else if (extension == "gz") {
+          console.log("Untaring", asset.name);
+          fs.createReadStream(asset.name)
+            .pipe(tar.x())
+            .on("close", async function () {
+              let extract_name = asset.name.slice(0, -7);
+              if (extract_name.endsWith("-private")) {
+                extract_name = extract_name.slice(0, -8);
+              }
+              console.log("Untar to:", extract_name);
+              const result = path.join(process.env.GITHUB_WORKSPACE, extract_name);
+              console.log("Result:", result);
+              await unlinkWithRetry(asset.name);
+              resolve(result);
+            });
         } else {
-          execSync(`unzip -o "${asset.name}" -d "${destPath}"`, { stdio: "inherit" });
+          console.log("Downloading", asset.name);
+          const result = path.join(process.env.GITHUB_WORKSPACE, asset.name);
+          resolve(result);
         }
-        let extract_name = asset.name.slice(0, -4);
-        if (extract_name.endsWith("-private")) extract_name = extract_name.slice(0, -8);
-        const result = path.join(destPath, extract_name);
-        console.log("Unzip to:", extract_name);
-        console.log("Result:", result);
-        await unlinkWithRetry(asset.name);
-        resolve(result);
-      } else if (extension == "gz") {
-        console.log("Untaring", asset.name);
-        fs.createReadStream(asset.name)
-          .pipe(tar.x())
-          .on("close", function () {
-            let extract_name = asset.name.slice(0, -7);
-            if (extract_name.endsWith("-private")) {
-              extract_name = extract_name.slice(0, -8);
-            }
-            console.log("Untar to:", extract_name);
-            const result = path.join(process.env.GITHUB_WORKSPACE, extract_name);
-            console.log("Result:", result);
-            fs.unlinkSync(asset.name);
-            resolve(result);
-          });
-      } else {
-        console.log("Downloading", asset.name);
-        const result = path.join(process.env.GITHUB_WORKSPACE, asset.name);
-        resolve(result);
+      } catch (err) {
+        reject(err);
       }
     });
+
+    writeStream.on("error", reject);
   });
 }
 

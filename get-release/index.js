@@ -27,37 +27,48 @@ async function unlinkWithRetry(filePath, retries = 6, delayMs = 500) {
   }
 }
 
+let extractionQueue = Promise.resolve();
+
+function withExtractionLock(fn) {
+  const run = extractionQueue.then(fn, fn); // run after previous settles, even on error
+  extractionQueue = run.catch(() => {}); // don't let one failure break the chain
+  return run;
+}
+
 async function extractArchiveWithRetry(zipName, destPath, retries = 6, delayMs = 1000) {
-  for (let i = 0; i < retries; i++) {
-    try {
-      if (process.platform === "win32") {
-        execSync(
-          `powershell -Command "Expand-Archive -Force -ErrorAction Stop -Path '${zipName}' -DestinationPath '${destPath}'"`,
-          { stdio: ["inherit", "inherit", "pipe"] }, // capture stderr only
+  return withExtractionLock(async () => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        if (process.platform === "win32") {
+          execSync(
+            `powershell -Command "Expand-Archive -Force -ErrorAction Stop -Path '${zipName}' -DestinationPath '${destPath}'"`,
+            { stdio: ["inherit", "inherit", "pipe"] },
+          );
+        } else {
+          execSync(`unzip -o "${zipName}" -d "${destPath}"`, {
+            stdio: ["inherit", "inherit", "pipe"],
+          });
+        }
+        return;
+      } catch (err) {
+        const stderrText = err.stderr ? err.stderr.toString() : "";
+        if (stderrText) console.error(stderrText);
+
+        const lockLike =
+          stderrText.includes("being used by another process") ||
+          stderrText.includes("cannot access the file") ||
+          stderrText.includes("Cannot remove item") ||
+          stderrText.includes("Cannot find path") || // new: TOCTOU race on -Force cleanup
+          stderrText.includes("does not exist");
+
+        if (!lockLike || i === retries - 1) throw err;
+        console.log(
+          `Extraction of ${zipName} hit a transient error, retrying in ${delayMs}ms... (${i + 1}/${retries})`,
         );
-      } else {
-        execSync(`unzip -o "${zipName}" -d "${destPath}"`, {
-          stdio: ["inherit", "inherit", "pipe"],
-        });
+        await sleep(delayMs);
       }
-      return; // success
-    } catch (err) {
-      const stderrText = err.stderr ? err.stderr.toString() : "";
-      // still print it, since stdio no longer auto-inherits stderr to the console
-      if (stderrText) console.error(stderrText);
-
-      const lockLike =
-        stderrText.includes("being used by another process") ||
-        stderrText.includes("cannot access the file") ||
-        stderrText.includes("Cannot remove item");
-
-      if (!lockLike || i === retries - 1) throw err;
-      console.log(
-        `Extraction of ${zipName} hit a file lock, retrying in ${delayMs}ms... (${i + 1}/${retries})`,
-      );
-      await sleep(delayMs);
     }
-  }
+  });
 }
 
 async function download_asset(asset, token, destPath) {

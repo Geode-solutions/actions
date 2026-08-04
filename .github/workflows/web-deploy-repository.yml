@@ -120,12 +120,6 @@ jobs:
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
           use_registry: ${{ inputs.use_registry }}
-      - name: Archive pyinstaller
-        if: steps.artifact.outcome != 'success'
-        uses: thedoctor0/zip-release@0.7.5
-        with:
-          filename: ${{ github.event.repository.name }}-pyinstaller-${{ runner.os }}.zip
-          directory: pyinstaller_dist
       - name: Release
         run: |
           ls -l pyinstaller_dist

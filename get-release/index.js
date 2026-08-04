@@ -7,6 +7,23 @@ import github from "@actions/github";
 import path from "node:path";
 import request from "request";
 
+function excludeWorkspaceFromDefender() {
+  if (process.platform !== "win32") return;
+  const workspace = process.env.GITHUB_WORKSPACE;
+  if (!workspace) return;
+  try {
+    execSync(
+      `powershell -Command "Add-MpPreference -ExclusionPath '${workspace}' -ErrorAction Stop"`,
+      { stdio: "inherit" },
+    );
+    console.log("Excluded", workspace, "from Windows Defender real-time scanning");
+  } catch (err) {
+    // Non-fatal: exclusion may fail on runners without admin rights (e.g. some self-hosted setups).
+    // Retry logic in extractArchiveWithRetry still covers this case.
+    console.log("Could not add Defender exclusion (continuing anyway):", err.message);
+  }
+}
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -132,6 +149,7 @@ async function download_asset(asset, token, destPath) {
 
 const main = async () => {
   try {
+    excludeWorkspaceFromDefender();
     const repos = core.getInput("repository");
     const directory = core.getInput("directory");
     if (repos.length) {

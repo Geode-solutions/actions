@@ -35,13 +35,14 @@ runs:
           packages=$(grep -E '^[^#].+==' "$file_txt" | cut -d'=' -f1 || true)
           for package in $packages; do
             echo "Package: $package"
-            if grep -q "^$package==" "$file_in" 2>/dev/null; then
-              pinned_version=$(grep "^$package==" "$file_in" | cut -d'=' -f3 || true)
+            pkg_regex=$(echo "$package" | sed -E 's/[-_]/[-_]/g')
+            if grep -qiE "^${pkg_regex}==" "$file_in" 2>/dev/null; then
+              pinned_version=$(grep -iE "^${pkg_regex}==" "$file_in" | cut -d'=' -f3 || true)
               echo "Pinned version in $file_in: $pinned_version"
               continue
             fi
             echo "Updating $package version"
-            perl -i -pe 's|^(\Q'"$package"'\E)==(\d+)\.(\d+)\.(\d+)(?:[a-z]+[0-9]*)?$|\1>=\2|' "$file_txt"
+            perl -i -pe 's|^(\Q'"$package"'\E)==(\d+)(?:\.\d+)?(?:\.\d+)?(?:[a-z]+[0-9]*)?$|\1>=\2|' "$file_txt"
           done
           if [ ${{ inputs.use_internal }} == "true" ]; then
             echo "Processing $file_internal_in"

@@ -30,11 +30,8 @@ jobs:
         with:
           token: ${{ secrets.TOKEN }}
       - name: Oxlint
-        run: npx oxlint@latest --no-error-on-unmatched-pattern --config .oxlintrc.json --format github
-      # - uses: oxc-project/oxlint-action@latest
-      #   with:
-      #     config: .oxlintrc.json
-      #     all-files: true
+        run: |
+          npx oxlint@latest --no-error-on-unmatched-pattern --config .oxlintrc.json --format github
 
   test-repository:
     needs: [prepare, config]

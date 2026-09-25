@@ -31,6 +31,7 @@ jobs:
           token: ${{ secrets.TOKEN }}
       - name: Oxlint
         run: |
+          npm i oxlint-tsgolint@latest
           npx oxlint@latest --no-error-on-unmatched-pattern --config .oxlintrc.json --format github
 
   test-repository:

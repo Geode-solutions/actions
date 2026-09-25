@@ -40,7 +40,7 @@ jobs:
           npm install --force --no-package-lock --ignore-scripts
           npm i -g oxlint@latest oxlint-tsgolint@latest
           export OXLINT_TSGOLINT_PATH="$(npm prefix -g)/bin/tsgolint"
-          npx nuxi prepare
+          MODE=BROWSER npx nuxi prepare
           oxlint --no-error-on-unmatched-pattern --config .oxlintrc.json --format github
 
   test-repository:

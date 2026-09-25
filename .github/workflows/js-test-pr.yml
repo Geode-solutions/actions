@@ -35,8 +35,9 @@ jobs:
           node-version: 24
       - name: Oxlint
         run: |
-          npm i oxlint-tsgolint@latest
-          npx oxlint@latest --no-error-on-unmatched-pattern --config .oxlintrc.json --format github
+          npm i -g oxlint@latest oxlint-tsgolint@latest
+          export OXLINT_TSGOLINT_PATH="$(npm prefix -g)/bin/tsgolint"
+          oxlint --no-error-on-unmatched-pattern --config .oxlintrc.json --format github
 
   test-repository:
     needs: [prepare, config]

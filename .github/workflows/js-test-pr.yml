@@ -29,6 +29,10 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
+      - uses: actions/setup-node@v6
+        with:
+          registry-url: "https://registry.npmjs.org"
+          node-version: 24
       - name: Oxlint
         run: |
           npm i oxlint-tsgolint@latest

@@ -35,6 +35,9 @@ jobs:
           node-version: 24
       - name: Oxlint
         run: |
+          jq '.dependencies |= with_entries(if .value == "0.0.0" then .value = "next" else . end) | if has("devDependencies") then .devDependencies |= with_entries(if .value == "0.0.0" then .value = "next" else . end) else . end' package.json > temp.json
+          mv temp.json package.json
+          npm install --force --no-package-lock --ignore-scripts
           npm i -g oxlint@latest oxlint-tsgolint@latest
           export OXLINT_TSGOLINT_PATH="$(npm prefix -g)/bin/tsgolint"
           npx nuxi prepare

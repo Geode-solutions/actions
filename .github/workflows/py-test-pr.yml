@@ -26,10 +26,21 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
+      - name: Check pyproject.toml
+        id: pyproject
+        run: |
+          if [ -f "pyproject.toml" ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "pyproject.toml not found, skipping checkers"
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/setup-python@v5
+        if: steps.pyproject.outputs.found == 'true'
         with:
           python-version: "3.12"
       - uses: Geode-solutions/actions/get-release@master
+        if: steps.pyproject.outputs.found == 'true'
         id: wheels
         with:
           repository: ${{ inputs.repos }}
@@ -37,6 +48,7 @@ jobs:
           token: ${{ secrets.TOKEN }}
           branch: ${{ github.event.pull_request.head.ref }}
       - name: Install dependencies
+        if: steps.pyproject.outputs.found == 'true'
         run: |
           pip install --pre .
           pip install mypy pylint
@@ -49,12 +61,14 @@ jobs:
           fi
           pip list
       - uses: dciborow/action-pylint@main
+        if: steps.pyproject.outputs.found == 'true'
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
           glob_pattern: "**/*.py"
           level: "warning"
       - uses: tsuyoshicho/action-mypy@v5
+        if: steps.pyproject.outputs.found == 'true'
         with:
           github_token: ${{ secrets.github_token }}
           mypy_flags: "--config-file mypy.ini"

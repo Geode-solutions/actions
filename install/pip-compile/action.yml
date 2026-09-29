@@ -19,8 +19,8 @@ runs:
           echo "Current folder: $folder"
           file_in=$folder/requirements.in
           if [ ! -f "$file_in" ]; then 
-            echo "File $file_in not found"
-            exit 1
+            echo "File $file_in not found, skipping $folder"
+            continue
           fi
           file_internal_in=$folder/requirements-internal.in
           if [ ! -f "$file_internal_in" ]; then 

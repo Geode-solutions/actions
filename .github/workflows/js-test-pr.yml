@@ -44,7 +44,7 @@ jobs:
         run: |
           npm i -g oxlint@latest oxlint-tsgolint@latest
           export OXLINT_TSGOLINT_PATH="$(npm prefix -g)/bin/tsgolint"
-          MODE=BROWSER npx nuxi prepare
+          npm run --if-present prepare:types
           oxlint --no-error-on-unmatched-pattern --config .oxlintrc.json --format github
 
   test-repository:

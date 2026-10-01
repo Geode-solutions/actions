@@ -83,11 +83,34 @@ function fetchAsset(asset, token) {
         "User-Agent": "",
       },
     });
+    let statusCode;
+    req.on("response", (response) => {
+      statusCode = response.statusCode;
+    });
     req.on("error", reject);
     writeStream.on("error", reject);
-    writeStream.on("close", resolve);
+    writeStream.on("close", () => {
+      if (statusCode !== 200) {
+        reject(new Error(`HTTP status ${statusCode}`));
+        return;
+      }
+      const size = fs.statSync(asset.name).size;
+      if (asset.size && size !== asset.size) {
+        reject(new Error(`incomplete file (${size}/${asset.size} bytes)`));
+        return;
+      }
+      resolve();
+    });
     req.pipe(writeStream);
   });
+}
+
+function removeFile(filePath) {
+  try {
+    fs.unlinkSync(filePath);
+  } catch {
+    // ignore, file may not have been created yet
+  }
 }
 
 async function downloadAssetWithRetry(asset, token, retries = 5, baseDelayMs = 2000) {
@@ -97,28 +120,37 @@ async function downloadAssetWithRetry(asset, token, retries = 5, baseDelayMs = 2
       return;
     } catch (err) {
       console.error(`Download of ${asset.name} failed: ${err.message}`);
-      try {
-        fs.unlinkSync(asset.name);
-      } catch {
-        // ignore, file may not have been created yet
-      }
+      removeFile(asset.name);
       if (i === retries - 1) throw err;
       const delayMs = baseDelayMs * (i + 1);
-      console.log(
-        `Retrying download of ${asset.name} in ${delayMs}ms... (${i + 1}/${retries})`,
-      );
+      console.log(`Retrying download of ${asset.name} in ${delayMs}ms... (${i + 1}/${retries})`);
       await sleep(delayMs);
     }
   }
 }
 
-async function download_asset(asset, token, destPath) {
-  await downloadAssetWithRetry(asset, token);
+// A corrupted archive cannot be fixed by extracting it again: download it again.
+async function downloadAndExtractWithRetry(asset, token, destPath, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    await downloadAssetWithRetry(asset, token);
+    try {
+      await extractArchiveWithRetry(asset.name, destPath, 3);
+      return;
+    } catch (err) {
+      if (i === retries - 1) throw err;
+      console.log(
+        `Extraction of ${asset.name} keeps failing, downloading it again... (${i + 1}/${retries})`,
+      );
+      await unlinkWithRetry(asset.name);
+    }
+  }
+}
 
+async function download_asset(asset, token, destPath) {
   const extension = asset.name.split(".").pop();
   if (extension == "zip") {
     console.log("Unzipping", asset.name);
-    await extractArchiveWithRetry(asset.name, destPath);
+    await downloadAndExtractWithRetry(asset, token, destPath);
     let extract_name = asset.name.slice(0, -4);
     if (extract_name.endsWith("-private")) extract_name = extract_name.slice(0, -8);
     const result = path.join(destPath, extract_name);
@@ -126,7 +158,9 @@ async function download_asset(asset, token, destPath) {
     console.log("Result:", result);
     await unlinkWithRetry(asset.name);
     return result;
-  } else if (extension == "gz") {
+  }
+  await downloadAssetWithRetry(asset, token);
+  if (extension == "gz") {
     console.log("Untaring", asset.name);
     return new Promise((resolve, reject) => {
       fs.createReadStream(asset.name)

@@ -45,6 +45,7 @@ jobs:
           pip install black
           black .
       - name: Install dependencies
+        if: hashFiles('package.json') != ''
         uses: Geode-solutions/actions/install/node-dependencies@master
         with:
           repos: ${{ inputs.repos }}
@@ -52,11 +53,8 @@ jobs:
           token: ${{ secrets.TOKEN }}
           use_registry: false
       - name: Json
-        id: json
+        if: hashFiles('package.json') != ''
         run: |
-          if [ ! -f "package.json" ]; then
-            exit 0
-          fi
           npm run json
       - uses: stefanzweifel/git-auto-commit-action@v7
         id: commit

@@ -1,6 +1,9 @@
 on:
   workflow_call:
     inputs:
+      repos:
+        type: string
+        required: true
       use_internal:
         type: boolean
         default: false
@@ -41,6 +44,13 @@ jobs:
         run: |
           pip install black
           black .
+      - name: Install dependencies
+        uses: Geode-solutions/actions/install/node-dependencies@master
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+          use_registry: false
       - name: Json
         id: json
         run: |

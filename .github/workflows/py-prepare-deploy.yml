@@ -24,4 +24,5 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/py-prepare.yml@master
     with:
       use_internal: true
+      repos: ${{ vars.REPOS }}
     secrets: inherit

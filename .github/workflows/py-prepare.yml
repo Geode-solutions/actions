@@ -57,7 +57,6 @@ jobs:
           if [ ! -f "package.json" ]; then
             exit 0
           fi
-          npm install --no-save @geode/opengeodeweb-microservice@next
           npm run json
       - uses: stefanzweifel/git-auto-commit-action@v7
         id: commit

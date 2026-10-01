@@ -52,10 +52,12 @@ jobs:
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
           use_registry: false
-      - name: Json
+      - name: Json & Discard dependency install changes
         if: hashFiles('package.json') != ''
         run: |
           npm run json
+          git checkout -- package.json
+          rm -f -- ./*.tgz
       - uses: stefanzweifel/git-auto-commit-action@v7
         id: commit
         with:

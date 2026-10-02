@@ -51,6 +51,7 @@ async function extractArchiveWithRetry(zipName, destPath, retries = 10, baseDela
   for (let i = 0; i < retries; i++) {
     try {
       // Async so archives from different repositories are extracted in parallel
+      fs.mkdirSync(destPath, { recursive: true });
       if (process.platform === "win32") {
         // Windows bsdtar reads zip files and is much faster than Expand-Archive
         const tarExe = path.join(process.env.SystemRoot || "C:\\Windows", "System32", "tar.exe");

@@ -14,6 +14,10 @@ inputs:
   token:
     type: string
     required: true
+  fetch-depth:
+    description: "Number of commits to fetch, 0 for the full history"
+    type: string
+    default: "1"
 
 runs:
   using: "composite"
@@ -43,7 +47,7 @@ runs:
     - uses: actions/checkout@v6
       if: steps.branch.outputs.branch == 'true'
       with:
-        fetch-depth: 0
+        fetch-depth: ${{ inputs.fetch-depth }}
         repository: ${{ inputs.repo }}
         token: ${{ inputs.token }}
         ref: refs/heads/${{ inputs.branch }}
@@ -51,7 +55,7 @@ runs:
     - uses: actions/checkout@v6
       if: steps.branch.outputs.branch == 'false' && inputs.base != ''
       with:
-        fetch-depth: 0
+        fetch-depth: ${{ inputs.fetch-depth }}
         repository: ${{ inputs.repo }}
         token: ${{ inputs.token }}
         ref: refs/heads/${{ steps.branch.outputs.checkout_branch }}
@@ -59,7 +63,7 @@ runs:
     - uses: actions/checkout@v6
       if: steps.branch.outputs.branch == 'false' && inputs.base == ''
       with:
-        fetch-depth: 0
+        fetch-depth: ${{ inputs.fetch-depth }}
         repository: ${{ inputs.repo }}
         token: ${{ inputs.token }}
         path: ${{ inputs.path }}

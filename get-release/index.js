@@ -1,11 +1,14 @@
 import * as tar from "tar";
 import { Octokit } from "@octokit/rest";
 import core from "@actions/core";
-import { execSync } from "node:child_process";
+import { execFile, execSync } from "node:child_process";
 import fs from "node:fs";
 import github from "@actions/github";
 import path from "node:path";
+import { promisify } from "node:util";
 import request from "request";
+
+const execFileAsync = promisify(execFile);
 
 function excludeWorkspaceFromDefender() {
   if (process.platform !== "win32") return;
@@ -47,15 +50,13 @@ async function unlinkWithRetry(filePath, retries = 6, delayMs = 500) {
 async function extractArchiveWithRetry(zipName, destPath, retries = 10, baseDelayMs = 2000) {
   for (let i = 0; i < retries; i++) {
     try {
+      // Async so archives from different repositories are extracted in parallel
       if (process.platform === "win32") {
-        execSync(
-          `powershell -Command "Expand-Archive -Force -ErrorAction Stop -Path '${zipName}' -DestinationPath '${destPath}'"`,
-          { stdio: ["inherit", "inherit", "pipe"] },
-        );
+        // Windows bsdtar reads zip files and is much faster than Expand-Archive
+        const tarExe = path.join(process.env.SystemRoot || "C:\\Windows", "System32", "tar.exe");
+        await execFileAsync(tarExe, ["-xf", zipName, "-C", destPath]);
       } else {
-        execSync(`unzip -o "${zipName}" -d "${destPath}"`, {
-          stdio: ["inherit", "inherit", "pipe"],
-        });
+        await execFileAsync("unzip", ["-o", "-q", zipName, "-d", destPath]);
       }
       return;
     } catch (err) {
@@ -216,8 +217,13 @@ function main() {
           const query = branch.includes("master")
             ? octokit.repos.getLatestRelease({ owner, repo }).then((release) => release.data.id)
             : octokit.repos.listReleases({ owner, repo, per_page: 100 }).then((releases) => {
-                console.log("pull_request:", github.context.payload.pull_request);
                 if (github.context.payload.pull_request) {
+                  console.log(
+                    "pull_request:",
+                    github.context.payload.pull_request.head.ref,
+                    "->",
+                    github.context.payload.pull_request.base.ref,
+                  );
                   const head_release = releases.data.find(
                     (r) => r.name === github.context.payload.pull_request.head.ref,
                   );

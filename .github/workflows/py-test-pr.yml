@@ -61,13 +61,24 @@ jobs:
             done
           fi
           pip list
-      - uses: dciborow/action-pylint@main
+      - uses: reviewdog/action-setup@v1
         if: steps.pyproject.outputs.found == 'true'
         with:
-          github_token: ${{ secrets.github_token }}
-          reporter: github-pr-review
-          glob_pattern: "**/*.py"
-          level: "warning"
+          reviewdog_version: latest
+      - name: Pylint
+        if: steps.pyproject.outputs.found == 'true'
+        shell: bash
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.github_token }}
+        run: |
+          shopt -s globstar
+          pylint --score n **/*.py 2>&1 |
+            reviewdog -efm="%f:%l:%c: %m" \
+              -name=pylint \
+              -reporter=github-pr-review \
+              -filter-mode=added \
+              -fail-level=none \
+              -level=warning
       - uses: tsuyoshicho/action-mypy@v5
         if: steps.pyproject.outputs.found == 'true'
         with:

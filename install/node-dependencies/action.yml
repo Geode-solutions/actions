@@ -28,7 +28,14 @@ runs:
       run: |
         source "$GITHUB_ACTION_PATH/retry.sh"
         retry npm install -g npm@11.18.0
+        echo "NPM_CACHE_DIR=$(npm config get cache)" >> "$GITHUB_ENV"
       shell: bash
+    - name: Cache npm downloads
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.NPM_CACHE_DIR }}
+        key: npm-${{ runner.os }}-${{ hashFiles('package.json') }}
+        restore-keys: npm-${{ runner.os }}-
     - uses: Geode-solutions/actions/get-release@master
       if: ${{ inputs.tarballs == '' && inputs.use_registry == 'false' }}
       id: tarballs
@@ -63,16 +70,18 @@ runs:
         cp package.json package.json.bak
         tarballs=$(echo "${{ steps.result.outputs.tarballs }}" | sed 's/\;/\ /g')
         echo "Tarballs = $tarballs"
-        if [ -n "$tarballs" ]; then
-          retry npm install --force $tarballs
-        fi
+        # Declare tarballs as file: dependencies so a single install resolves everything
+        for tarball in $tarballs; do
+          name=$(tar -xOzf - package/package.json < "$tarball" | jq -r .name)
+          jq --arg name "$name" --arg path "file:$tarball" '.dependencies[$name] = $path' package.json > package.json.tmp && mv package.json.tmp package.json
+        done
         overrides=$(jq -r '.dependencies | to_entries | map(select(.value | startswith("file:"))) | map({key: .key, value: .value}) | from_entries' package.json)
         if [ -n "$overrides" ] && [ "$overrides" != "{}" ]; then
           # Merge existing overrides (if any) with new overrides
           jq --argjson newOverrides "$overrides" '.overrides = (.overrides // {}) * $newOverrides' package.json > package.json.tmp && mv package.json.tmp package.json
           echo "Updated package.json with local file dependencies in overrides"
         fi
-        retry npm install --force --no-package-lock
+        retry npm install --force --no-package-lock --no-audit --no-fund
         npm list --all || true
         mv package.json.bak package.json
       shell: bash

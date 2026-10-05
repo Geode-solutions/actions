@@ -1,4 +1,5 @@
 name: "Test Node"
+description: "Run the Node tests, and optionally pack the package for release-node"
 
 inputs:
   repos:
@@ -13,6 +14,10 @@ inputs:
   token:
     type: string
     required: true
+  pack:
+    description: "Build and pack the package as the node-package artifact, reused by release-node in web-deploy-repository.yml"
+    type: boolean
+    default: false
 
 runs:
   using: "composite"
@@ -29,3 +34,18 @@ runs:
       run: |
         npm run test
       shell: bash
+    # Package files are listed in package.json "files", so test outputs cannot end up in it
+    - name: Pack
+      if: ${{ inputs.pack == 'true' }}
+      run: |
+        npm run build
+        mkdir -p "$RUNNER_TEMP/node-package"
+        npm pack --pack-destination "$RUNNER_TEMP/node-package"
+      shell: bash
+    - uses: actions/upload-artifact@v7
+      if: ${{ inputs.pack == 'true' }}
+      with:
+        name: node-package
+        path: ${{ runner.temp }}/node-package/*.tgz
+        retention-days: 1
+        if-no-files-found: error

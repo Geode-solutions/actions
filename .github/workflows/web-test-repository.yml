@@ -102,6 +102,8 @@ jobs:
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
           use_registry: ${{ inputs.use_registry }}
+          # release-node runs on Linux
+          pack: ${{ runner.os == 'Linux' }}
 
   test-integration:
     if: inputs.integration == 'true'

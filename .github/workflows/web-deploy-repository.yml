@@ -136,7 +136,36 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
+      # Only exists when test-node packed it earlier in the same run (test PRs): reused if it has the requested version,
+      # otherwise the package is built as usual
+      - uses: actions/download-artifact@v8
+        id: artifact
+        continue-on-error: true
+        with:
+          name: node-package
+          path: node-package
+      - name: Check packed package
+        id: packed
+        if: steps.artifact.outcome == 'success'
+        run: |
+          tarball=$(ls node-package/*.tgz)
+          version=$(tar -xOzf "$tarball" package/package.json | jq -r .version)
+          if [ "$version" == "${{ inputs.version }}" ]; then
+            mv "$tarball" .
+            echo "tarball=$(basename "$tarball")" >> "$GITHUB_OUTPUT"
+          else
+            echo "Packed version $version is not ${{ inputs.version }}: building the package"
+          fi
+          rm -rf node-package
+        shell: bash
+      # Same setup as install/node-dependencies, used by the npm publish
+      - uses: actions/setup-node@v6
+        if: steps.packed.outputs.tarball != ''
+        with:
+          registry-url: "https://registry.npmjs.org"
+          node-version: 24
       - name: Install dependencies
+        if: steps.packed.outputs.tarball == ''
         uses: Geode-solutions/actions/install/node-dependencies@master
         with:
           repos: ${{ inputs.repos }}
@@ -144,6 +173,7 @@ jobs:
           token: ${{ secrets.TOKEN }}
           use_registry: ${{ inputs.use_registry }}
       - name: Build
+        if: steps.packed.outputs.tarball == ''
         id: build
         run: |
           npm --no-git-tag-version --allow-same-version version ${{ inputs.version }}
@@ -157,7 +187,7 @@ jobs:
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
           counter=0
-          for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY ${{ inputs.release }} ${{ steps.build.outputs.tarball }} && break || counter=$[$counter +1] && sleep 30; done
+          for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY ${{ inputs.release }} ${{ steps.packed.outputs.tarball || steps.build.outputs.tarball }} && break || counter=$[$counter +1] && sleep 30; done
           echo $counter
           if [ "$counter" -eq "5" ]; then exit 1; fi
         env:
@@ -169,9 +199,9 @@ jobs:
           npm install -g npm@11.18.0
           npm --version
           if [ -n "${{ inputs.release_channel }}" ]; then
-            npm publish "${{ steps.build.outputs.tarball }}" --tag ${{ inputs.release_channel }}
+            npm publish "${{ steps.packed.outputs.tarball || steps.build.outputs.tarball }}" --tag ${{ inputs.release_channel }}
           else
-            npm publish "${{ steps.build.outputs.tarball }}"
+            npm publish "${{ steps.packed.outputs.tarball || steps.build.outputs.tarball }}"
           fi
         env:
           NODE_AUTH_TOKEN: ""

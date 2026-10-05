@@ -164,26 +164,12 @@ jobs:
 
   test-extension:
     if: inputs.extension == 'true'
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, windows-2022]
-        shard: [1, 2, 3]
-    steps:
-      - name: Checkout
-        uses: Geode-solutions/actions/install/checkout@master
-        with:
-          token: ${{ secrets.TOKEN }}
-          branch: ${{ inputs.branch }}
-      - name: Test Extension
-        uses: Geode-solutions/actions/test/extension@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
-          use_registry: ${{ inputs.use_registry }}
-          shard_index: ${{ matrix.shard }}
-          shard_total: 3
+    uses: Geode-solutions/actions/.github/workflows/web-test-extension.yml@master
+    with:
+      repos: ${{ inputs.repos }}
+      branch: ${{ inputs.branch }}
+      use_registry: ${{ inputs.use_registry }}
+    secrets: inherit
 
   test-docker:
     if: inputs.docker == 'true'

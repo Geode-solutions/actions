@@ -273,7 +273,30 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
+      # Only exists when web-test-extension.yml packaged it earlier in the same run (test PRs): reused if it has the
+      # requested version, otherwise the extension is packaged as usual
+      - uses: actions/download-artifact@v8
+        id: artifact
+        continue-on-error: true
+        with:
+          name: extension-${{ runner.os }}
+          path: extension-package
+      - name: Check packaged extension
+        id: packaged
+        if: steps.artifact.outcome == 'success'
+        run: |
+          vext=$(ls extension-package/*.vext)
+          version=$(unzip -p "$vext" metadata.json | jq -r .version)
+          if [ "$version" == "${{ inputs.version }}" ]; then
+            mv "$vext" .
+            echo "reused=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Packaged version $version is not ${{ inputs.version }}: packaging the extension"
+          fi
+          rm -rf extension-package
+        shell: bash
       - name: Install dependencies
+        if: steps.packaged.outputs.reused != 'true'
         uses: Geode-solutions/actions/install/node-dependencies@master
         with:
           repos: ${{ inputs.repos }}
@@ -281,12 +304,14 @@ jobs:
           token: ${{ secrets.TOKEN }}
           use_registry: ${{ inputs.use_registry }}
       - name: Install Microservices
+        if: steps.packaged.outputs.reused != 'true'
         uses: Geode-solutions/actions/install/microservices@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
       - name: Package
+        if: steps.packaged.outputs.reused != 'true'
         run: |
           jq '.version = "${{ inputs.version }}"' package.json > temp && mv temp package.json
           npm run package

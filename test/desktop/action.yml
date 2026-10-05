@@ -23,11 +23,16 @@ inputs:
   shard_total:
     type: string
 
-# Without registry, the unpacked app must already be in release/0.0.0 (see web-test-desktop.yml)
+# Without registry, node_modules and the unpacked app in release/0.0.0 must already be extracted (see web-test-desktop.yml)
 runs:
   using: "composite"
   steps:
+    - uses: actions/setup-node@v6
+      if: ${{ inputs.use_registry == 'false' }}
+      with:
+        node-version: 24
     - name: Install dependencies
+      if: ${{ inputs.use_registry == 'true' }}
       uses: Geode-solutions/actions/install/node-dependencies@master
       with:
         repos: ${{ inputs.repos }}

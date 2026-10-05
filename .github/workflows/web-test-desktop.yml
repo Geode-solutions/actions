@@ -24,7 +24,7 @@ on:
         required: false
 
 jobs:
-  # Unpacked app shared by the test shards and the installer packaging
+  # node_modules and unpacked app shared by the test shards and the installer packaging
   build-desktop:
     if: ${{ !inputs.use_registry }}
     runs-on: ${{ matrix.os }}
@@ -65,20 +65,19 @@ jobs:
       # Tar keeps executable bits and symlinks, which upload-artifact drops
       - name: Archive
         run: |
-          unpacked=$(basename "$(ls -d release/0.0.0/*-unpacked)")
-          tar -cf desktop-unpacked.tar -C release/0.0.0 "$unpacked"
+          tar --use-compress-program "zstd -T0" -cf desktop-build.tar.zst node_modules "$(ls -d release/0.0.0/*-unpacked)"
         shell: bash
       - uses: actions/upload-artifact@v7
         with:
-          name: desktop-unpacked-${{ runner.os }}
-          path: desktop-unpacked.tar
+          name: desktop-build-${{ runner.os }}
+          path: desktop-build.tar.zst
           retention-days: 1
-          compression-level: 1
+          compression-level: 0
 
   test-desktop:
     needs: build-desktop
     # Also runs when build is skipped (use_registry): the published app is tested instead
-    if: ${{ !cancelled() && needs.build.result != 'failure' }}
+    if: ${{ !cancelled() && needs.build-desktop.result != 'failure' }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -93,13 +92,12 @@ jobs:
       - uses: actions/download-artifact@v8
         if: ${{ !inputs.use_registry }}
         with:
-          name: desktop-unpacked-${{ runner.os }}
+          name: desktop-build-${{ runner.os }}
       - name: Extract
         if: ${{ !inputs.use_registry }}
         run: |
-          mkdir -p release/0.0.0
-          tar -xf desktop-unpacked.tar -C release/0.0.0
-          rm desktop-unpacked.tar
+          tar --use-compress-program "zstd -d" -xf desktop-build.tar.zst
+          rm desktop-build.tar.zst
         shell: bash
       - name: Test Desktop
         uses: Geode-solutions/actions/test/desktop@master
@@ -125,23 +123,19 @@ jobs:
         with:
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - name: Install dependencies
-        uses: Geode-solutions/actions/install/node-dependencies@master
+      # Same version as install/node-dependencies, which built node_modules
+      - uses: actions/setup-node@v6
         with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
-          use_registry: false
+          node-version: 24
       - name: Install Azure Sign Tool
         uses: Geode-solutions/actions/install/azure-sign@master
       - uses: actions/download-artifact@v8
         with:
-          name: desktop-unpacked-${{ runner.os }}
+          name: desktop-build-${{ runner.os }}
       - name: Package
         run: |
-          mkdir -p release/0.0.0
-          tar -xf desktop-unpacked.tar -C release/0.0.0
-          rm desktop-unpacked.tar
+          tar --use-compress-program "zstd -d" -xf desktop-build.tar.zst
+          rm desktop-build.tar.zst
           npx electron-builder build --prepackaged "$(ls -d release/0.0.0/*-unpacked)" --publish=never
         shell: bash
         env:

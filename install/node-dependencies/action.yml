@@ -23,11 +23,9 @@ runs:
     - uses: actions/setup-node@v6
       with:
         registry-url: "https://registry.npmjs.org"
-        node-version: 22
-    - name: Update npm to latest
+        node-version: 24
+    - name: Get npm cache directory
       run: |
-        source "$GITHUB_ACTION_PATH/retry.sh"
-        retry npm install -g npm@11.18.0
         echo "NPM_CACHE_DIR=$(npm config get cache)" >> "$GITHUB_ENV"
       shell: bash
     - name: Cache npm downloads

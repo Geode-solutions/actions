@@ -164,28 +164,12 @@ jobs:
 
   test-desktop:
     if: inputs.desktop == 'true'
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, windows-2022]
-    steps:
-      - name: Checkout
-        uses: Geode-solutions/actions/install/checkout@master
-        with:
-          token: ${{ secrets.TOKEN }}
-          branch: ${{ inputs.branch }}
-      - name: Test Desktop
-        uses: Geode-solutions/actions/test/desktop@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
-          use_registry: ${{ inputs.use_registry }}
-          AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
+    uses: Geode-solutions/actions/.github/workflows/web-test-desktop.yml@master
+    with:
+      repos: ${{ inputs.repos }}
+      branch: ${{ inputs.branch }}
+      use_registry: ${{ inputs.use_registry }}
+    secrets: inherit
 
   test-extension:
     if: inputs.extension == 'true'

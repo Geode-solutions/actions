@@ -11,30 +11,19 @@ inputs:
     type: string
   tarballs:
     type: string
-  pyinstallers:
-    type: string
   use_registry:
     type: boolean
     required: true
   token:
     type: string
     required: true
-  AZURE_KEY_VAULT_URI:
+  shard_index:
+    description: "1-based index of the Playwright shard to run, empty to run every test"
     type: string
-    required: true
-  AZURE_CLIENT_ID:
+  shard_total:
     type: string
-    required: true
-  AZURE_TENANT_ID:
-    type: string
-    required: true
-  AZURE_CLIENT_SECRET:
-    type: string
-    required: true
-  AZURE_CERT_NAME:
-    type: string
-    required: true
 
+# Without registry, the unpacked app must already be in release/0.0.0 (see web-test-desktop.yml)
 runs:
   using: "composite"
   steps:
@@ -46,19 +35,8 @@ runs:
         token: ${{ inputs.token }}
         tarballs: ${{ inputs.tarballs }}
         use_registry: ${{ inputs.use_registry }}
-    - name: Install Microservices
-      if: ${{ inputs.use_registry == 'false' }}
-      uses: Geode-solutions/actions/install/microservices@master
-      with:
-        repos: ${{ inputs.repos }}
-        branch: ${{ inputs.branch }}
-        token: ${{ inputs.token }}
-        pyinstallers: ${{ inputs.pyinstallers }}
     - name: Install OSMesa
       uses: Geode-solutions/actions/install/osmesa@master
-    - name: Install Azure Sign Tool
-      if: ${{ inputs.use_registry == 'false' }}
-      uses: Geode-solutions/actions/install/azure-sign@master
     - name: Install desktop app
       if: ${{ inputs.use_registry == 'true' }}
       uses: Geode-solutions/actions/install/desktop@master
@@ -67,17 +45,14 @@ runs:
         token: ${{ inputs.token }}
     - name: Install Playwright
       uses: Geode-solutions/actions/install/playwright@master
-    - name: Build
-      if: ${{ inputs.use_registry == 'false' }}
+    - name: Shard arguments
+      id: shard
       run: |
-        npm run build:desktop
+        if [ -n "${{ inputs.shard_index }}" ]; then
+          echo "args=-- --shard=${{ inputs.shard_index }}/${{ inputs.shard_total }}" >> "$GITHUB_OUTPUT"
+          echo "suffix=-${{ inputs.shard_index }}" >> "$GITHUB_OUTPUT"
+        fi
       shell: bash
-      env:
-        AZURE_KEY_VAULT_URI: ${{ inputs.AZURE_KEY_VAULT_URI }}
-        AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}
-        AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
-        AZURE_CLIENT_SECRET: ${{ inputs.AZURE_CLIENT_SECRET }}
-        AZURE_CERT_NAME: ${{ inputs.AZURE_CERT_NAME }}
     - name: Test on Linux
       if: runner.os == 'Linux'
       run: |
@@ -85,30 +60,20 @@ runs:
           sudo chown root:root ./release/0.0.0/linux-unpacked/chrome-sandbox
           sudo chmod 4755 ./release/0.0.0/linux-unpacked/chrome-sandbox
         fi
-        xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:e2e:desktop
+        xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:e2e:desktop ${{ steps.shard.outputs.args }}
       shell: bash
       env:
         DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"
-        DEBUG: "pw:browser"
     - name: Test on Windows
       if: runner.os == 'Windows'
       run: |
-        npm run test:e2e:desktop
+        npm run test:e2e:desktop ${{ steps.shard.outputs.args }}
       shell: bash
       env:
         DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"
-        DEBUG: "pw:browser"
-    - uses: actions/upload-artifact@v7
-      with:
-        name: desktop-${{ runner.os }}
-        path: |
-          release/0.0.0/*.zip
-          release/0.0.0/*.AppImage
-          release/0.0.0/*.exe
-          release/0.0.0/latest*
     - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
       with:
-        name: playwright-${{ inputs.name }}-desktop-${{ runner.os }}
+        name: playwright-${{ inputs.name }}-desktop-${{ runner.os }}${{ steps.shard.outputs.suffix }}
         path: playwright-report/
         overwrite: true

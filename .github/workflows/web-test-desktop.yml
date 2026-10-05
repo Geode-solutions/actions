@@ -1,0 +1,160 @@
+on:
+  workflow_call:
+    inputs:
+      repos:
+        type: string
+      branch:
+        type: string
+        default: ${{ github.ref_name }}
+      use_registry:
+        type: boolean
+        default: false
+    secrets:
+      TOKEN:
+        required: true
+      AZURE_KEY_VAULT_URI:
+        required: false
+      AZURE_CLIENT_ID:
+        required: false
+      AZURE_TENANT_ID:
+        required: false
+      AZURE_CLIENT_SECRET:
+        required: false
+      AZURE_CERT_NAME:
+        required: false
+
+jobs:
+  # Unpacked app shared by the test shards and the installer packaging
+  build:
+    if: ${{ !inputs.use_registry }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+    steps:
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Install dependencies
+        uses: Geode-solutions/actions/install/node-dependencies@master
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+          use_registry: false
+      - name: Install Microservices
+        uses: Geode-solutions/actions/install/microservices@master
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+      - name: Install Azure Sign Tool
+        uses: Geode-solutions/actions/install/azure-sign@master
+      - name: Build
+        run: |
+          npm run build:desktop:unpacked
+        shell: bash
+        env:
+          AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
+      # Tar keeps executable bits and symlinks, which upload-artifact drops
+      - name: Archive
+        run: |
+          unpacked=$(basename "$(ls -d release/0.0.0/*-unpacked)")
+          tar -cf desktop-unpacked.tar -C release/0.0.0 "$unpacked"
+        shell: bash
+      - uses: actions/upload-artifact@v7
+        with:
+          name: desktop-unpacked-${{ runner.os }}
+          path: desktop-unpacked.tar
+          retention-days: 1
+          compression-level: 1
+
+  test:
+    needs: build
+    # Also runs when build is skipped (use_registry): the published app is tested instead
+    if: ${{ !cancelled() && needs.build.result != 'failure' }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+        shard: [1, 2, 3]
+    steps:
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - uses: actions/download-artifact@v8
+        if: ${{ !inputs.use_registry }}
+        with:
+          name: desktop-unpacked-${{ runner.os }}
+      - name: Extract
+        if: ${{ !inputs.use_registry }}
+        run: |
+          mkdir -p release/0.0.0
+          tar -xf desktop-unpacked.tar -C release/0.0.0
+          rm desktop-unpacked.tar
+        shell: bash
+      - name: Test Desktop
+        uses: Geode-solutions/actions/test/desktop@master
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+          use_registry: ${{ inputs.use_registry }}
+          shard_index: ${{ matrix.shard }}
+          shard_total: 3
+
+  # Installers built from the unpacked app, consumed by release-desktop in web-deploy-repository.yml
+  package:
+    needs: build
+    if: ${{ !inputs.use_registry }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+    steps:
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Install dependencies
+        uses: Geode-solutions/actions/install/node-dependencies@master
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+          use_registry: false
+      - name: Install Azure Sign Tool
+        uses: Geode-solutions/actions/install/azure-sign@master
+      - uses: actions/download-artifact@v8
+        with:
+          name: desktop-unpacked-${{ runner.os }}
+      - name: Package
+        run: |
+          mkdir -p release/0.0.0
+          tar -xf desktop-unpacked.tar -C release/0.0.0
+          rm desktop-unpacked.tar
+          npx electron-builder build --prepackaged "$(ls -d release/0.0.0/*-unpacked)" --publish=never
+        shell: bash
+        env:
+          AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: desktop-${{ runner.os }}
+          path: |
+            release/0.0.0/*.zip
+            release/0.0.0/*.AppImage
+            release/0.0.0/*.exe
+            release/0.0.0/latest*

@@ -11,6 +11,8 @@ inputs:
     type: string
   tarballs:
     type: string
+  pyinstallers:
+    type: string
   use_registry:
     type: boolean
     required: true
@@ -22,17 +24,31 @@ inputs:
     type: string
   shard_total:
     type: string
+  prebuilt:
+    description: "node_modules and the unpacked app in release/0.0.0 are already extracted (see web-test-desktop.yml)"
+    type: boolean
+    default: false
+  AZURE_KEY_VAULT_URI:
+    type: string
+  AZURE_CLIENT_ID:
+    type: string
+  AZURE_TENANT_ID:
+    type: string
+  AZURE_CLIENT_SECRET:
+    type: string
+  AZURE_CERT_NAME:
+    type: string
 
-# Without registry, node_modules and the unpacked app in release/0.0.0 must already be extracted (see web-test-desktop.yml)
 runs:
   using: "composite"
   steps:
+    # Same version as install/node-dependencies, which built the extracted node_modules
     - uses: actions/setup-node@v6
-      if: ${{ inputs.use_registry == 'false' }}
+      if: ${{ inputs.prebuilt == 'true' }}
       with:
         node-version: 24
     - name: Install dependencies
-      if: ${{ inputs.use_registry == 'true' }}
+      if: ${{ inputs.prebuilt != 'true' }}
       uses: Geode-solutions/actions/install/node-dependencies@master
       with:
         repos: ${{ inputs.repos }}
@@ -40,6 +56,17 @@ runs:
         token: ${{ inputs.token }}
         tarballs: ${{ inputs.tarballs }}
         use_registry: ${{ inputs.use_registry }}
+    - name: Install Microservices
+      if: ${{ inputs.use_registry == 'false' && inputs.prebuilt != 'true' }}
+      uses: Geode-solutions/actions/install/microservices@master
+      with:
+        repos: ${{ inputs.repos }}
+        branch: ${{ inputs.branch }}
+        token: ${{ inputs.token }}
+        pyinstallers: ${{ inputs.pyinstallers }}
+    - name: Install Azure Sign Tool
+      if: ${{ inputs.use_registry == 'false' && inputs.prebuilt != 'true' }}
+      uses: Geode-solutions/actions/install/azure-sign@master
     - name: Install OSMesa
       uses: Geode-solutions/actions/install/osmesa@master
     - name: Install desktop app
@@ -50,6 +77,17 @@ runs:
         token: ${{ inputs.token }}
     - name: Install Playwright
       uses: Geode-solutions/actions/install/playwright@master
+    - name: Build
+      if: ${{ inputs.use_registry == 'false' && inputs.prebuilt != 'true' }}
+      run: |
+        npm run build:desktop:unpacked
+      shell: bash
+      env:
+        AZURE_KEY_VAULT_URI: ${{ inputs.AZURE_KEY_VAULT_URI }}
+        AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}
+        AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
+        AZURE_CLIENT_SECRET: ${{ inputs.AZURE_CLIENT_SECRET }}
+        AZURE_CERT_NAME: ${{ inputs.AZURE_CERT_NAME }}
     - name: Shard arguments
       id: shard
       run: |

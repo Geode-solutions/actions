@@ -108,6 +108,7 @@ jobs:
           use_registry: ${{ inputs.use_registry }}
           shard_index: ${{ matrix.shard }}
           shard_total: 3
+          prebuilt: ${{ !inputs.use_registry }}
 
   # Installers built from the unpacked app, consumed by release-desktop in web-deploy-repository.yml
   package-desktop:

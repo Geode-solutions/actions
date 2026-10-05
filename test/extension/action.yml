@@ -1,7 +1,10 @@
-name: "Test Browser"
-description: "Test Browser"
+name: "Test Extension"
+description: "Test Extension"
 
 inputs:
+  name:
+    type: string
+    default: "results"
   repos:
     type: string
   branch:
@@ -16,21 +19,11 @@ inputs:
   token:
     type: string
     required: true
-  AZURE_KEY_VAULT_URI:
+  shard_index:
+    description: "1-based index of the Playwright shard to run, empty to run every test"
     type: string
-    required: true
-  AZURE_CLIENT_ID:
+  shard_total:
     type: string
-    required: true
-  AZURE_TENANT_ID:
-    type: string
-    required: true
-  AZURE_CLIENT_SECRET:
-    type: string
-    required: true
-  AZURE_CERT_NAME:
-    type: string
-    required: true
 
 runs:
   using: "composite"
@@ -64,27 +57,33 @@ runs:
       run: |
         npm run package
       shell: bash
+    - name: Shard arguments
+      id: shard
+      run: |
+        if [ -n "${{ inputs.shard_index }}" ]; then
+          echo "args=-- --shard=${{ inputs.shard_index }}/${{ inputs.shard_total }}" >> "$GITHUB_OUTPUT"
+          echo "suffix=-${{ inputs.shard_index }}" >> "$GITHUB_OUTPUT"
+        fi
+      shell: bash
     - name: Test on Linux
       if: runner.os == 'Linux'
       run: |
-        xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:extension
+        xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:extension ${{ steps.shard.outputs.args }}
       shell: bash
       env:
         DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
-        DEBUG: "pw:browser"
     - name: Test on Windows
       if: runner.os == 'Windows'
       run: |
-        npm run test:extension
+        npm run test:extension ${{ steps.shard.outputs.args }}
       shell: bash
       env:
         DESKTOP_EXECUTABLE_PATH: "${{ github.workspace }}/desktop_app"
         GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
-        DEBUG: "pw:browser"
     - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
       with:
-        name: playwright-${{ inputs.name }}-extension-${{ runner.os }}
+        name: playwright-${{ inputs.name }}-extension-${{ runner.os }}${{ steps.shard.outputs.suffix }}
         path: playwright-report/
         overwrite: true

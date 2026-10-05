@@ -166,6 +166,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04, windows-2022]
+        shard: [1, 2, 3]
     steps:
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
@@ -179,6 +180,8 @@ jobs:
           branch: ${{ inputs.branch }}
           token: ${{ secrets.TOKEN }}
           use_registry: ${{ inputs.use_registry }}
+          shard_index: ${{ matrix.shard }}
+          shard_total: 3
 
   test-docker:
     if: inputs.docker == 'true'

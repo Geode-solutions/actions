@@ -25,7 +25,7 @@ on:
 
 jobs:
   # Unpacked app shared by the test shards and the installer packaging
-  build:
+  build-desktop:
     if: ${{ !inputs.use_registry }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -75,8 +75,8 @@ jobs:
           retention-days: 1
           compression-level: 1
 
-  test:
-    needs: build
+  test-desktop:
+    needs: build-desktop
     # Also runs when build is skipped (use_registry): the published app is tested instead
     if: ${{ !cancelled() && needs.build.result != 'failure' }}
     runs-on: ${{ matrix.os }}
@@ -112,8 +112,8 @@ jobs:
           shard_total: 3
 
   # Installers built from the unpacked app, consumed by release-desktop in web-deploy-repository.yml
-  package:
-    needs: build
+  package-desktop:
+    needs: build-desktop
     if: ${{ !inputs.use_registry }}
     runs-on: ${{ matrix.os }}
     strategy:

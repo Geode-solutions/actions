@@ -46,7 +46,22 @@ runs:
     - name: Install dependencies
       run: |
         echo "$PATH"
-        pip install --pre .
+        # A dependency released moments ago may not be visible on PyPI yet:
+        # retry, bypassing pip's cache which may hold a stale index page
+        max_attempts=5
+        for attempt in $(seq 1 $max_attempts); do
+          if [ "$attempt" -eq 1 ]; then
+            pip install --pre . && break
+          else
+            pip install --pre --no-cache-dir . && break
+          fi
+          if [ "$attempt" -eq "$max_attempts" ]; then
+            echo "pip install failed after $max_attempts attempts"
+            exit 1
+          fi
+          echo "pip install failed (attempt $attempt/$max_attempts), retrying in 60s..."
+          sleep 60
+        done
         wheels=$(echo "${{ steps.result.outputs.wheels }}" | sed 's/\;/\ /g')
         echo "all wheels = $wheels"
         if [ -n "$wheels" ]; then 

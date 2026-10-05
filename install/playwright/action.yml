@@ -1,4 +1,5 @@
 name: "Install Playwright"
+description: "Install Playwright browsers and their system dependencies"
 
 inputs:
   browsers:
@@ -31,12 +32,12 @@ runs:
       with:
         path: ${{ steps.info.outputs.path }}
         key: playwright-${{ runner.os }}-${{ steps.info.outputs.version }}-${{ inputs.browsers }}
-    # Always run: browsers already in cache are skipped, system dependencies are still installed on Linux
+    # Always run: browsers already in cache are skipped, system dependencies are still installed on Linux.
+    # On Windows, the only dependency (Media Foundation, slow to enable) is for browser media playback, not needed by the tests
     - name: Install Playwright
       if: ${{ inputs.deps_only != 'true' }}
-      run: npx playwright install ${{ inputs.browsers }} --with-deps
+      run: npx playwright install ${{ inputs.browsers }} ${{ runner.os == 'Linux' && '--with-deps' || '' }}
       shell: bash
-    # On Windows, the only dependency (Media Foundation) is for browser media playback
     - name: Install Playwright system dependencies
       if: ${{ inputs.deps_only == 'true' && runner.os == 'Linux' }}
       run: npx playwright install-deps ${{ inputs.browsers }}

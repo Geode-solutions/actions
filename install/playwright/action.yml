@@ -5,11 +5,16 @@ inputs:
     description: "Space separated list of Playwright browsers to install"
     type: string
     default: "chromium"
+  deps_only:
+    description: "Only install the Linux system dependencies of the browsers, not the browsers themselves (e.g. Electron tests)"
+    type: boolean
+    default: false
 
 runs:
   using: "composite"
   steps:
     - name: Get Playwright cache info
+      if: ${{ inputs.deps_only != 'true' }}
       id: info
       run: |
         version=$(npx playwright --version | awk '{print $2}')
@@ -21,11 +26,18 @@ runs:
         esac
       shell: bash
     - name: Cache Playwright browsers
+      if: ${{ inputs.deps_only != 'true' }}
       uses: actions/cache@v4
       with:
         path: ${{ steps.info.outputs.path }}
         key: playwright-${{ runner.os }}-${{ steps.info.outputs.version }}-${{ inputs.browsers }}
     # Always run: browsers already in cache are skipped, system dependencies are still installed on Linux
     - name: Install Playwright
+      if: ${{ inputs.deps_only != 'true' }}
       run: npx playwright install ${{ inputs.browsers }} --with-deps
+      shell: bash
+    # On Windows, the only dependency (Media Foundation) is for browser media playback
+    - name: Install Playwright system dependencies
+      if: ${{ inputs.deps_only == 'true' && runner.os == 'Linux' }}
+      run: npx playwright install-deps ${{ inputs.browsers }}
       shell: bash

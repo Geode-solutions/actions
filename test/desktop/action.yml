@@ -75,8 +75,11 @@ runs:
       with:
         branch: ${{ inputs.branch }}
         token: ${{ inputs.token }}
+    # Electron is driven directly: no Playwright browser is needed, only the Linux system libraries it shares with Chromium
     - name: Install Playwright
       uses: Geode-solutions/actions/install/playwright@master
+      with:
+        deps_only: true
     - name: Build
       if: ${{ inputs.use_registry == 'false' && inputs.prebuilt != 'true' }}
       run: |

@@ -125,23 +125,12 @@ jobs:
 
   test-browser:
     if: inputs.browser == 'true'
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, windows-2022]
-    steps:
-      - name: Checkout
-        uses: Geode-solutions/actions/install/checkout@master
-        with:
-          token: ${{ secrets.TOKEN }}
-          branch: ${{ inputs.branch }}
-      - name: Test Browser
-        uses: Geode-solutions/actions/test/browser@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
-          use_registry: ${{ inputs.use_registry }}
+    uses: Geode-solutions/actions/.github/workflows/web-test-browser.yml@master
+    with:
+      repos: ${{ inputs.repos }}
+      branch: ${{ inputs.branch }}
+      use_registry: ${{ inputs.use_registry }}
+    secrets: inherit
 
   test-cloud:
     if: inputs.cloud == 'true'

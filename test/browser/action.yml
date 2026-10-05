@@ -19,11 +19,26 @@ inputs:
   token:
     type: string
     required: true
+  shard_index:
+    description: "1-based index of the Playwright shard to run, empty to run every test"
+    type: string
+  shard_total:
+    type: string
+  prebuilt:
+    description: "The built workspace (node_modules, microservices, build output) is already extracted (see web-test-browser.yml)"
+    type: boolean
+    default: false
 
 runs:
   using: "composite"
   steps:
+    # Same version as install/node-dependencies, which built the extracted node_modules
+    - uses: actions/setup-node@v6
+      if: ${{ inputs.prebuilt == 'true' }}
+      with:
+        node-version: 24
     - name: Install dependencies
+      if: ${{ inputs.prebuilt != 'true' }}
       uses: Geode-solutions/actions/install/node-dependencies@master
       with:
         repos: ${{ inputs.repos }}
@@ -32,6 +47,7 @@ runs:
         tarballs: ${{ inputs.tarballs }}
         use_registry: ${{ inputs.use_registry }}
     - name: Install Microservices
+      if: ${{ inputs.prebuilt != 'true' }}
       uses: Geode-solutions/actions/install/microservices@master
       with:
         repos: ${{ inputs.repos }}
@@ -43,26 +59,31 @@ runs:
     - name: Install Playwright
       uses: Geode-solutions/actions/install/playwright@master
     - name: Build
+      if: ${{ inputs.prebuilt != 'true' }}
       run: |
         npm run build:browser
+      shell: bash
+    - name: Shard arguments
+      id: shard
+      run: |
+        if [ -n "${{ inputs.shard_index }}" ]; then
+          echo "args=-- --shard=${{ inputs.shard_index }}/${{ inputs.shard_total }}" >> "$GITHUB_OUTPUT"
+          echo "suffix=-${{ inputs.shard_index }}" >> "$GITHUB_OUTPUT"
+        fi
       shell: bash
     - name: Test on Linux
       if: runner.os == 'Linux'
       run: |
-        xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:e2e:browser
+        xvfb-run -n 99 --server-args="-screen 0 1280x960x24" npm run test:e2e:browser ${{ steps.shard.outputs.args }}
       shell: bash
-      env:
-        DEBUG: "pw:browser"
     - name: Test on Windows
       if: runner.os == 'Windows'
       run: |
-        npm run test:e2e:browser
+        npm run test:e2e:browser ${{ steps.shard.outputs.args }}
       shell: bash
-      env:
-        DEBUG: "pw:browser"
     - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
       with:
-        name: playwright-${{ inputs.name }}-browser-${{ runner.os }}
+        name: playwright-${{ inputs.name }}-browser-${{ runner.os }}${{ steps.shard.outputs.suffix }}
         path: playwright-report/
         overwrite: true

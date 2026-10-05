@@ -1,0 +1,83 @@
+on:
+  workflow_call:
+    inputs:
+      repos:
+        type: string
+      branch:
+        type: string
+        default: ${{ github.ref_name }}
+      use_registry:
+        type: boolean
+        default: false
+    secrets:
+      TOKEN:
+        required: true
+
+jobs:
+  # Built workspace (node_modules, microservices, build output) shared by the test shards
+  build-browser:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+    steps:
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Install dependencies
+        uses: Geode-solutions/actions/install/node-dependencies@master
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+          use_registry: ${{ inputs.use_registry }}
+      - name: Install Microservices
+        uses: Geode-solutions/actions/install/microservices@master
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+      - name: Build
+        run: |
+          npm run build:browser
+        shell: bash
+      # The whole workspace, as build outputs differ between repositories; tar keeps executable bits and symlinks
+      - name: Archive
+        run: |
+          tar --use-compress-program "zstd -T0" --exclude=./.git --exclude=./browser-build.tar.zst -cf browser-build.tar.zst .
+        shell: bash
+      - uses: actions/upload-artifact@v7
+        with:
+          name: browser-build-${{ runner.os }}
+          path: browser-build.tar.zst
+          retention-days: 1
+          compression-level: 0
+
+  test-browser:
+    needs: build-browser
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+        shard: [1, 2, 3]
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: browser-build-${{ runner.os }}
+      - name: Extract
+        run: |
+          tar --use-compress-program "zstd -d" -xf browser-build.tar.zst
+          rm browser-build.tar.zst
+        shell: bash
+      - name: Test Browser
+        uses: Geode-solutions/actions/test/browser@master
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ secrets.TOKEN }}
+          use_registry: ${{ inputs.use_registry }}
+          shard_index: ${{ matrix.shard }}
+          shard_total: 3
+          prebuilt: true

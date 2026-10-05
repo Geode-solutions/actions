@@ -43,15 +43,16 @@ jobs:
         run: |
           npm run build:browser
         shell: bash
-      # The whole workspace, as build outputs differ between repositories; tar keeps executable bits and symlinks
+      # The whole workspace, as build outputs differ between repositories; tar keeps executable bits and symlinks.
+      # Written outside the workspace, otherwise tar fails because the archived directory changes while it is read
       - name: Archive
         run: |
-          tar --use-compress-program "zstd -T0" --exclude=./.git --exclude=./browser-build.tar.zst -cf browser-build.tar.zst .
+          tar --exclude=./.git -cf - . | zstd -T0 -q -o "$RUNNER_TEMP/browser-build.tar.zst"
         shell: bash
       - uses: actions/upload-artifact@v7
         with:
           name: browser-build-${{ runner.os }}
-          path: browser-build.tar.zst
+          path: ${{ runner.temp }}/browser-build.tar.zst
           retention-days: 1
           compression-level: 0
 

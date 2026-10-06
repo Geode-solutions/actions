@@ -1,6 +1,9 @@
 on:
   workflow_call:
     inputs:
+      name:
+        type: string
+        required: true
       directory:
         type: string
         default: "."
@@ -15,6 +18,9 @@ on:
       branch:
         type: string
         default: ${{ github.ref_name }}
+      shards:
+        type: number
+        default: 2
     secrets:
       TOKEN:
         required: true
@@ -22,7 +28,17 @@ on:
         required: true
 
 jobs:
-  windows:
+  setup-windows-shards:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set shards matrix
+        id: set-matrix
+        run: |
+          echo "matrix=$(jq -cn --argjson shards ${{ inputs.shards }} '{shard: [range(1; $shards + 1)]}')" >> $GITHUB_OUTPUT
+
+  build-windows:
     runs-on: windows-2022
     steps:
       - name: Checkout
@@ -49,7 +65,7 @@ jobs:
       - uses: TheMrMilchmann/setup-msvc-dev@v4
         with:
           arch: x64
-      - name: Compile & Test
+      - name: Compile
         run: |
           if(!(test-path build)) { mkdir build }
           cd build
@@ -63,7 +79,7 @@ jobs:
               Copy-Item -Path $path\* -Destination bin
             }
           }
-          if(!(test-path share)) { 
+          if(!(test-path share)) {
             mkdir share
           }
           $shares = "${{ steps.libraries.outputs.share }}"
@@ -75,6 +91,54 @@ jobs:
           }
           cmake --build . -j 2
           cmake --build . -t install
-          ctest --output-on-failure --stop-on-failure --no-tests=error -j 2 -L essential
+          $count = (ctest -N -L essential | Select-String "^Total Tests: (\d+)").Matches.Groups[1].Value
+          echo "Essential tests: $count"
+          if(!$count -or [int]$count -eq 0) {
+            echo "No essential tests found"
+            exit 1
+          }
+        env:
+          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+      - name: Upload tests
+        uses: actions/upload-artifact@v7
+        with:
+          name: cpp-tests-win64
+          path: |
+            build
+            !build/**/CMakeFiles
+            !build/**/*.obj
+            !build/**/*.ilk
+            !build/**/*.lib
+            !build/**/.ninja_*
+          retention-days: 1
+          overwrite: true
+
+  test-windows:
+    runs-on: windows-2022
+    needs: [setup-windows-shards, build-windows]
+    strategy:
+      matrix: ${{ fromJson(needs.setup-windows-shards.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Install dependencies
+        uses: Geode-solutions/actions/install/cpp-dependencies@master
+        with:
+          repos: ${{ inputs.repos }}
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+          system: win64
+      - name: Download tests
+        uses: actions/download-artifact@v8
+        with:
+          name: cpp-tests-win64
+          path: build
+      - name: Test (shard ${{ matrix.shard }}/${{ inputs.shards }})
+        run: |
+          cd build/${{ inputs.directory }}
+          ctest --output-on-failure --stop-on-failure --no-tests=ignore -j $env:NUMBER_OF_PROCESSORS -L essential -I ${{ matrix.shard }},,${{ inputs.shards }}
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

@@ -24,6 +24,9 @@ on:
       python:
         type: boolean
         default: true
+      shards:
+        type: number
+        default: 2
     secrets:
       TOKEN:
         required: true
@@ -34,11 +37,13 @@ jobs:
   test-linux:
     uses: Geode-solutions/actions/.github/workflows/cpp-test-linux.yml@master
     with:
+      name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
       light: ${{ inputs.light }}
       type: ${{ inputs.type }}
       branch: ${{ inputs.branch }}
+      shards: ${{ inputs.shards }}
     secrets: inherit
 
   test-linux-python:
@@ -57,11 +62,13 @@ jobs:
   test-windows:
     uses: Geode-solutions/actions/.github/workflows/cpp-test-windows.yml@master
     with:
+      name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
       light: ${{ inputs.light }}
       type: ${{ inputs.type }}
       branch: ${{ inputs.branch }}
+      shards: ${{ inputs.shards }}
     secrets: inherit
 
   test-windows-python:

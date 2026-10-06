@@ -1,6 +1,9 @@
 on:
   workflow_call:
     inputs:
+      name:
+        type: string
+        required: true
       directory:
         type: string
         default: "."
@@ -15,6 +18,9 @@ on:
       branch:
         type: string
         default: ${{ github.ref_name }}
+      shards:
+        type: number
+        default: 2
     secrets:
       TOKEN:
         required: true
@@ -26,19 +32,23 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+      test_matrix: ${{ steps.set-matrix.outputs.test_matrix }}
     steps:
       - name: Set matrix based on inputs.light
         id: set-matrix
         run: |
           if [ "${{ inputs.light }}" == "true" ]; then
             # Exclude rhel when light is true
-            echo 'matrix={"include":[{"system":"ubuntu","cc":"/usr/bin/clang","cxx":"/usr/bin/clang++"}]}' >> $GITHUB_OUTPUT
+            systems='[{"system":"ubuntu","cc":"/usr/bin/clang","cxx":"/usr/bin/clang++"}]'
           else
             # Include both rhel and ubuntu
-            echo 'matrix={"include":[{"system":"rhel","cc":"/opt/rh/gcc-toolset-14/root/usr/bin/gcc","cxx":"/opt/rh/gcc-toolset-14/root/usr/bin/g++"},{"system":"ubuntu","cc":"/usr/bin/clang","cxx":"/usr/bin/clang++"}]}' >> $GITHUB_OUTPUT
+            systems='[{"system":"rhel","cc":"/opt/rh/gcc-toolset-14/root/usr/bin/gcc","cxx":"/opt/rh/gcc-toolset-14/root/usr/bin/g++"},{"system":"ubuntu","cc":"/usr/bin/clang","cxx":"/usr/bin/clang++"}]'
           fi
+          echo "matrix={\"include\":$systems}" >> $GITHUB_OUTPUT
+          test_matrix=$(echo "$systems" | jq -c --argjson shards ${{ inputs.shards }} '{include: [.[] as $s | range(1; $shards + 1) | $s + {shard: .}]}')
+          echo "test_matrix=$test_matrix" >> $GITHUB_OUTPUT
 
-  linux:
+  build-linux:
     runs-on: ubuntu-latest
     needs: setup-linux-systems
     container: ghcr.io/geode-solutions/${{ matrix.system }}:master
@@ -79,20 +89,87 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_INSTALL_PREFIX:PATH="$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install" ..
           cmake --build . -t third_party
           cd ${{ inputs.directory }}
           cmake --build . -t essential
           cmake --build . -t install
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
-      - name: Test
+      - name: Compile tests
         run: |
           rm -rf $GITHUB_WORKSPACE/build/${{ inputs.directory }}/bin
           mkdir -p test
           cd test
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DCMAKE_PREFIX_PATH:PATH="${{ steps.repos.outputs.path }};$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install;$GITHUB_WORKSPACE/build" ../tests
-          cmake --build .
-          ctest --output-on-failure --stop-on-failure --no-tests=error -j 2 -L essential
+          cmake --build . -t essential
+          count=$(ctest -N -L essential | sed -n 's/^Total Tests: //p')
+          echo "Essential tests: $count"
+          if [ -z "$count" ] || [ "$count" -eq 0 ]; then
+            echo "No essential tests found"
+            exit 1
+          fi
+        env:
+          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+      - name: Package tests
+        run: |
+          tar --exclude='*.o' --exclude='CMakeFiles' -I 'zstd -T0' -cf tests.tar.zst test build/${{ inputs.directory }}/install
+          ls -lh tests.tar.zst
+      - name: Upload tests
+        uses: actions/upload-artifact@v7
+        with:
+          name: cpp-tests-${{ matrix.system }}
+          path: tests.tar.zst
+          retention-days: 1
+          compression-level: 0
+          overwrite: true
+
+  test-linux:
+    runs-on: ubuntu-latest
+    needs: [setup-linux-systems, build-linux]
+    container: ghcr.io/geode-solutions/${{ matrix.system }}:master
+    strategy:
+      matrix: ${{ fromJson(needs.setup-linux-systems.outputs.test_matrix) }}
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+    steps:
+      - name: Get info
+        id: info
+        run: |
+          if [ "${{ matrix.system }}" = "rhel" ]; then
+            echo "lib=lib64" >> $GITHUB_OUTPUT
+          else
+            echo "lib=lib" >> $GITHUB_OUTPUT
+          fi
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+      - name: Install dependencies
+        uses: Geode-solutions/actions/install/cpp-dependencies@master
+        id: repos
+        with:
+          repos: ${{ inputs.repos }}
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+          system: ${{ matrix.system }}
+      - name: Libraries
+        run: |
+          new_path=$(echo "${{ steps.repos.outputs.path }}" | sed 's/\;/\/${{ steps.info.outputs.lib }}\:/g')/${{ steps.info.outputs.lib }}
+          echo "LD_LIBRARY_PATH=$new_path" >> $GITHUB_ENV
+      - name: Download tests
+        uses: actions/download-artifact@v8
+        with:
+          name: cpp-tests-${{ matrix.system }}
+      - name: Unpack tests
+        run: |
+          tar -I zstd -xf tests.tar.zst
+          rm tests.tar.zst
+      - name: Test (shard ${{ matrix.shard }}/${{ inputs.shards }})
+        run: |
+          cd test
+          ctest --output-on-failure --stop-on-failure --no-tests=ignore -j $(nproc) -L essential -I ${{ matrix.shard }},,${{ inputs.shards }}
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

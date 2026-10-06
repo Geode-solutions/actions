@@ -1,0 +1,49 @@
+name: "CTest shard"
+description: "Run one shard of the labelled CTest tests"
+
+inputs:
+  shard:
+    description: "Shard index, starting at 1"
+    required: true
+  shards:
+    description: "Total number of shards"
+    required: true
+  directory:
+    description: "CTest build directory"
+    default: "."
+  label:
+    description: "CTest label to run"
+    default: "essential"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Test (shard ${{ inputs.shard }}/${{ inputs.shards }})
+      working-directory: ${{ inputs.directory }}
+      shell: bash
+      run: |
+        # Tests are cut into 2 x shards consecutive blocks, shard s runs blocks s and s + shards:
+        # consecutive fixture chains (repair -> remesh -> optimize) stay together and slow tests
+        # at the end of the list are spread over all shards
+        count=$(ctest -N -L ${{ inputs.label }} | sed -n 's/^Total Tests: //p')
+        shard=${{ inputs.shard }}
+        shards=${{ inputs.shards }}
+        blocks=$(( 2 * shards ))
+        tests=""
+        for block in $shard $(( shard + shards )); do
+          start=$(( (block - 1) * count / blocks + 1 ))
+          end=$(( block * count / blocks ))
+          if [ "$start" -le "$end" ]; then
+            tests="$tests $(seq -s ' ' $start $end)"
+          fi
+        done
+        set -- $tests
+        if [ $# -eq 0 ]; then
+          # An empty -I selection would run every test
+          echo "No test in this shard"
+          exit 0
+        fi
+        first=$1
+        shift
+        list=$(echo "$@" | tr ' ' ',')
+        ctest --output-on-failure --stop-on-failure --no-tests=error -j $(nproc) -L ${{ inputs.label }} -I "$first,$first,1${list:+,$list}"

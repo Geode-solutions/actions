@@ -167,32 +167,11 @@ jobs:
         run: |
           tar -I zstd -xf tests.tar.zst
           rm tests.tar.zst
-      - name: Test (shard ${{ matrix.shard }}/${{ inputs.shards }})
-        run: |
-          cd test
-          # Tests are cut into 2 x shards consecutive blocks, shard s runs blocks s and s + shards:
-          # consecutive fixture chains (repair -> remesh -> optimize) stay together and slow tests
-          # at the end of the list are spread over all shards
-          count=$(ctest -N -L essential | sed -n 's/^Total Tests: //p')
-          shard=${{ matrix.shard }}
-          shards=${{ inputs.shards }}
-          blocks=$(( 2 * shards ))
-          tests=""
-          for block in $shard $(( shard + shards )); do
-            start=$(( (block - 1) * count / blocks + 1 ))
-            end=$(( block * count / blocks ))
-            if [ "$start" -le "$end" ]; then
-              tests="$tests $(seq -s ' ' $start $end)"
-            fi
-          done
-          set -- $tests
-          if [ $# -eq 0 ]; then
-            echo "No test in this shard"
-            exit 0
-          fi
-          first=$1
-          shift
-          list=$(echo "$@" | tr ' ' ',')
-          ctest --output-on-failure --stop-on-failure --no-tests=error -j $(nproc) -L essential -I "$first,$first,1${list:+,$list}"
+      - name: Test
+        uses: Geode-solutions/actions/test/ctest-shard@master
+        with:
+          shard: ${{ matrix.shard }}
+          shards: ${{ inputs.shards }}
+          directory: test
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

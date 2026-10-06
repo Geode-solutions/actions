@@ -135,29 +135,11 @@ jobs:
         with:
           name: cpp-tests-win64
           path: build
-      - name: Test (shard ${{ matrix.shard }}/${{ inputs.shards }})
-        run: |
-          cd build/${{ inputs.directory }}
-          # Tests are cut into 2 x shards consecutive blocks, shard s runs blocks s and s + shards:
-          # consecutive fixture chains (repair -> remesh -> optimize) stay together and slow tests
-          # at the end of the list are spread over all shards
-          $count = [int](ctest -N -L essential | Select-String "^Total Tests: (\d+)").Matches.Groups[1].Value
-          $shard = ${{ matrix.shard }}
-          $shards = ${{ inputs.shards }}
-          $blocks = 2 * $shards
-          $tests = @()
-          Foreach($block in @($shard, ($shard + $shards))) {
-            $start = [math]::Floor(($block - 1) * $count / $blocks) + 1
-            $end = [math]::Floor($block * $count / $blocks)
-            if($start -le $end) {
-              $tests += $start..$end
-            }
-          }
-          if($tests.Count -eq 0) {
-            echo "No test in this shard"
-            exit 0
-          }
-          $selection = (@($tests[0], $tests[0], 1) + @($tests | Select-Object -Skip 1)) -join ","
-          ctest --output-on-failure --stop-on-failure --no-tests=error -j $env:NUMBER_OF_PROCESSORS -L essential -I "$selection"
+      - name: Test
+        uses: Geode-solutions/actions/test/ctest-shard@master
+        with:
+          shard: ${{ matrix.shard }}
+          shards: ${{ inputs.shards }}
+          directory: build/${{ inputs.directory }}
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

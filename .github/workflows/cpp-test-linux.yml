@@ -170,14 +170,29 @@ jobs:
       - name: Test (shard ${{ matrix.shard }}/${{ inputs.shards }})
         run: |
           cd test
-          # Contiguous ranges keep consecutive fixture chains (repair -> remesh -> optimize) in the same shard
+          # Tests are cut into 2 x shards consecutive blocks, shard s runs blocks s and s + shards:
+          # consecutive fixture chains (repair -> remesh -> optimize) stay together and slow tests
+          # at the end of the list are spread over all shards
           count=$(ctest -N -L essential | sed -n 's/^Total Tests: //p')
-          start=$(( (${{ matrix.shard }} - 1) * count / ${{ inputs.shards }} + 1 ))
-          end=$(( ${{ matrix.shard }} * count / ${{ inputs.shards }} ))
-          if [ "$start" -gt "$end" ]; then
+          shard=${{ matrix.shard }}
+          shards=${{ inputs.shards }}
+          blocks=$(( 2 * shards ))
+          tests=""
+          for block in $shard $(( shard + shards )); do
+            start=$(( (block - 1) * count / blocks + 1 ))
+            end=$(( block * count / blocks ))
+            if [ "$start" -le "$end" ]; then
+              tests="$tests $(seq -s ' ' $start $end)"
+            fi
+          done
+          set -- $tests
+          if [ $# -eq 0 ]; then
             echo "No test in this shard"
             exit 0
           fi
-          ctest --output-on-failure --stop-on-failure --no-tests=error -j $(nproc) -L essential -I $start,$end
+          first=$1
+          shift
+          list=$(echo "$@" | tr ' ' ',')
+          ctest --output-on-failure --stop-on-failure --no-tests=error -j $(nproc) -L essential -I "$first,$first,1${list:+,$list}"
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

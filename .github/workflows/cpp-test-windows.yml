@@ -139,6 +139,14 @@ jobs:
       - name: Test (shard ${{ matrix.shard }}/${{ inputs.shards }})
         run: |
           cd build/${{ inputs.directory }}
-          ctest --output-on-failure --stop-on-failure --no-tests=ignore -j $env:NUMBER_OF_PROCESSORS -L essential -I ${{ matrix.shard }},,${{ inputs.shards }}
+          # Contiguous ranges keep consecutive fixture chains (repair -> remesh -> optimize) in the same shard
+          $count = [int](ctest -N -L essential | Select-String "^Total Tests: (\d+)").Matches.Groups[1].Value
+          $start = [math]::Floor((${{ matrix.shard }} - 1) * $count / ${{ inputs.shards }}) + 1
+          $end = [math]::Floor(${{ matrix.shard }} * $count / ${{ inputs.shards }})
+          if($start -gt $end) {
+            echo "No test in this shard"
+            exit 0
+          }
+          ctest --output-on-failure --stop-on-failure --no-tests=error -j $env:NUMBER_OF_PROCESSORS -L essential -I "$start,$end"
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

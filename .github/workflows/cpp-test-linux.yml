@@ -170,6 +170,14 @@ jobs:
       - name: Test (shard ${{ matrix.shard }}/${{ inputs.shards }})
         run: |
           cd test
-          ctest --output-on-failure --stop-on-failure --no-tests=ignore -j $(nproc) -L essential -I ${{ matrix.shard }},,${{ inputs.shards }}
+          # Contiguous ranges keep consecutive fixture chains (repair -> remesh -> optimize) in the same shard
+          count=$(ctest -N -L essential | sed -n 's/^Total Tests: //p')
+          start=$(( (${{ matrix.shard }} - 1) * count / ${{ inputs.shards }} + 1 ))
+          end=$(( ${{ matrix.shard }} * count / ${{ inputs.shards }} ))
+          if [ "$start" -gt "$end" ]; then
+            echo "No test in this shard"
+            exit 0
+          fi
+          ctest --output-on-failure --stop-on-failure --no-tests=error -j $(nproc) -L essential -I $start,$end
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic

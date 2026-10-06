@@ -89,8 +89,7 @@ jobs:
               Copy-Item -Path $share\* -Destination share -Recurse -Force
             }
           }
-          cmake --build . -j 2
-          cmake --build . -t install
+          cmake --build . -t essential -j 2
           $count = (ctest -N -L essential | Select-String "^Total Tests: (\d+)").Matches.Groups[1].Value
           echo "Essential tests: $count"
           if(!$count -or [int]$count -eq 0) {

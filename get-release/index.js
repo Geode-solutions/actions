@@ -218,6 +218,9 @@ function main() {
           const query = branch.includes("master")
             ? octokit.repos.getLatestRelease({ owner, repo }).then((release) => release.data.id)
             : octokit.repos.listReleases({ owner, repo, per_page: 100 }).then((releases) => {
+                // GitHub does not return releases in chronological order (e.g. v1.0.0-rc.10 can come after v1.0.0-rc.6)
+                const releaseDate = (r) => Date.parse(r.published_at || r.created_at);
+                releases.data.sort((a, b) => releaseDate(b) - releaseDate(a));
                 if (github.context.payload.pull_request) {
                   console.log(
                     "pull_request:",

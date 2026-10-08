@@ -43,7 +43,6 @@ jobs:
       - name: Ruff
         run: |
           pip install ruff
-          ruff check --fix --output-format=github .
           ruff format .
       - name: Install dependencies
         if: hashFiles('package.json') != ''

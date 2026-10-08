@@ -52,7 +52,7 @@ jobs:
         if: steps.pyproject.outputs.found == 'true'
         run: |
           pip install --pre .
-          pip install mypy pylint
+          pip install mypy ruff
           wheels=$(echo "${{ steps.wheels.outputs.path }}" | sed 's/\;/\ /g')
           echo "all wheels = $wheels"
           if [ -n "$wheels" ]; then 
@@ -61,6 +61,7 @@ jobs:
             done
           fi
           pip list
+          ruff check --fix --output-format=github .
       - uses: tsuyoshicho/action-mypy@v5
         if: steps.pyproject.outputs.found == 'true'
         with:

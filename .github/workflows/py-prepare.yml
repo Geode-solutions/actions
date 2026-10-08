@@ -37,13 +37,14 @@ jobs:
       - name: "Get config files"
         run: |
           curl -f --retry 3 --retry-delay 2 --retry-connrefused -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/commitlint.config.js\?ref\=master > commitlint.config.js
-          curl -f --retry 3 --retry-delay 2 --retry-connrefused -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.pylintrc\?ref\=master > .pylintrc
           curl -f --retry 3 --retry-delay 2 --retry-connrefused -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.releaserc\?ref\=master > .releaserc
           curl -f --retry 3 --retry-delay 2 --retry-connrefused -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/mypy.ini\?ref\=master > mypy.ini
-      - name: Black
+          curl -f --retry 3 --retry-delay 2 --retry-connrefused -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/ruff.toml\?ref\=master > ruff.toml
+      - name: Ruff
         run: |
-          pip install black
-          black .
+          pip install ruff
+          ruff check --fix --output-format=github .
+          ruff format .
       - name: Install dependencies
         if: hashFiles('package.json') != ''
         uses: Geode-solutions/actions/install/node-dependencies@master

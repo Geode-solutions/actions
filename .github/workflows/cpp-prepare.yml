@@ -1,9 +1,5 @@
 on:
   workflow_call:
-    inputs:
-      directory:
-        type: string
-        default: "bindings/python"
     outputs:
       changes_detected:
         description: "commit has been done"
@@ -22,20 +18,6 @@ jobs:
         uses: Geode-solutions/actions/install/checkout@master
         with:
           token: ${{ secrets.TOKEN }}
-      - name: "pip-compile"
-        run: |
-          file=${{ inputs.directory }}/requirements.in
-          if [ ! -f "$file" ]; then 
-            exit 0
-          fi
-          pip install pip-tools typing_extensions
-          echo $GITHUB_REF_NAME
-          if [ $GITHUB_REF_NAME == "master" ]; then
-            pip-compile -v --upgrade $file
-          else
-            pip-compile -v --pre --upgrade $file
-          fi
-          sed -i -E 's/==(.+)\.(.+)\.(.+)/==\1\.*,>=\1\.\2\.\3/' ${{ inputs.directory }}/requirements.txt
       - name: "Get config files"
         run: |
           curl -f --retry 3 --retry-delay 2 --retry-connrefused -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/commitlint.config.js\?ref\=master > commitlint.config.js

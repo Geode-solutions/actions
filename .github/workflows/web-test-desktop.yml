@@ -37,21 +37,22 @@ jobs:
         with:
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - name: Install dependencies
-        uses: Geode-solutions/actions/install/node-dependencies@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
-          use_registry: false
-      - name: Install Microservices
-        uses: Geode-solutions/actions/install/microservices@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
-      - name: Install Azure Sign Tool
-        uses: Geode-solutions/actions/install/azure-sign@master
+      - parallel:
+          - name: Install dependencies
+            uses: Geode-solutions/actions/install/node-dependencies@master
+            with:
+              repos: ${{ inputs.repos }}
+              branch: ${{ inputs.branch }}
+              token: ${{ secrets.TOKEN }}
+              use_registry: false
+          - name: Install Microservices
+            uses: Geode-solutions/actions/install/microservices@master
+            with:
+              repos: ${{ inputs.repos }}
+              branch: ${{ inputs.branch }}
+              token: ${{ secrets.TOKEN }}
+          - name: Install Azure Sign Tool
+            uses: Geode-solutions/actions/install/azure-sign@master
       - name: Build
         run: |
           npm run build:desktop:unpacked

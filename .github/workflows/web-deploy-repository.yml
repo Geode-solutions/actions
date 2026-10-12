@@ -223,24 +223,25 @@ jobs:
         with:
           name: desktop-${{ runner.os }}
           path: release/0.0.0
-      - name: Install dependencies
-        if: steps.artifact.outcome != 'success'
-        uses: Geode-solutions/actions/install/node-dependencies@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
-          use_registry: ${{ inputs.use_registry }}
-      - name: Install Microservices
-        if: steps.artifact.outcome != 'success'
-        uses: Geode-solutions/actions/install/microservices@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
-      - name: Install Azure Sign Tool
-        if: steps.artifact.outcome != 'success'
-        uses: Geode-solutions/actions/install/azure-sign@master
+      - parallel:
+          - name: Install dependencies
+            if: steps.artifact.outcome != 'success'
+            uses: Geode-solutions/actions/install/node-dependencies@master
+            with:
+              repos: ${{ inputs.repos }}
+              branch: ${{ inputs.branch }}
+              token: ${{ secrets.TOKEN }}
+              use_registry: ${{ inputs.use_registry }}
+          - name: Install Microservices
+            if: steps.artifact.outcome != 'success'
+            uses: Geode-solutions/actions/install/microservices@master
+            with:
+              repos: ${{ inputs.repos }}
+              branch: ${{ inputs.branch }}
+              token: ${{ secrets.TOKEN }}
+          - name: Install Azure Sign Tool
+            if: steps.artifact.outcome != 'success'
+            uses: Geode-solutions/actions/install/azure-sign@master
       - name: Package
         if: steps.artifact.outcome != 'success'
         run: |
@@ -295,21 +296,22 @@ jobs:
           fi
           rm -rf extension-package
         shell: bash
-      - name: Install dependencies
-        if: steps.packaged.outputs.reused != 'true'
-        uses: Geode-solutions/actions/install/node-dependencies@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
-          use_registry: ${{ inputs.use_registry }}
-      - name: Install Microservices
-        if: steps.packaged.outputs.reused != 'true'
-        uses: Geode-solutions/actions/install/microservices@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
+      - parallel:
+          - name: Install dependencies
+            if: steps.packaged.outputs.reused != 'true'
+            uses: Geode-solutions/actions/install/node-dependencies@master
+            with:
+              repos: ${{ inputs.repos }}
+              branch: ${{ inputs.branch }}
+              token: ${{ secrets.TOKEN }}
+              use_registry: ${{ inputs.use_registry }}
+          - name: Install Microservices
+            if: steps.packaged.outputs.reused != 'true'
+            uses: Geode-solutions/actions/install/microservices@master
+            with:
+              repos: ${{ inputs.repos }}
+              branch: ${{ inputs.branch }}
+              token: ${{ secrets.TOKEN }}
       - name: Package
         if: steps.packaged.outputs.reused != 'true'
         run: |

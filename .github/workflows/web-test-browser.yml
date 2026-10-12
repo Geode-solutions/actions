@@ -26,19 +26,20 @@ jobs:
         with:
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
-      - name: Install dependencies
-        uses: Geode-solutions/actions/install/node-dependencies@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
-          use_registry: ${{ inputs.use_registry }}
-      - name: Install Microservices
-        uses: Geode-solutions/actions/install/microservices@master
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
+      - parallel:
+          - name: Install dependencies
+            uses: Geode-solutions/actions/install/node-dependencies@master
+            with:
+              repos: ${{ inputs.repos }}
+              branch: ${{ inputs.branch }}
+              token: ${{ secrets.TOKEN }}
+              use_registry: ${{ inputs.use_registry }}
+          - name: Install Microservices
+            uses: Geode-solutions/actions/install/microservices@master
+            with:
+              repos: ${{ inputs.repos }}
+              branch: ${{ inputs.branch }}
+              token: ${{ secrets.TOKEN }}
       - name: Build
         run: |
           npm run build:browser

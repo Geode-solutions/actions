@@ -1,0 +1,12 @@
+# Wrapper so that the check name of cpp-test-pr.yml notification stays
+# "test / deploy-repository / notify / notify" (required by branch protection)
+on:
+  workflow_call:
+    secrets:
+      SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  notify:
+    uses: Geode-solutions/actions/.github/workflows/cpp-deploy-notify.yml@master
+    secrets: inherit

@@ -46,6 +46,11 @@ jobs:
       wheels_from_pypi: true
     secrets: inherit
 
+  notify-success:
+    needs: [deploy-repository]
+    uses: Geode-solutions/actions/.github/workflows/cpp-deploy-notify.yml@master
+    secrets: inherit
+
   notify:
     runs-on: ubuntu-latest
     if: ${{ always() && needs.deploy-repository.result == 'failure' }}

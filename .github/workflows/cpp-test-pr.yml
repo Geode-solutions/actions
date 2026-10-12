@@ -82,12 +82,12 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/semantic-commit.yml@master
     secrets: inherit
 
-  # The Release build does not wait for the Debug tests: both run concurrently, gate joins them
+  # The Release build does not wait for the Debug tests: both run concurrently
   release:
     needs: semantic-commit
     uses: Geode-solutions/actions/.github/workflows/dev-release.yml@master
 
-  deploy-repository:
+  deploy:
     needs: release
     uses: Geode-solutions/actions/.github/workflows/cpp-deploy-repository.yml@master
     with:
@@ -101,9 +101,10 @@ jobs:
       python: ${{ inputs.python }}
     secrets: inherit
 
-  # Checked by Versions validate-pr.yml: only succeeds when both tests and deploy succeed
-  gate:
-    needs: [test-repository, deploy-repository]
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Tests and deploy succeeded"
+  # Last job, once tests and deploy succeeded. Its job ids keep the check name required by the
+  # repositories branch protection: "test / deploy-repository / notify / notify"
+  deploy-repository:
+    needs: [test-repository, deploy]
+    if: ${{ !failure() && !cancelled() }}
+    uses: Geode-solutions/actions/.github/workflows/cpp-test-pr-notify.yml@master
+    secrets: inherit

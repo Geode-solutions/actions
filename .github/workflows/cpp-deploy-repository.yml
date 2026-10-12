@@ -89,15 +89,3 @@ jobs:
     needs: [release-linux, release-windows]
     uses: Geode-solutions/actions/.github/workflows/cpp-public-release.yml@master
     secrets: inherit
-
-  notify:
-    if: ${{ !failure() && !cancelled() }}
-    uses: Geode-solutions/actions/.github/workflows/cpp-deploy-notify.yml@master
-    needs:
-      [
-        release-linux,
-        release-linux-python,
-        release-windows,
-        release-windows-python,
-      ]
-    secrets: inherit

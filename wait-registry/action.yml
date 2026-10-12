@@ -1,0 +1,64 @@
+name: "Wait for registry"
+description: "Wait until the latest release of each internal dependency is available on its registry (PyPI or npm)"
+
+inputs:
+  registry:
+    description: "pypi (requirements-internal.in) or npm (package.json dependencies set to 0.0.0)"
+    type: string
+    required: true
+  token:
+    type: string
+    required: true
+  timeout:
+    description: "Maximum waiting time in seconds, the job continues with a warning afterwards"
+    type: string
+    default: "300"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Wait for registry
+      run: |
+        get_file() {
+          gh api "repos/$GITHUB_REPOSITORY/contents/$1?ref=$GITHUB_REF_NAME" --jq .content 2>/dev/null | base64 -d
+        }
+        # Package names are the repository names (lowercase on PyPI, @geode scope on npm)
+        if [ "$REGISTRY" == "pypi" ]; then
+          packages=$(get_file requirements-internal.in)
+        else
+          packages=$(get_file package.json | jq -r '(.dependencies // {}) + (.devDependencies // {}) | to_entries[] | select(.value == "0.0.0") | .key')
+        fi
+        deadline=$((SECONDS + TIMEOUT))
+        for package in $packages; do
+          repo=${package#@geode/}
+          tag=$(gh api "repos/Geode-solutions/$repo/releases?per_page=30" --jq '[.[] | select(.tag_name | test("^v[0-9]"))][0].tag_name')
+          if [ -z "$tag" ]; then
+            echo "$package: no release found, skipping"
+            continue
+          fi
+          version=${tag#v}
+          if [ "$REGISTRY" == "pypi" ]; then
+            # v1.2.3-rc.4 is published as 1.2.3rc4
+            version=$(echo "$version" | sed -E 's/-rc\.([0-9]+)$/rc\1/')
+          fi
+          until
+            if [ "$REGISTRY" == "pypi" ]; then
+              pip index versions --pre "$package" 2>/dev/null | sed -n 's/^Available versions: //p' | tr -d ' ' | tr ',' '\n' | grep -qxF "$version"
+            else
+              npm view "$package@$version" version 2>/dev/null | grep -q .
+            fi
+          do
+            if [ $SECONDS -ge $deadline ]; then
+              echo "::warning::$package $version still not available on $REGISTRY"
+              continue 2
+            fi
+            echo "$package: waiting for $version"
+            sleep 10
+          done
+          echo "$package: $version available"
+        done
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        REGISTRY: ${{ inputs.registry }}
+        TIMEOUT: ${{ inputs.timeout }}

@@ -17,7 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Wait for registry to update
-        run: sleep 1m
+        uses: Geode-solutions/actions/wait-registry@master
+        with:
+          registry: pypi
+          token: ${{ secrets.TOKEN }}
 
   prepare:
     needs: sleep

@@ -110,6 +110,8 @@ jobs:
           arch: x64
       - name: Compile & Test
         run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           if(!(test-path build)) { 
             mkdir build
           }

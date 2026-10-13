@@ -118,7 +118,17 @@ jobs:
         run: |
           $requirements = "bindings/python/requirements.txt"
           if(test-path -Path $requirements -PathType Leaf) {
-            build/${{ inputs.directory }}/wheel/venv/Scripts/pip install --pre -r $requirements
+            # A dependency released moments ago may not be served by every PyPI CDN node yet
+            # (index pages are cached up to 10 min): retry, bypassing pip's cache
+            $pip = "build/${{ inputs.directory }}/wheel/venv/Scripts/pip"
+            for ($attempt = 1; $attempt -le 5; $attempt++) {
+              if ($attempt -eq 1) { & $pip install --pre -r $requirements }
+              else { & $pip install --pre --no-cache-dir -r $requirements }
+              if ($LASTEXITCODE -eq 0) { break }
+              if ($attempt -eq 5) { Write-Output "pip install failed after $attempt attempts"; exit 1 }
+              Write-Output "pip install failed (attempt $attempt/5), retrying in 60s..."
+              Start-Sleep -Seconds 60
+            }
           }
       - name: Compile wheel
         run: |

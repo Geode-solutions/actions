@@ -115,8 +115,20 @@ jobs:
         if: ${{ inputs.wheels_from_pypi }}
         run: |
           requirements="bindings/python/requirements.txt"
-          if [ -f "$requirements" ]; then 
-            build/${{ inputs.directory }}/wheel/venv/bin/pip install --pre -r $requirements
+          if [ -f "$requirements" ]; then
+            # A dependency released moments ago may not be served by every PyPI CDN node yet
+            # (index pages are cached up to 10 min): retry, bypassing pip's cache
+            pip="build/${{ inputs.directory }}/wheel/venv/bin/pip"
+            attempt=1
+            until $pip install --pre $([ $attempt -gt 1 ] && echo --no-cache-dir) -r $requirements; do
+              if [ $attempt -ge 5 ]; then
+                echo "pip install failed after $attempt attempts"
+                exit 1
+              fi
+              echo "pip install failed (attempt $attempt/5), retrying in 60s..."
+              sleep 60
+              attempt=$((attempt + 1))
+            done
           fi
       - name: Compile wheel
         run: |

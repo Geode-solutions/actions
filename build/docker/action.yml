@@ -23,9 +23,22 @@ runs:
       shell: bash
     - name: Build Docker image
       run: |
+        args=(-t ${{ steps.image.outputs.IMAGE }} --build-arg BRANCH=${{ inputs.tag }})
         if [ "${{ inputs.license_token }}" != '' ]; then
-          docker build -t ${{ steps.image.outputs.IMAGE }} --build-arg TOKEN=${{ inputs.license_token }} --build-arg BRANCH=${{ inputs.tag }} .
-        else
-          docker build -t ${{ steps.image.outputs.IMAGE }} --build-arg BRANCH=${{ inputs.tag }} .
+          args+=(--build-arg TOKEN=${{ inputs.license_token }})
         fi
+        # A dependency released moments ago may not be served by every PyPI CDN node yet
+        # (index pages are cached up to 10 min): retry only on that error
+        log="$RUNNER_TEMP/docker-build.log"
+        max_attempts=5
+        for attempt in $(seq 1 $max_attempts); do
+          if docker build "${args[@]}" . 2>&1 | tee "$log"; [ "${PIPESTATUS[0]}" -eq 0 ]; then
+            break
+          fi
+          if ! grep -q "No matching distribution found" "$log" || [ "$attempt" -eq "$max_attempts" ]; then
+            exit 1
+          fi
+          echo "A dependency is not available on PyPI yet (attempt $attempt/$max_attempts), retrying in 60s..."
+          sleep 60
+        done
       shell: bash

@@ -19,8 +19,11 @@ runs:
   steps:
     - name: Wait for registry
       run: |
+        # A missing file means no internal dependency to wait for
         get_file() {
-          gh api "repos/$GITHUB_REPOSITORY/contents/$1?ref=$GITHUB_REF_NAME" --jq .content 2>/dev/null | base64 -d
+          local content
+          content=$(gh api "repos/$GITHUB_REPOSITORY/contents/$1?ref=$GITHUB_REF_NAME" --jq .content 2>/dev/null) || return 0
+          echo "$content" | base64 -d
         }
         # Package names are the repository names (lowercase on PyPI, @geode scope on npm)
         if [ "$REGISTRY" == "pypi" ]; then

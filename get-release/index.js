@@ -31,6 +31,23 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// GitHub API sometimes fails transiently (5xx, "other side closed"): retry those, not 4xx.
+async function apiWithRetry(name, call, retries = 5, baseDelayMs = 2000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await call();
+    } catch (err) {
+      const transient = !err.status || err.status >= 500 || err.status === 429;
+      if (!transient || i === retries - 1) throw err;
+      const delayMs = baseDelayMs * (i + 1);
+      console.log(
+        `${name} failed (${err.status || "no status"}: ${err.message}), retrying in ${delayMs}ms... (${i + 1}/${retries})`,
+      );
+      await sleep(delayMs);
+    }
+  }
+}
+
 async function unlinkWithRetry(filePath, retries = 6, delayMs = 500) {
   for (let i = 0; i < retries; i++) {
     try {
@@ -213,11 +230,15 @@ function main() {
           owner = owner_repo_array[0];
           repo = owner_repo_array[1];
         }
-        let promise = new Promise(function (resolve) {
+        let promise = new Promise(function (resolve, reject) {
           console.log("Looking for repository:", repo);
           const query = branch.includes("master")
-            ? octokit.repos.getLatestRelease({ owner, repo }).then((release) => release.data.id)
-            : octokit.repos.listReleases({ owner, repo, per_page: 100 }).then((releases) => {
+            ? apiWithRetry(`getLatestRelease ${repo}`, () =>
+                octokit.repos.getLatestRelease({ owner, repo }),
+              ).then((release) => release.data.id)
+            : apiWithRetry(`listReleases ${repo}`, () =>
+                octokit.repos.listReleases({ owner, repo, per_page: 100 }),
+              ).then((releases) => {
                 // GitHub does not return releases in chronological order (e.g. v1.0.0-rc.10 can come after v1.0.0-rc.6)
                 const releaseDate = (r) => Date.parse(r.published_at || r.created_at);
                 releases.data.sort((a, b) => releaseDate(b) - releaseDate(a));
@@ -263,8 +284,13 @@ function main() {
                 console.log("Found default release:", releases.data[0].name, " for ", repo);
                 return releases.data[0].id;
               });
-          query.then((release_id) => {
-            octokit.repos.listReleaseAssets({ owner, repo, release_id }).then(async (assets) => {
+          query
+            .then((release_id) =>
+              apiWithRetry(`listReleaseAssets ${repo}`, () =>
+                octokit.repos.listReleaseAssets({ owner, repo, release_id }),
+              ),
+            )
+            .then(async (assets) => {
               const filtered_assets = assets.data.filter((asset) => asset.name.includes(file));
               let results = [];
               for (let i = 0; i < filtered_assets.length; i++) {
@@ -273,23 +299,25 @@ function main() {
                 results.push(result);
               }
               resolve(results);
-            });
-          });
+            })
+            .catch(reject);
         });
         promises.push(promise);
       });
-      Promise.all(promises).then((outputs) => {
-        let result = "";
-        outputs.forEach((output) => {
-          console.log("Output:", output);
-          output.forEach((file) => {
-            result += file + ";";
+      Promise.all(promises)
+        .then((outputs) => {
+          let result = "";
+          outputs.forEach((output) => {
+            console.log("Output:", output);
+            output.forEach((file) => {
+              result += file + ";";
+            });
           });
-        });
-        result = result.slice(0, -1);
-        core.setOutput("path", result);
-        console.log("Final result:", result);
-      });
+          result = result.slice(0, -1);
+          core.setOutput("path", result);
+          console.log("Final result:", result);
+        })
+        .catch((error) => core.setFailed(error.message));
     }
   } catch (error) {
     core.setFailed(error.message);

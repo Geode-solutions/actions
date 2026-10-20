@@ -34,6 +34,7 @@ jobs:
         with:
           folders: .
           use_internal: ${{ inputs.use_internal }}
+          token: ${{ secrets.TOKEN }}
       - name: "Get config files"
         run: |
           curl -f --retry 3 --retry-delay 2 --retry-connrefused -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/commitlint.config.js\?ref\=master > commitlint.config.js

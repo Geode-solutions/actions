@@ -8,6 +8,10 @@ inputs:
   use_internal:
     type: boolean
     required: true
+  token:
+    description: "Reads the releases of the internal dependencies"
+    type: string
+    default: ${{ github.token }}
 
 runs:
   using: "composite"
@@ -52,7 +56,14 @@ runs:
                 continue
               fi
               echo "Package: $package"
-              full_version=$(pip index versions --pre $package | grep $package | cut -d'(' -f2 | cut -d')' -f1)
+              # Same release as wait-registry: a second PyPI query can hit a mirror that does not list it yet
+              tag=$(gh api "repos/Geode-solutions/$package/releases?per_page=30" --jq '[.[] | select(.tag_name | test("^v[0-9]"))][0].tag_name' 2>/dev/null || true)
+              if [ -n "$tag" ]; then
+                # v1.2.3-rc.4 is published as 1.2.3rc4
+                full_version=$(echo "${tag#v}" | sed -E 's/-rc\.([0-9]+)$/rc\1/')
+              else
+                full_version=$(pip index versions --pre $package | grep $package | cut -d'(' -f2 | cut -d')' -f1)
+              fi
               echo "Full version: $full_version"
               major=$(echo "$full_version" | sed -E 's/^([0-9]+\.).*/\1/')
               echo "Major: $major"
@@ -63,3 +74,5 @@ runs:
           cat $file_txt
         done
       shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}

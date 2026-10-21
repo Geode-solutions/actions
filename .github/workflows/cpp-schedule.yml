@@ -22,7 +22,53 @@ on:
         required: true
 
 jobs:
+  # Skips the tests when neither the repository nor its dependency releases changed since the
+  # last green run. Every Sunday and every manual run test anyway (third-party, runner updates)
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+      key: ${{ steps.fingerprint.outputs.key }}
+      cache-hit: ${{ steps.cache.outputs.cache-hit }}
+    steps:
+      - uses: Geode-solutions/actions/get-release@master
+        id: releases
+        with:
+          repository: ${{ inputs.repos }}
+          file: "."
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ inputs.branch }}
+          download: false
+      - name: Fingerprint
+        id: fingerprint
+        run: |
+          head=$(gh api "repos/$GITHUB_REPOSITORY/commits/${{ inputs.branch }}" --jq .sha)
+          echo "head: $head"
+          echo "releases: ${{ steps.releases.outputs.releases }}"
+          hash=$(echo "$head;${{ steps.releases.outputs.releases }}" | sha256sum | cut -d' ' -f1)
+          echo "key=schedule-${{ inputs.branch }}-$hash" >> $GITHUB_OUTPUT
+          echo "$hash" > schedule-fingerprint
+        env:
+          GH_TOKEN: ${{ secrets.TOKEN }}
+      - uses: actions/cache/restore@v4
+        id: cache
+        with:
+          path: schedule-fingerprint
+          key: ${{ steps.fingerprint.outputs.key }}
+          lookup-only: true
+      - name: Decide
+        id: decide
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ] || [ "$(date -u +%u)" == "7" ] || [ "${{ steps.cache.outputs.cache-hit }}" != "true" ]; then
+            echo "run=true" >> $GITHUB_OUTPUT
+          else
+            echo "Same repository and dependencies as the last green run: skip"
+            echo "run=false" >> $GITHUB_OUTPUT
+          fi
+
   test-repository:
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
     uses: Geode-solutions/actions/.github/workflows/cpp-test-repository.yml@master
     with:
       name: ${{ inputs.name }}
@@ -34,6 +80,17 @@ jobs:
       wheels_from_pypi: true
       python: ${{ inputs.python }}
     secrets: inherit
+
+  save-fingerprint:
+    needs: [changes, test-repository]
+    if: needs.test-repository.result == 'success' && needs.changes.outputs.cache-hit != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "${{ needs.changes.outputs.key }}" > schedule-fingerprint
+      - uses: actions/cache/save@v4
+        with:
+          path: schedule-fingerprint
+          key: ${{ needs.changes.outputs.key }}
 
   notify:
     runs-on: ubuntu-latest

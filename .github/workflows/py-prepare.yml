@@ -39,11 +39,13 @@ jobs:
           use_internal: ${{ inputs.use_internal }}
           token: ${{ secrets.TOKEN }}
       - name: "Get config files"
-        run: |
-          curl -f --retry 3 --retry-delay 2 --retry-connrefused -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/commitlint.config.js\?ref\=master > commitlint.config.js
-          curl -f --retry 3 --retry-delay 2 --retry-connrefused -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/.releaserc\?ref\=master > .releaserc
-          curl -f --retry 3 --retry-delay 2 --retry-connrefused -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/mypy.ini\?ref\=master > mypy.ini
-          curl -f --retry 3 --retry-delay 2 --retry-connrefused -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/ruff.toml\?ref\=master > ruff.toml
+        uses: Geode-solutions/actions/install/config-files@master
+        with:
+          files: |
+            commitlint.config.js commitlint.config.js
+            .releaserc .releaserc
+            mypy.ini mypy.ini
+            ruff.toml ruff.toml
       - name: Ruff
         run: |
           pip install ruff

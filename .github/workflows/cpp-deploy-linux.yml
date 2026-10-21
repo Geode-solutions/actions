@@ -96,6 +96,10 @@ jobs:
           done
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - uses: Geode-solutions/actions/install/config-files@master
+        if: matrix.system == 'ubuntu' && github.ref == 'refs/heads/master'
+        with:
+          files: doc/style.py ${{ runner.temp }}/style.py
       - name: Doc
         shell: bash
         if: matrix.system == 'ubuntu' && github.ref == 'refs/heads/master'
@@ -109,8 +113,7 @@ jobs:
           jq 'map(select(.file | test("/private/"; "i") | not))' compile_commands.json > public_compile_commands.json
           clang-doc-22 --output=doc --doxygen --public --format=md --executor=all-TUs public_compile_commands.json
           cd doc/geode
-          curl -f --retry 3 --retry-delay 2 --retry-connrefused -H "Accept: application/vnd.github.VERSION.raw" -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/Geode-solutions/actions/contents/doc/style.py\?ref\=master > style.py
-          python3 style.py .
+          python3 ${{ runner.temp }}/style.py .
 
           git clone https://github.com/Geode-solutions/docs $docs_path
           cd $docs_path

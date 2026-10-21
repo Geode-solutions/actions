@@ -22,9 +22,15 @@ inputs:
     description: "directory name"
     required: false
     default: ${{ github.workspace }}
+  download:
+    description: "false only lists the selected releases in the releases output"
+    required: false
+    default: "true"
 outputs:
   path:
     description: "path of the extracted asset"
+  releases:
+    description: "repo:release_id:newest asset update of each selected release, separated by ;"
 runs:
   using: "node24"
   main: "index.js"

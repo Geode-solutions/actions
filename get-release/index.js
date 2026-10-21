@@ -218,6 +218,7 @@ function main() {
       const token = core.getInput("token");
       const branch = core.getInput("branch");
       const base = core.getInput("base");
+      const download = core.getInput("download") !== "false";
       const octokit = new Octokit({ auth: token });
       repos.split(";").forEach((owner_repo) => {
         if (!owner_repo.length) {
@@ -288,10 +289,16 @@ function main() {
             .then((release_id) =>
               apiWithRetry(`listReleaseAssets ${repo}`, () =>
                 octokit.repos.listReleaseAssets({ owner, repo, release_id }),
-              ),
+              ).then((assets) => ({ release_id, assets })),
             )
-            .then(async (assets) => {
+            .then(async ({ release_id, assets }) => {
               const filtered_assets = assets.data.filter((asset) => asset.name.includes(file));
+              if (!download) {
+                // Identifies the selected build: assets re-uploaded with --clobber keep the release id
+                const updated = filtered_assets.map((asset) => asset.updated_at).sort();
+                resolve([`${repo}:${release_id}:${updated.at(-1) || ""}`]);
+                return;
+              }
               let results = [];
               for (let i = 0; i < filtered_assets.length; i++) {
                 console.log("Asset name:", filtered_assets[i].name);
@@ -314,7 +321,7 @@ function main() {
             });
           });
           result = result.slice(0, -1);
-          core.setOutput("path", result);
+          core.setOutput(download ? "path" : "releases", result);
           console.log("Final result:", result);
         })
         .catch((error) => core.setFailed(error.message));

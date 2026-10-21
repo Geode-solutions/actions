@@ -4,6 +4,8 @@ on:
       pr_found:
         value: ${{ jobs.skip.outputs.pr_found }}
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
 
@@ -13,10 +15,17 @@ jobs:
     outputs:
       pr_found: ${{ steps.PR.outputs.pr_found }}
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
       - uses: 8BitJonny/gh-get-current-pr@2.2.0
         id: PR
         with:

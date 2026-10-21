@@ -28,18 +28,44 @@ on:
         type: number
         default: 2
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
       SLACK_WEBHOOK_URL:
         required: true
 
 jobs:
+  # Release lookup done once for all jobs, instead of once per job and per dependency
+  releases:
+    runs-on: ubuntu-latest
+    outputs:
+      selection: ${{ steps.releases.outputs.selection }}
+    steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
+      - uses: Geode-solutions/actions/get-release@master
+        id: releases
+        with:
+          repository: ${{ inputs.repos }}
+          file: "-private."
+          token: ${{ steps.token.outputs.token }}
+          branch: ${{ inputs.branch }}
+          download: false
+
   test-linux:
+    needs: releases
     uses: Geode-solutions/actions/.github/workflows/cpp-test-linux.yml@master
     with:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
+      releases: ${{ needs.releases.outputs.selection }}
       light: ${{ inputs.light }}
       type: ${{ inputs.type }}
       branch: ${{ inputs.branch }}
@@ -48,11 +74,13 @@ jobs:
 
   test-linux-python:
     if: ${{ inputs.python }}
+    needs: releases
     uses: Geode-solutions/actions/.github/workflows/cpp-test-linux-python.yml@master
     with:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
+      releases: ${{ needs.releases.outputs.selection }}
       light: ${{ inputs.light }}
       type: ${{ inputs.type }}
       branch: ${{ inputs.branch }}
@@ -60,11 +88,13 @@ jobs:
     secrets: inherit
 
   test-windows:
+    needs: releases
     uses: Geode-solutions/actions/.github/workflows/cpp-test-windows.yml@master
     with:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
+      releases: ${{ needs.releases.outputs.selection }}
       light: ${{ inputs.light }}
       type: ${{ inputs.type }}
       branch: ${{ inputs.branch }}
@@ -73,11 +103,13 @@ jobs:
 
   test-windows-python:
     if: ${{ inputs.python }}
+    needs: releases
     uses: Geode-solutions/actions/.github/workflows/cpp-test-windows-python.yml@master
     with:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
+      releases: ${{ needs.releases.outputs.selection }}
       light: ${{ inputs.light }}
       type: ${{ inputs.type }}
       branch: ${{ inputs.branch }}

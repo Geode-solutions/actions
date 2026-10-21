@@ -17,6 +17,8 @@ on:
       pyinstaller:
         value: ${{ jobs.py-config.outputs.pyinstaller }}
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
 jobs:
@@ -28,11 +30,18 @@ jobs:
       docker: ${{ steps.config.outputs.docker }}
       pyinstaller: ${{ steps.config.outputs.pyinstaller }}
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
           repo: ${{ inputs.repo }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: Read config
         id: config

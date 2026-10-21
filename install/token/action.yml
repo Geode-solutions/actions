@@ -1,0 +1,27 @@
+name: "Token"
+description: "GitHub App installation token for the Geode-solutions organization, or the fallback token when the App is not configured"
+
+inputs:
+  app-id:
+    type: string
+  private-key:
+    type: string
+  token:
+    description: "Fallback token (personal access token)"
+    type: string
+
+outputs:
+  token:
+    value: ${{ steps.app.outputs.token || inputs.token }}
+
+runs:
+  using: "composite"
+  steps:
+    # The App has its own rate limit (15,000 requests/hour on Enterprise Cloud), separate from the users'
+    - uses: actions/create-github-app-token@v2
+      if: inputs.app-id != '' && inputs.private-key != ''
+      id: app
+      with:
+        app-id: ${{ inputs.app-id }}
+        private-key: ${{ inputs.private-key }}
+        owner: Geode-solutions

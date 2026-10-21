@@ -1,6 +1,8 @@
 on:
   workflow_call:
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
 
@@ -16,9 +18,16 @@ jobs:
     needs: semantic-release
     if: needs.semantic-release.outputs.new_release == 'true'
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - uses: actions/github-script@v8
         with:
-          github-token: ${{ secrets.TOKEN }}
+          github-token: ${{ steps.token.outputs.token }}
           script: |
             github.rest.actions.createWorkflowDispatch({
               owner: 'Geode-solutions',

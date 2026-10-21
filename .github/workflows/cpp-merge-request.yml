@@ -1,6 +1,8 @@
 on:
   workflow_call:
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
 
@@ -8,13 +10,20 @@ jobs:
   request:
     runs-on: ubuntu-latest
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - run: |
           if [[ "$GITHUB_REF_NAME" == "master" || "$GITHUB_REF_NAME" == "next" ]]; then 
             exit 1
           fi
       - uses: actions/github-script@v8
         with:
-          github-token: ${{ secrets.TOKEN }}
+          github-token: ${{ steps.token.outputs.token }}
           script: |
             github.rest.actions.createWorkflowDispatch({
               owner: 'Geode-solutions',

@@ -21,7 +21,13 @@ on:
       wheels_from_pypi:
         type: boolean
         default: false
+      releases:
+        description: "selection output of get-release, skips the release lookup"
+        type: string
+        default: ""
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
       SLACK_WEBHOOK_URL:
@@ -34,6 +40,13 @@ jobs:
       matrix:
         python: ["3.14"]
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Get info
         id: info
         run: |
@@ -43,14 +56,15 @@ jobs:
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
         with:
           repos: ${{ inputs.repos }}
-          token: ${{ secrets.TOKEN }}
+          releases: ${{ inputs.releases }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
           system: win64
           save: false
@@ -73,7 +87,7 @@ jobs:
         with:
           repository: ${{ inputs.repos }}
           file: "-${{ steps.info.outputs.tag }}-win_amd64.whl"
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: "pip-compile"
         run: |

@@ -26,11 +26,17 @@ inputs:
     description: "false only lists the selected releases in the releases output"
     required: false
     default: "true"
+  selection:
+    description: "selection output of a previous call: reuses its releases and assets instead of querying the GitHub API"
+    required: false
+    default: ""
 outputs:
   path:
     description: "path of the extracted asset"
   releases:
     description: "repo:release_id:newest asset update of each selected release, separated by ;"
+  selection:
+    description: "JSON of the selected release and matching assets of each repository, to pass to the selection input of later calls"
 runs:
   using: "node24"
   main: "index.js"

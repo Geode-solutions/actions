@@ -43,6 +43,8 @@ on:
         type: boolean
         default: false
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
       SLACK_WEBHOOK_URL:
@@ -55,16 +57,23 @@ jobs:
     if: inputs.python == 'true'
     runs-on: ubuntu-22.04
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/python-dependencies@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           use_registry: ${{ inputs.use_registry }}
       - name: Build
         run: |
@@ -98,10 +107,17 @@ jobs:
       matrix:
         os: [ubuntu-22.04, windows-2022]
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: Update version number
         run: |
@@ -117,7 +133,7 @@ jobs:
         uses: Geode-solutions/actions/test/pyinstaller@master
         with:
           repos: ${{ inputs.repos }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
           use_registry: ${{ inputs.use_registry }}
       - name: Release
@@ -132,10 +148,17 @@ jobs:
     if: inputs.node == 'true'
     runs-on: ubuntu-22.04
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
       # Only exists when test-node packed it earlier in the same run (test PRs): reused if it has the requested version,
       # otherwise the package is built as usual
       - uses: actions/download-artifact@v8
@@ -170,7 +193,7 @@ jobs:
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           use_registry: ${{ inputs.use_registry }}
       - name: Build
         if: steps.packed.outputs.tarball == ''
@@ -213,10 +236,17 @@ jobs:
       matrix:
         os: [ubuntu-22.04, windows-2022]
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
       - uses: actions/download-artifact@v8
         id: artifact
         continue-on-error: true
@@ -230,7 +260,7 @@ jobs:
             with:
               repos: ${{ inputs.repos }}
               branch: ${{ inputs.branch }}
-              token: ${{ secrets.TOKEN }}
+              token: ${{ steps.token.outputs.token }}
               use_registry: ${{ inputs.use_registry }}
           - name: Install Microservices
             if: steps.artifact.outcome != 'success'
@@ -238,7 +268,7 @@ jobs:
             with:
               repos: ${{ inputs.repos }}
               branch: ${{ inputs.branch }}
-              token: ${{ secrets.TOKEN }}
+              token: ${{ steps.token.outputs.token }}
           - name: Install Azure Sign Tool
             if: steps.artifact.outcome != 'success'
             uses: Geode-solutions/actions/install/azure-sign@master
@@ -270,10 +300,17 @@ jobs:
       matrix:
         os: [ubuntu-22.04, windows-2022]
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
       # Only exists when web-test-extension.yml packaged it earlier in the same run (test PRs): reused if it has the
       # requested version, otherwise the extension is packaged as usual
       - uses: actions/download-artifact@v8
@@ -303,7 +340,7 @@ jobs:
             with:
               repos: ${{ inputs.repos }}
               branch: ${{ inputs.branch }}
-              token: ${{ secrets.TOKEN }}
+              token: ${{ steps.token.outputs.token }}
               use_registry: ${{ inputs.use_registry }}
           - name: Install Microservices
             if: steps.packaged.outputs.reused != 'true'
@@ -311,7 +348,7 @@ jobs:
             with:
               repos: ${{ inputs.repos }}
               branch: ${{ inputs.branch }}
-              token: ${{ secrets.TOKEN }}
+              token: ${{ steps.token.outputs.token }}
       - name: Package
         if: steps.packaged.outputs.reused != 'true'
         run: |
@@ -368,6 +405,7 @@ jobs:
     secrets: 
       TOKEN: ${{secrets.TOKEN}}
       LICENSE_TOKEN: ${{secrets.TOKEN}}
+      APP_PRIVATE_KEY: ${{secrets.APP_PRIVATE_KEY}}
       GOOGLE_CLOUD_KEY: ${{secrets.GOOGLE_CLOUD_KEY}}
       GOOGLE_CLOUD_PROJECT_ID: ${{secrets.GOOGLE_CLOUD_PROJECT_ID}}
 

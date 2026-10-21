@@ -1,0 +1,26 @@
+name: "Config files"
+description: "Copy shared config files from this repository, already downloaded by the runner (no GitHub API call)"
+
+inputs:
+  files:
+    description: "One 'source destination' pair per line, source relative to the root of this repository"
+    type: string
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Copy config files
+      run: |
+        root="${GITHUB_ACTION_PATH//\\//}/../.."
+        while read -r source destination; do
+          if [ -z "$source" ]; then
+            continue
+          fi
+          mkdir -p "$(dirname "$destination")"
+          cp "$root/$source" "$destination"
+          echo "$source -> $destination"
+        done <<< "$FILES"
+      shell: bash
+      env:
+        FILES: ${{ inputs.files }}

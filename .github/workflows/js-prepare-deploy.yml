@@ -1,6 +1,8 @@
 on:
   workflow_call:
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
 
@@ -21,11 +23,18 @@ jobs:
     needs: config
     runs-on: ubuntu-latest
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Wait for registry to update
         uses: Geode-solutions/actions/wait-registry@master
         with:
           registry: npm
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
 
   prepare:
     needs: [config, sleep]

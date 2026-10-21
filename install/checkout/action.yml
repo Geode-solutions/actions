@@ -30,10 +30,14 @@ runs:
     - name: check branch exist
       id: branch
       run: |
-        if gh api repos/${{ inputs.repo }}/branches/${{ inputs.branch }} --silent; then
+        # git protocol instead of the REST API: does not count against the API rate limit
+        branch_exists() {
+          [ -n "$1" ] && git ls-remote --exit-code --heads "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ inputs.repo }}.git" "refs/heads/$1" > /dev/null
+        }
+        if branch_exists "${{ inputs.branch }}"; then
           echo "found branch ${{ inputs.branch }}"
           echo 'branch=true' >> $GITHUB_OUTPUT
-         elif gh api repos/${{ inputs.repo }}/branches/${{ inputs.base }} --silent; then
+         elif branch_exists "${{ inputs.base }}"; then
           echo "base branch found: ${{ inputs.base }}"
           echo "branch=false" >> "$GITHUB_OUTPUT"
           echo "checkout_branch=${{ inputs.base }}" >> "$GITHUB_OUTPUT"
@@ -45,6 +49,7 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
+        GIT_TERMINAL_PROMPT: "0"
     - run: |
         echo "${{ steps.branch.outputs.branch }}"
         git config --global url."https://x-access-token:${{ inputs.TOKEN }}@github.com/".insteadOf "https://github.com/"

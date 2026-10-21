@@ -26,6 +26,8 @@ on:
         type: string
         default: ""
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
       SLACK_WEBHOOK_URL:
@@ -45,10 +47,17 @@ jobs:
   build-windows:
     runs-on: windows-2022
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
@@ -56,7 +65,7 @@ jobs:
         with:
           repos: ${{ inputs.repos }}
           releases: ${{ inputs.releases }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
           system: win64
       - name: Libraries
@@ -125,17 +134,24 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.setup-windows-shards.outputs.matrix) }}
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         with:
           repos: ${{ inputs.repos }}
           releases: ${{ inputs.releases }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
           system: win64
       - name: Download tests

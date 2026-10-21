@@ -26,6 +26,8 @@ on:
         type: string
         default: ""
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
       SLACK_WEBHOOK_URL:
@@ -48,6 +50,13 @@ jobs:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Get info
         id: info
         run: |
@@ -60,7 +69,7 @@ jobs:
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
@@ -68,7 +77,7 @@ jobs:
         with:
           repos: ${{ inputs.repos }}
           releases: ${{ inputs.releases }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
           system: ${{ matrix.system }}
           save: false
@@ -101,6 +110,15 @@ jobs:
           done
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      # App tokens expire after 1 hour: get a new one after the build
+      - name: Docs token
+        if: matrix.system == 'ubuntu' && github.ref == 'refs/heads/master'
+        uses: Geode-solutions/actions/install/token@master
+        id: docs-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - uses: Geode-solutions/actions/install/config-files@master
         if: matrix.system == 'ubuntu' && github.ref == 'refs/heads/master'
         with:
@@ -120,6 +138,9 @@ jobs:
           cd doc/geode
           python3 ${{ runner.temp }}/style.py .
 
+          # Replace the checkout credentials, they may have expired during the build
+          git config --global --get-regexp '^url\..*\.insteadof$' | cut -d' ' -f1 | xargs -r -n1 git config --global --unset-all
+          git config --global url."https://x-access-token:${{ steps.docs-token.outputs.token }}@github.com/".insteadOf "https://github.com/"
           git clone https://github.com/Geode-solutions/docs $docs_path
           cd $docs_path
           git checkout master
@@ -135,5 +156,5 @@ jobs:
               git config user.name $GITHUB_ACTOR
               git add --all
               git commit -m "Update $repo_name documentation"
-              git push https://${{ secrets.TOKEN }}@github.com/Geode-solutions/docs master
+              git push https://x-access-token:${{ steps.docs-token.outputs.token }}@github.com/Geode-solutions/docs master
           fi

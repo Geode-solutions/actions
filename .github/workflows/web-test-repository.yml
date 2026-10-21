@@ -37,6 +37,8 @@ on:
         type: boolean
         default: false
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
       SLACK_WEBHOOK_URL:
@@ -50,16 +52,23 @@ jobs:
       matrix:
         os: [ubuntu-22.04, windows-2022]
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: Test Python
         uses: Geode-solutions/actions/test/python@master
         with:
           repos: ${{ inputs.repos }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
           use_registry: ${{ inputs.use_registry }}
 
@@ -70,16 +79,23 @@ jobs:
       matrix:
         os: [ubuntu-22.04, windows-2022]
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: Test pyinstaller
         uses: Geode-solutions/actions/test/pyinstaller@master
         with:
           repos: ${{ inputs.repos }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
           use_registry: ${{ inputs.use_registry }}
 
@@ -90,17 +106,24 @@ jobs:
       matrix:
         os: [ubuntu-22.04, windows-2022]
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: Test Node
         uses: Geode-solutions/actions/test/node@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           use_registry: ${{ inputs.use_registry }}
           # release-node runs on Linux
           pack: ${{ runner.os == 'Linux' }}
@@ -112,17 +135,24 @@ jobs:
       matrix:
         os: [ubuntu-22.04, windows-2022]
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: Test Integration
         uses: Geode-solutions/actions/test/integration@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           use_registry: ${{ inputs.use_registry }}
 
   test-browser:
@@ -138,17 +168,24 @@ jobs:
     if: inputs.cloud == 'true'
     runs-on: ubuntu-22.04
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: Test Cloud
         uses: Geode-solutions/actions/test/cloud@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           email: ${{ secrets.GEODE_USER_EMAIL }}
           password: ${{ secrets.GEODE_USER_PASSWORD }}
           use_registry: true
@@ -175,14 +212,21 @@ jobs:
     if: inputs.docker == 'true'
     runs-on: ubuntu-22.04
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: Build docker
         uses: Geode-solutions/actions/build/docker@master
         id: docker
         with:
           tag: next
-          license_token: ${{ secrets.TOKEN }}
+          license_token: ${{ steps.token.outputs.token }}

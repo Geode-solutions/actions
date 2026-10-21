@@ -29,6 +29,8 @@ on:
         description: "Cache key"
         value: ${{ jobs.linux.outputs.key }}
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
 
@@ -42,11 +44,18 @@ jobs:
       matrix:
         system: ["ubuntu", "rhel"]
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
           repo: Geode-solutions/${{ inputs.repository }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: master
       - name: Get info
         run: |
@@ -92,11 +101,18 @@ jobs:
     outputs:
       key: ${{ steps.info.outputs.key }}
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
           repo: Geode-solutions/${{ inputs.repository }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: master
       - name: Get info
         run: |

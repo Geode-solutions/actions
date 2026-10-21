@@ -13,6 +13,8 @@ on:
         type: boolean
         default: true
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
 
@@ -33,16 +35,23 @@ jobs:
       CC: /usr/bin/clang
       CXX: /usr/bin/clang++
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
         with:
           repos: ${{ inputs.repos }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ github.event.pull_request.head.ref }}
           system: ubuntu
       - name: Configure

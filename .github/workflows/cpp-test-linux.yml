@@ -26,6 +26,8 @@ on:
         type: string
         default: ""
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
       SLACK_WEBHOOK_URL:
@@ -62,6 +64,13 @@ jobs:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Get info
         id: info
         run: |
@@ -74,7 +83,7 @@ jobs:
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
@@ -82,7 +91,7 @@ jobs:
         with:
           repos: ${{ inputs.repos }}
           releases: ${{ inputs.releases }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
           system: ${{ matrix.system }}
       - name: Libraries
@@ -139,6 +148,13 @@ jobs:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Get info
         id: info
         run: |
@@ -150,7 +166,7 @@ jobs:
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
@@ -158,7 +174,7 @@ jobs:
         with:
           repos: ${{ inputs.repos }}
           releases: ${{ inputs.releases }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
           system: ${{ matrix.system }}
       - name: Libraries

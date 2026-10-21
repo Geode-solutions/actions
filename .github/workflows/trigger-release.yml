@@ -5,6 +5,8 @@ on:
         type: string
         default: "master"
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
 
@@ -12,10 +14,17 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - uses: stefanzweifel/git-auto-commit-action@v7
         with:
@@ -24,7 +33,7 @@ jobs:
           commit_options: "--allow-empty"
       - uses: actions/github-script@v8
         with:
-          github-token: ${{ secrets.TOKEN }}
+          github-token: ${{ steps.token.outputs.token }}
           script: |
             github.rest.actions.createWorkflowDispatch({
               owner: 'Geode-solutions',

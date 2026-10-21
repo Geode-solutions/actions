@@ -4,6 +4,8 @@ on:
       repos:
         type: string
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
 
@@ -25,16 +27,23 @@ jobs:
     needs: prepare
     runs-on: ubuntu-latest
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/node-dependencies@master
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ github.event.pull_request.head.ref }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           use_registry: false
       - uses: actions/setup-node@v6
         with:

@@ -16,6 +16,8 @@ on:
         type: boolean
         default: true
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
       SLACK_WEBHOOK_URL:
@@ -31,12 +33,19 @@ jobs:
       key: ${{ steps.fingerprint.outputs.key }}
       cache-hit: ${{ steps.cache.outputs.cache-hit }}
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - uses: Geode-solutions/actions/get-release@master
         id: releases
         with:
           repository: ${{ inputs.repos }}
           file: "."
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
           download: false
       - name: Fingerprint
@@ -49,7 +58,7 @@ jobs:
           echo "key=schedule-${{ inputs.branch }}-$hash" >> $GITHUB_OUTPUT
           echo "$hash" > schedule-fingerprint
         env:
-          GH_TOKEN: ${{ secrets.TOKEN }}
+          GH_TOKEN: ${{ github.token }}
       - uses: actions/cache/restore@v4
         id: cache
         with:

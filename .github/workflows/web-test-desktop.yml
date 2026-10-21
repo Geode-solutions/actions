@@ -10,6 +10,8 @@ on:
         type: boolean
         default: false
     secrets:
+      APP_PRIVATE_KEY:
+        required: false
       TOKEN:
         required: true
       AZURE_KEY_VAULT_URI:
@@ -32,10 +34,17 @@ jobs:
       matrix:
         os: [ubuntu-22.04, windows-2022]
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - parallel:
           - name: Install dependencies
@@ -43,14 +52,14 @@ jobs:
             with:
               repos: ${{ inputs.repos }}
               branch: ${{ inputs.branch }}
-              token: ${{ secrets.TOKEN }}
+              token: ${{ steps.token.outputs.token }}
               use_registry: false
           - name: Install Microservices
             uses: Geode-solutions/actions/install/microservices@master
             with:
               repos: ${{ inputs.repos }}
               branch: ${{ inputs.branch }}
-              token: ${{ secrets.TOKEN }}
+              token: ${{ steps.token.outputs.token }}
           - name: Install Azure Sign Tool
             uses: Geode-solutions/actions/install/azure-sign@master
       - name: Build
@@ -85,10 +94,17 @@ jobs:
         os: [ubuntu-22.04, windows-2022]
         shard: [1, 2, 3]
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - uses: actions/download-artifact@v8
         if: ${{ !inputs.use_registry }}
@@ -105,7 +121,7 @@ jobs:
         with:
           repos: ${{ inputs.repos }}
           branch: ${{ inputs.branch }}
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           use_registry: ${{ inputs.use_registry }}
           shard_index: ${{ matrix.shard }}
           shard_total: 3
@@ -120,10 +136,17 @@ jobs:
       matrix:
         os: [ubuntu-22.04, windows-2022]
     steps:
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       # Same version as install/node-dependencies, which built node_modules
       - uses: actions/setup-node@v6

@@ -21,10 +21,11 @@ jobs:
           app-id: ${{ vars.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
           token: ${{ secrets.TOKEN }}
+      # The commit below may target a protected branch: only the personal token can bypass its rules
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ steps.token.outputs.token }}
+          token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
       - uses: stefanzweifel/git-auto-commit-action@v7
         with:

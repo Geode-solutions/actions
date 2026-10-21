@@ -5,8 +5,6 @@ on:
         description: "commit has been done"
         value: ${{ jobs.prepare.outputs.changes_detected }}
     secrets:
-      APP_PRIVATE_KEY:
-        required: false
       TOKEN:
         required: true
 
@@ -16,17 +14,11 @@ jobs:
     outputs:
       changes_detected: ${{ steps.commit.outputs.changes_detected }}
     steps:
-      - name: Token
-        uses: Geode-solutions/actions/install/token@master
-        id: token
-        with:
-          app-id: ${{ vars.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-          token: ${{ secrets.TOKEN }}
+      # The commit below may target a protected branch: only the personal token can bypass its rules
       - name: Checkout
         uses: Geode-solutions/actions/install/checkout@master
         with:
-          token: ${{ steps.token.outputs.token }}
+          token: ${{ secrets.TOKEN }}
       - name: "Get config files"
         uses: Geode-solutions/actions/install/config-files@master
         with:

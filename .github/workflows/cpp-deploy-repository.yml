@@ -36,23 +36,42 @@ on:
         required: true
 
 jobs:
+  # Release lookup done once for all jobs, instead of once per job and per dependency
+  releases:
+    runs-on: ubuntu-latest
+    outputs:
+      selection: ${{ steps.releases.outputs.selection }}
+    steps:
+      - uses: Geode-solutions/actions/get-release@master
+        id: releases
+        with:
+          repository: ${{ inputs.repos }}
+          file: "-private."
+          token: ${{ secrets.TOKEN }}
+          branch: ${{ github.ref_name }}
+          download: false
+
   release-linux:
+    needs: releases
     uses: Geode-solutions/actions/.github/workflows/cpp-deploy-linux.yml@master
     with:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
+      releases: ${{ needs.releases.outputs.selection }}
       version: ${{ inputs.version }}
       release: ${{ inputs.release }}
     secrets: inherit
 
   release-linux-python:
     if: ${{ inputs.python }}
+    needs: releases
     uses: Geode-solutions/actions/.github/workflows/cpp-deploy-linux-python.yml@master
     with:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
+      releases: ${{ needs.releases.outputs.selection }}
       version: ${{ inputs.version }}
       release: ${{ inputs.release }}
       upload-pypi: ${{ inputs.upload-pypi }}
@@ -61,22 +80,26 @@ jobs:
     secrets: inherit
 
   release-windows:
+    needs: releases
     uses: Geode-solutions/actions/.github/workflows/cpp-deploy-windows.yml@master
     with:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
+      releases: ${{ needs.releases.outputs.selection }}
       version: ${{ inputs.version }}
       release: ${{ inputs.release }}
     secrets: inherit
 
   release-windows-python:
     if: ${{ inputs.python }}
+    needs: releases
     uses: Geode-solutions/actions/.github/workflows/cpp-deploy-windows-python.yml@master
     with:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
+      releases: ${{ needs.releases.outputs.selection }}
       version: ${{ inputs.version }}
       release: ${{ inputs.release }}
       upload-pypi: ${{ inputs.upload-pypi }}

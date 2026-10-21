@@ -207,6 +207,83 @@ async function download_asset(asset, token, destPath) {
   }
 }
 
+function selectRelease(octokit, owner, repo, branch, base) {
+  return branch.includes("master")
+    ? apiWithRetry(`getLatestRelease ${repo}`, () =>
+        octokit.repos.getLatestRelease({ owner, repo }),
+      ).then((release) => release.data.id)
+    : apiWithRetry(`listReleases ${repo}`, () =>
+        octokit.repos.listReleases({ owner, repo, per_page: 100 }),
+      ).then((releases) => {
+        // GitHub does not return releases in chronological order (e.g. v1.0.0-rc.10 can come after v1.0.0-rc.6)
+        const releaseDate = (r) => Date.parse(r.published_at || r.created_at);
+        releases.data.sort((a, b) => releaseDate(b) - releaseDate(a));
+        if (github.context.payload.pull_request) {
+          console.log(
+            "pull_request:",
+            github.context.payload.pull_request.head.ref,
+            "->",
+            github.context.payload.pull_request.base.ref,
+          );
+          const head_release = releases.data.find(
+            (r) => r.name === github.context.payload.pull_request.head.ref,
+          );
+          if (head_release) {
+            console.log("Found head release:", head_release.name, " for ", repo);
+            return head_release.id;
+          }
+          const base_release = releases.data.find(
+            (r) => r.name === github.context.payload.pull_request.base.ref,
+          );
+          if (base_release) {
+            console.log("Found base release:", base_release.name, " for ", repo);
+            return base_release.id;
+          }
+        }
+        const branch_release = releases.data.find((r) => r.name === branch);
+        if (branch_release) {
+          console.log("Found branch release:", branch_release.name, " for ", repo);
+          return branch_release.id;
+        }
+        const base_release = releases.data.find((r) => r.name === base);
+        if (base_release) {
+          console.log("Found base release:", base_release.name, " for ", repo);
+          return base_release.id;
+        }
+        const release = releases.data.find(
+          (r) => r.name.startsWith("v") && r.name.includes("-rc."),
+        );
+        if (release) {
+          console.log("Found release:", release.name, " for ", repo);
+          return release.id;
+        }
+        console.log("Found default release:", releases.data[0].name, " for ", repo);
+        return releases.data[0].id;
+      });
+}
+
+// Selected release and its assets, from a previous selection output when available (no API call)
+function getRelease(octokit, selection, owner, repo, branch, base) {
+  const selected = selection[`${owner}/${repo}`];
+  if (selected) {
+    console.log("Using selected release", selected.release_id, "for", repo);
+    return Promise.resolve(selected);
+  }
+  return selectRelease(octokit, owner, repo, branch, base).then((release_id) =>
+    apiWithRetry(`listReleaseAssets ${repo}`, () =>
+      octokit.repos.listReleaseAssets({ owner, repo, release_id, per_page: 100 }),
+    ).then((assets) => ({
+      release_id,
+      assets: assets.data.map(({ name, url, size, updated_at }) => ({
+        name,
+        url,
+        size,
+        updated_at,
+      })),
+    })),
+  );
+}
+
 function main() {
   try {
     excludeWorkspaceFromDefender();
@@ -219,6 +296,8 @@ function main() {
       const branch = core.getInput("branch");
       const base = core.getInput("base");
       const download = core.getInput("download") !== "false";
+      const selection = JSON.parse(core.getInput("selection") || "{}");
+      const new_selection = {};
       const octokit = new Octokit({ auth: token });
       repos.split(";").forEach((owner_repo) => {
         if (!owner_repo.length) {
@@ -233,66 +312,10 @@ function main() {
         }
         let promise = new Promise(function (resolve, reject) {
           console.log("Looking for repository:", repo);
-          const query = branch.includes("master")
-            ? apiWithRetry(`getLatestRelease ${repo}`, () =>
-                octokit.repos.getLatestRelease({ owner, repo }),
-              ).then((release) => release.data.id)
-            : apiWithRetry(`listReleases ${repo}`, () =>
-                octokit.repos.listReleases({ owner, repo, per_page: 100 }),
-              ).then((releases) => {
-                // GitHub does not return releases in chronological order (e.g. v1.0.0-rc.10 can come after v1.0.0-rc.6)
-                const releaseDate = (r) => Date.parse(r.published_at || r.created_at);
-                releases.data.sort((a, b) => releaseDate(b) - releaseDate(a));
-                if (github.context.payload.pull_request) {
-                  console.log(
-                    "pull_request:",
-                    github.context.payload.pull_request.head.ref,
-                    "->",
-                    github.context.payload.pull_request.base.ref,
-                  );
-                  const head_release = releases.data.find(
-                    (r) => r.name === github.context.payload.pull_request.head.ref,
-                  );
-                  if (head_release) {
-                    console.log("Found head release:", head_release.name, " for ", repo);
-                    return head_release.id;
-                  }
-                  const base_release = releases.data.find(
-                    (r) => r.name === github.context.payload.pull_request.base.ref,
-                  );
-                  if (base_release) {
-                    console.log("Found base release:", base_release.name, " for ", repo);
-                    return base_release.id;
-                  }
-                }
-                const branch_release = releases.data.find((r) => r.name === branch);
-                if (branch_release) {
-                  console.log("Found branch release:", branch_release.name, " for ", repo);
-                  return branch_release.id;
-                }
-                const base_release = releases.data.find((r) => r.name === base);
-                if (base_release) {
-                  console.log("Found base release:", base_release.name, " for ", repo);
-                  return base_release.id;
-                }
-                const release = releases.data.find(
-                  (r) => r.name.startsWith("v") && r.name.includes("-rc."),
-                );
-                if (release) {
-                  console.log("Found release:", release.name, " for ", repo);
-                  return release.id;
-                }
-                console.log("Found default release:", releases.data[0].name, " for ", repo);
-                return releases.data[0].id;
-              });
-          query
-            .then((release_id) =>
-              apiWithRetry(`listReleaseAssets ${repo}`, () =>
-                octokit.repos.listReleaseAssets({ owner, repo, release_id }),
-              ).then((assets) => ({ release_id, assets })),
-            )
+          getRelease(octokit, selection, owner, repo, branch, base)
             .then(async ({ release_id, assets }) => {
-              const filtered_assets = assets.data.filter((asset) => asset.name.includes(file));
+              const filtered_assets = assets.filter((asset) => asset.name.includes(file));
+              new_selection[`${owner}/${repo}`] = { release_id, assets: filtered_assets };
               if (!download) {
                 // Identifies the selected build: assets re-uploaded with --clobber keep the release id
                 const updated = filtered_assets.map((asset) => asset.updated_at).sort();
@@ -322,6 +345,7 @@ function main() {
           });
           result = result.slice(0, -1);
           core.setOutput(download ? "path" : "releases", result);
+          core.setOutput("selection", JSON.stringify(new_selection));
           console.log("Final result:", result);
         })
         .catch((error) => core.setFailed(error.message));

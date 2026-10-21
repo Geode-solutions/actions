@@ -17,6 +17,10 @@ inputs:
   save:
     type: boolean
     default: true
+  releases:
+    description: "selection output of get-release, skips the release lookup"
+    type: string
+    default: ""
 outputs:
   path:
     value: ${{ steps.repos.outputs.path }}
@@ -48,3 +52,4 @@ runs:
         file: "-${{ inputs.system }}-private.${{ env.ext }}"
         token: ${{ inputs.token }}
         branch: ${{ inputs.branch }}
+        selection: ${{ inputs.releases }}

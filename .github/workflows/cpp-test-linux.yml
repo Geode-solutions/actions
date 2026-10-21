@@ -21,6 +21,10 @@ on:
       shards:
         type: number
         default: 2
+      releases:
+        description: "selection output of get-release, skips the release lookup"
+        type: string
+        default: ""
     secrets:
       TOKEN:
         required: true
@@ -77,6 +81,7 @@ jobs:
         id: repos
         with:
           repos: ${{ inputs.repos }}
+          releases: ${{ inputs.releases }}
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
           system: ${{ matrix.system }}
@@ -152,6 +157,7 @@ jobs:
         id: repos
         with:
           repos: ${{ inputs.repos }}
+          releases: ${{ inputs.releases }}
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
           system: ${{ matrix.system }}

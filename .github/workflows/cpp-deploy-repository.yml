@@ -56,7 +56,7 @@ jobs:
       version: ${{ inputs.version }}
       release: ${{ inputs.release }}
       upload-pypi: ${{ inputs.upload-pypi }}
-      light: ${{ inputs.light }}
+      light: ${{ inputs.light || github.ref_name != 'master' }}
       wheels_from_pypi: ${{ inputs.wheels_from_pypi }}
     secrets: inherit
 
@@ -80,7 +80,7 @@ jobs:
       version: ${{ inputs.version }}
       release: ${{ inputs.release }}
       upload-pypi: ${{ inputs.upload-pypi }}
-      light: ${{ inputs.light }}
+      light: ${{ inputs.light || github.ref_name != 'master' }}
       wheels_from_pypi: ${{ inputs.wheels_from_pypi }}
     secrets: inherit
 

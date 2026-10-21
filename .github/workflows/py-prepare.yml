@@ -29,6 +29,9 @@ jobs:
         with:
           token: ${{ secrets.TOKEN }}
           branch: ${{ inputs.branch }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
       - name: pip-compile
         uses: Geode-solutions/actions/install/pip-compile@master
         with:

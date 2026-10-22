@@ -212,9 +212,14 @@ function selectRelease(octokit, owner, repo, branch, base) {
     ? apiWithRetry(`getLatestRelease ${repo}`, () =>
         octokit.repos.getLatestRelease({ owner, repo }),
       ).then((release) => release.data.id)
-    : apiWithRetry(`listReleases ${repo}`, () =>
-        octokit.repos.listReleases({ owner, repo, per_page: 100 }),
-      ).then((releases) => {
+    : apiWithRetry(`listReleases ${repo}`, async () => {
+        const releases = await octokit.repos.listReleases({ owner, repo, per_page: 100 });
+        // GitHub sometimes transiently answers 200 with an empty list: retry it as a transient error
+        if (!releases.data.length) {
+          throw new Error(`No release found for ${owner}/${repo}`);
+        }
+        return releases;
+      }).then((releases) => {
         // GitHub does not return releases in chronological order (e.g. v1.0.0-rc.10 can come after v1.0.0-rc.6)
         const releaseDate = (r) => Date.parse(r.published_at || r.created_at);
         releases.data.sort((a, b) => releaseDate(b) - releaseDate(a));

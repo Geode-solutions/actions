@@ -58,6 +58,12 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v6
+        id: python
+        with:
+          python-version: ${{ matrix.python }}
+          pip-version: 25.2
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
@@ -67,12 +73,7 @@ jobs:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
           system: win64
-          save: false
-      - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python }}
-          pip-version: 25.2
+          cache-suffix: -py${{ steps.python.outputs.python-version }}
       - name: Libraries
         id: libraries
         run: |

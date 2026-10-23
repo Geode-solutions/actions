@@ -17,6 +17,10 @@ inputs:
   save:
     type: boolean
     default: true
+  cache-suffix:
+    description: "appended to the cache key, e.g. to separate caches by Python version"
+    type: string
+    default: ""
   releases:
     description: "selection output of get-release, skips the release lookup"
     type: string
@@ -32,12 +36,12 @@ runs:
       uses: actions/cache@v4
       with:
         path: build/third_party
-        key: ${{ inputs.system }}-${{ hashFiles('cmake/Configure**.cmake') }}
+        key: ${{ inputs.system }}${{ inputs.cache-suffix }}-${{ hashFiles('cmake/Configure**.cmake') }}
     - if: ${{ !inputs.save && runner.environment == 'github-hosted' }}
       uses: actions/cache/restore@v4
       with:
         path: build/third_party
-        key: ${{ inputs.system }}-${{ hashFiles('cmake/Configure**.cmake') }}
+        key: ${{ inputs.system }}${{ inputs.cache-suffix }}-${{ hashFiles('cmake/Configure**.cmake') }}
     - run: |
         if [ "${{ runner.os }}" == "Windows" ]; then
           echo "ext=zip" >> $GITHUB_ENV

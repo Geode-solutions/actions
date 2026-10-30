@@ -115,9 +115,3 @@ jobs:
       light: ${{ inputs.light || github.ref_name != 'master' }}
       wheels_from_pypi: ${{ inputs.wheels_from_pypi }}
     secrets: inherit
-
-  public-release:
-    if: github.ref == 'refs/heads/master'
-    needs: [release-linux, release-windows]
-    uses: Geode-solutions/actions/.github/workflows/cpp-public-release.yml@master
-    secrets: inherit

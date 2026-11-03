@@ -31,6 +31,7 @@ jobs:
             commitlint.config.js commitlint.config.js
             .releaserc .releaserc
             .oxlintrc.json .oxlintrc.json
+            oxlint/ternary_primitive_only.mjs oxlint/ternary_primitive_only.mjs
       - name: oxfmt
         run: npx oxfmt .
       - uses: stefanzweifel/git-auto-commit-action@v7

@@ -25,10 +25,44 @@ jobs:
         with:
           github-token: ${{ steps.token.outputs.token }}
           script: |
-            github.rest.actions.createWorkflowDispatch({
-              owner: 'Geode-solutions',
-              repo: 'Versions',
-              workflow_id: 'web-merge-request.yml',
+            const owner = 'Geode-solutions'
+            const repo = 'Versions'
+            const workflow_id = 'web-merge-request.yml'
+            const branch = '${{ github.ref_name }}'
+            const dispatched_at = Date.now()
+            await github.rest.actions.createWorkflowDispatch({
+              owner,
+              repo,
+              workflow_id,
               ref: 'master',
-              inputs: { branch: '${{ github.ref_name }}' }
+              inputs: { branch }
             })
+            try {
+              // The dispatch does not return the run: find it from its run name
+              // (set from the branch input) and creation time
+              for (let attempt = 0; attempt < 12; attempt++) {
+                await new Promise((resolve) => setTimeout(resolve, 5000))
+                const { data } = await github.rest.actions.listWorkflowRuns({
+                  owner,
+                  repo,
+                  workflow_id,
+                  event: 'workflow_dispatch',
+                  per_page: 20
+                })
+                const run = data.workflow_runs.find(
+                  (run) =>
+                    run.display_title.endsWith(` - ${branch}`) &&
+                    Date.parse(run.created_at) >= dispatched_at - 10000
+                )
+                if (run) {
+                  core.info(`Merge request run: ${run.html_url}`)
+                  await core.summary
+                    .addLink(`Merge request run for ${branch}`, run.html_url)
+                    .write()
+                  return
+                }
+              }
+              core.warning(`Merge request run for ${branch} not found in ${repo}`)
+            } catch (error) {
+              core.warning(`Cannot look for the merge request run: ${error.message}`)
+            }

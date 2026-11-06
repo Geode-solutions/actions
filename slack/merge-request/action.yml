@@ -1,0 +1,133 @@
+name: "Slack merge request"
+description: "Create or edit the single Slack message listing the failed jobs of a merge request run"
+
+inputs:
+  slack-token:
+    description: "Slack bot token (chat:write and channels:history scopes)"
+    type: string
+    required: true
+  channel:
+    type: string
+    default: "C0598GTCLGH"
+  branch:
+    type: string
+    required: true
+  title:
+    description: "Kind of merge request, e.g. 'C++ merge request'"
+    type: string
+    required: true
+  current:
+    description: "Name of the calling failing job: its conclusion is not set yet in the API"
+    type: string
+    default: ""
+  final:
+    description: "'true' in the last job: rebuild the message from the final run state and remove duplicates"
+    type: string
+    default: "false"
+  token:
+    description: "GitHub token to list the run jobs"
+    type: string
+    default: ${{ github.token }}
+
+runs:
+  using: "composite"
+  steps:
+    # The message is rebuilt from the run state at each call (never appended), so concurrent jobs converge.
+    # It is found back from the run URL it contains: no message is posted until something fails.
+    - uses: actions/github-script@v8
+      env:
+        SLACK_TOKEN: ${{ inputs.slack-token }}
+        CHANNEL: ${{ inputs.channel }}
+        BRANCH: ${{ inputs.branch }}
+        TITLE: ${{ inputs.title }}
+        CURRENT: ${{ inputs.current }}
+        FINAL: ${{ inputs.final }}
+      with:
+        github-token: ${{ inputs.token }}
+        script: |
+          const { SLACK_TOKEN, CHANNEL, BRANCH, TITLE, CURRENT, FINAL } = process.env
+          const run_url = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+          // Distinguishes this message from other ones of the run, e.g. the PR validation failure
+          const marker = `${TITLE} failed`
+
+          async function slack(method, body) {
+            const response = await fetch(`https://slack.com/api/${method}`, {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${SLACK_TOKEN}` },
+              // Form encoding: read methods like conversations.history do not accept JSON bodies
+              body: new URLSearchParams(body)
+            })
+            const data = await response.json()
+            if (!data.ok) {
+              throw new Error(`Slack ${method}: ${data.error}`)
+            }
+            return data
+          }
+
+          async function failed_jobs() {
+            const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRunAttempt, {
+              ...context.repo,
+              run_id: context.runId,
+              attempt_number: Number(process.env.GITHUB_RUN_ATTEMPT),
+              per_page: 100
+            })
+            const names = jobs.filter((job) => job.conclusion === 'failure').map((job) => job.name)
+            if (CURRENT) {
+              names.push(CURRENT)
+            }
+            return [...new Set(names)].toSorted()
+          }
+
+          async function run_messages(oldest) {
+            try {
+              // History is newest first: reverse to keep the first posted message
+              const { messages } = await slack('conversations.history', {
+                channel: CHANNEL,
+                oldest,
+                limit: '200'
+              })
+              return messages
+                .filter(
+                  (message) =>
+                    message.bot_id &&
+                    message.text?.includes(marker) &&
+                    message.text.includes(run_url)
+                )
+                .toReversed()
+            } catch (error) {
+              // Missing channels:history scope: post a new message as before
+              core.warning(`Cannot look for the run Slack message: ${error.message}`)
+              return []
+            }
+          }
+
+          try {
+            const names = await failed_jobs()
+            if (names.length === 0) {
+              core.info('No failed job to report')
+              return
+            }
+            const lines = names.map((name) => `• ${name}`).join('\n')
+            const text = `:x: ${BRANCH}: ${marker} (${names.length} job${names.length > 1 ? 's' : ''})\n${lines}\n${run_url}`
+            const { data: run } = await github.rest.actions.getWorkflowRun({
+              ...context.repo,
+              run_id: context.runId
+            })
+            const oldest = String(Date.parse(run.run_started_at ?? run.created_at) / 1000)
+            const [message, ...duplicates] = await run_messages(oldest)
+            if (message) {
+              await slack('chat.update', { channel: CHANNEL, ts: message.ts, text })
+              core.info(`Slack message updated: ${message.ts}`)
+            } else {
+              const { ts } = await slack('chat.postMessage', { channel: CHANNEL, text })
+              core.info(`Slack message posted: ${ts}`)
+            }
+            if (FINAL === 'true') {
+              for (const duplicate of duplicates) {
+                await slack('chat.delete', { channel: CHANNEL, ts: duplicate.ts })
+                core.info(`Duplicate Slack message deleted: ${duplicate.ts}`)
+              }
+            }
+          } catch (error) {
+            core.warning(`Cannot notify Slack: ${error.message}`)
+          }

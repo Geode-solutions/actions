@@ -21,7 +21,7 @@ inputs:
     type: string
     default: ""
   final:
-    description: "'true' in the last job: rebuild the message from the final run state and remove duplicates"
+    description: "'true' in the last job: rebuild the existing message (never create one) from the final run state and remove duplicates"
     type: string
     default: "false"
   token:
@@ -115,6 +115,11 @@ runs:
             })
             const oldest = String(Date.parse(run.run_started_at ?? run.created_at) / 1000)
             const [message, ...duplicates] = await run_messages(oldest)
+            if (!message && FINAL === 'true') {
+              // Only failing test jobs create the message: other failures (e.g. PR validation) have their own
+              core.info('No Slack message to update')
+              return
+            }
             if (message) {
               await slack('chat.update', { channel: CHANNEL, ts: message.ts, text })
               core.info(`Slack message updated: ${message.ts}`)

@@ -98,19 +98,9 @@ jobs:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
       - name: "pip-compile"
-        run: |
-          file=bindings/python/requirements.in
-          if [ ! -f "$file" ]; then 
-            exit 0
-          fi
-          pip install pip-tools typing_extensions
-          echo $GITHUB_REF_NAME
-          if [ $GITHUB_REF_NAME == "master" ]; then
-            pip-compile -v --upgrade $file
-          else
-            pip-compile -v --pre --upgrade $file
-          fi
-          sed -i -E 's/==(.+)\.(.+)\.(.+)/==\1\.*,>=\1\.\2\.\3/' bindings/python/requirements.txt
+        uses: Geode-solutions/actions/install/cpp-pip-compile@master
+        with:
+          dependencies: ${{ steps.repos.outputs.path }}
       - name: Compile
         run: |
           mkdir -p build

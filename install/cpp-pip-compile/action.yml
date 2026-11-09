@@ -1,0 +1,67 @@
+name: "C++ pip-compile"
+description: "Compile bindings/python/requirements.txt with the internal packages pinned to the C++ releases used by the build"
+
+inputs:
+  dependencies:
+    description: "';'-separated folders of the installed C++ releases (cpp-dependencies 'path' output), named <Repo>-<version>-<system>"
+    type: string
+    required: true
+  timeout:
+    description: "Maximum time in seconds to wait for the pinned versions on PyPI"
+    type: string
+    default: "900"
+
+runs:
+  using: "composite"
+  steps:
+    - name: pip-compile
+      run: |
+        file=bindings/python/requirements.in
+        if [ ! -f "$file" ]; then
+          exit 0
+        fi
+        pip install pip-tools typing_extensions
+        # Each Python package must match the C++ release linked by the build:
+        # without a pin, a release not yet listed by PyPI makes pip silently pick an older one
+        constraints=$(mktemp)
+        IFS=';' read -ra folders <<< "$DEPENDENCIES"
+        for folder in "${folders[@]}"; do
+          folder=${folder##*[/\\]}
+          # OpenGeode-IO-8.0.0-rc.1-rhel -> OpenGeode-IO 8.0.0-rc.1
+          if [[ ! "$folder" =~ ^(.+)-([0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?)-[^-]+$ ]]; then
+            continue
+          fi
+          package=${BASH_REMATCH[1]}
+          version=${BASH_REMATCH[2]}
+          if [ "$version" == "0.0.0" ]; then
+            continue
+          fi
+          if [ "$package" == "OpenGeode" ]; then
+            package=OpenGeode-core
+          fi
+          # v1.2.3-rc.4 is published as 1.2.3rc4
+          echo "$package==$(echo "$version" | sed -E 's/-rc\.([0-9]+)$/rc\1/')" >> $constraints
+        done
+        echo "Constraints:"
+        cat $constraints
+        pre=--pre
+        if [ "$GITHUB_REF_NAME" == "master" ]; then
+          pre=
+        fi
+        # A release uploaded moments ago may not be listed by every PyPI CDN node yet
+        # (index pages are cached up to 10 min): retry with a fresh cache
+        deadline=$((SECONDS + TIMEOUT))
+        until pip-compile -v $pre --upgrade --cache-dir "$(mktemp -d)" -c $constraints $file; do
+          if [ $SECONDS -ge $deadline ]; then
+            echo "::error::pip-compile failed: the pinned versions are still not available on PyPI"
+            cat $constraints
+            exit 1
+          fi
+          echo "Pinned versions not available yet, retrying in 30s"
+          sleep 30
+        done
+        sed -i -E 's/==(.+)\.(.+)\.(.+)/==\1\.*,>=\1\.\2\.\3/' bindings/python/requirements.txt
+      shell: bash
+      env:
+        DEPENDENCIES: ${{ inputs.dependencies }}
+        TIMEOUT: ${{ inputs.timeout }}

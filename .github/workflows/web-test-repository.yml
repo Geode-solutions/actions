@@ -66,6 +66,10 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
+      - name: License
+        uses: Geode-solutions/actions/install/license@master
+        with:
+          license: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Test Python
         uses: Geode-solutions/actions/test/python@master
         with:

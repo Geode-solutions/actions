@@ -14,6 +14,8 @@ on:
         required: false
       TOKEN:
         required: true
+      GEODE_CI_LICENSE:
+        required: false
 
 jobs:
   # Built workspace (node_modules, microservices, packaged extension) shared by the test shards,
@@ -96,6 +98,10 @@ jobs:
           tar --use-compress-program "zstd -d" -xf extension-build.tar.zst
           rm extension-build.tar.zst
         shell: bash
+      - name: License
+        uses: Geode-solutions/actions/install/license@master
+        with:
+          license: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Test Extension
         uses: Geode-solutions/actions/test/extension@master
         with:

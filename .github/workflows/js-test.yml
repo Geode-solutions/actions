@@ -8,6 +8,8 @@ on:
         required: true
       SLACK_WEBHOOK_URL:
         required: true
+      GEODE_CI_LICENSE:
+        required: false
 
 concurrency:
   group: ${{ github.ref }}

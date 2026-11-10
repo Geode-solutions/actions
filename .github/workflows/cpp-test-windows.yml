@@ -32,6 +32,8 @@ on:
         required: true
       SLACK_WEBHOOK_URL:
         required: true
+      GEODE_CI_LICENSE:
+        required: false
 
 jobs:
   setup-windows-shards:
@@ -59,6 +61,10 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
+      - name: License
+        uses: Geode-solutions/actions/install/license@master
+        with:
+          license: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
@@ -146,6 +152,10 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
+      - name: License
+        uses: Geode-solutions/actions/install/license@master
+        with:
+          license: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         with:

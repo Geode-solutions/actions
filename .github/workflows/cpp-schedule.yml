@@ -22,6 +22,8 @@ on:
         required: true
       SLACK_WEBHOOK_URL:
         required: true
+      GEODE_CI_LICENSE:
+        required: false
 
 jobs:
   # Skips the tests when neither the repository nor its dependency releases changed since the

@@ -74,7 +74,7 @@ jobs:
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DINCLUDE_PYBIND11:BOOL=ON ..
           cmake --build .
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
       - name: Test
         run: |
           mkdir -p test
@@ -83,7 +83,7 @@ jobs:
           cmake --build .
           ctest --output-on-failure --stop-on-failure -j 2 -L essential
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
       - name: Notify slack
         if: failure() && github.ref == 'refs/heads/master'
         uses: 8398a7/action-slack@v3
@@ -145,7 +145,7 @@ jobs:
           cd ${{ inputs.directory}}
           ctest --output-on-failure --stop-on-failure -R -py- -j 2
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
       - name: Notify slack
         if: failure() && github.ref == 'refs/heads/master'
         uses: 8398a7/action-slack@v3
@@ -220,7 +220,7 @@ jobs:
           }
           ctest --output-on-failure --stop-on-failure -j 2 -L essential
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
       - name: Notify slack
         if: failure()
         uses: 8398a7/action-slack@v3

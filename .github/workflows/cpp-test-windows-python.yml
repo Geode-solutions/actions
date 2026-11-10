@@ -191,4 +191,4 @@ jobs:
           cmake --build . --target wheel
           cmake --build . --target test-wheel
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic

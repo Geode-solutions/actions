@@ -67,7 +67,7 @@ jobs:
           cd ${{ inputs.directory }}
           ctest --output-on-failure --stop-on-failure --no-tests=error -j -L local
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
 
   notify:
     runs-on: ubuntu-latest

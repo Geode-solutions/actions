@@ -115,7 +115,7 @@ jobs:
           cmake --build . -t essential
           cmake --build . -t install
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
       - name: Compile tests
         run: |
           rm -rf $GITHUB_WORKSPACE/build/${{ inputs.directory }}/bin
@@ -130,7 +130,7 @@ jobs:
             exit 1
           fi
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
       - name: Package tests
         run: |
           tar --exclude='*.o' --exclude='CMakeFiles' -I 'zstd -T0' -cf tests.tar.zst test build/${{ inputs.directory }}/install
@@ -206,4 +206,4 @@ jobs:
           shards: ${{ inputs.shards }}
           directory: test
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic

@@ -119,7 +119,7 @@ jobs:
             exit 1
           }
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
       - name: Upload tests
         uses: actions/upload-artifact@v7
         with:
@@ -176,4 +176,4 @@ jobs:
           shards: ${{ inputs.shards }}
           directory: build/${{ inputs.directory }}
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic

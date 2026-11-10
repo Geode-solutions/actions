@@ -9,9 +9,6 @@ on:
         default: "."
       repos:
         type: string
-      light:
-        type: boolean
-        default: false
       type:
         type: string
         default: "Debug"
@@ -29,6 +26,10 @@ on:
         description: "release receiving the packages of the build (none when empty)"
         type: string
         default: ""
+      test_matrix:
+        description: "test matrix (shards), built by cpp-test-repository.yml"
+        type: string
+        required: true
     secrets:
       APP_PRIVATE_KEY:
         required: false
@@ -38,16 +39,6 @@ on:
         required: true
 
 jobs:
-  setup-windows-shards:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - name: Set shards matrix
-        id: set-matrix
-        run: |
-          echo "matrix=$(jq -cn --argjson shards ${{ inputs.shards }} '{shard: [range(1; $shards + 1)]}')" >> $GITHUB_OUTPUT
-
   build-windows:
     runs-on: windows-2022
     steps:
@@ -135,7 +126,19 @@ jobs:
           Remove-Item -Recurse -Force _CPack_Packages
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      # A single shard runs in the build job: a test job would repeat the checkout and dependencies
+      # setup and transfer the tests as an artifact
+      - name: Test
+        if: ${{ inputs.shards == 1 }}
+        uses: Geode-solutions/actions/test/ctest-shard@master
+        with:
+          shard: 1
+          shards: 1
+          directory: build/${{ inputs.directory }}
+        env:
+          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
       - name: Upload tests
+        if: ${{ inputs.shards > 1 }}
         uses: actions/upload-artifact@v7
         with:
           name: cpp-tests-win64
@@ -150,10 +153,11 @@ jobs:
           overwrite: true
 
   test-windows:
+    if: ${{ inputs.shards > 1 }}
     runs-on: windows-2022
-    needs: [setup-windows-shards, build-windows]
+    needs: build-windows
     strategy:
-      matrix: ${{ fromJson(needs.setup-windows-shards.outputs.matrix) }}
+      matrix: ${{ fromJson(inputs.test_matrix) }}
     steps:
       - name: Token
         uses: Geode-solutions/actions/install/token@master

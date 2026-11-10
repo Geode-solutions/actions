@@ -9,9 +9,6 @@ on:
         default: "."
       repos:
         type: string
-      light:
-        type: boolean
-        default: false
       type:
         type: string
         default: "Debug"
@@ -29,6 +26,14 @@ on:
         description: "release receiving the packages of the build (none when empty)"
         type: string
         default: ""
+      matrix:
+        description: "build matrix (Linux systems), built by cpp-test-repository.yml"
+        type: string
+        required: true
+      test_matrix:
+        description: "test matrix (systems x shards), built by cpp-test-repository.yml"
+        type: string
+        required: true
     secrets:
       APP_PRIVATE_KEY:
         required: false
@@ -38,32 +43,11 @@ on:
         required: true
 
 jobs:
-  setup-linux-systems:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-      test_matrix: ${{ steps.set-matrix.outputs.test_matrix }}
-    steps:
-      - name: Set matrix based on inputs.light
-        id: set-matrix
-        run: |
-          if [ "${{ inputs.light }}" == "true" ]; then
-            # Exclude rhel when light is true
-            systems='[{"system":"ubuntu","cc":"/usr/bin/clang","cxx":"/usr/bin/clang++"}]'
-          else
-            # Include both rhel and ubuntu
-            systems='[{"system":"rhel","cc":"/opt/rh/gcc-toolset-14/root/usr/bin/gcc","cxx":"/opt/rh/gcc-toolset-14/root/usr/bin/g++"},{"system":"ubuntu","cc":"/usr/bin/clang","cxx":"/usr/bin/clang++"}]'
-          fi
-          echo "matrix={\"include\":$systems}" >> $GITHUB_OUTPUT
-          test_matrix=$(echo "$systems" | jq -c --argjson shards ${{ inputs.shards }} '{include: [.[] as $s | range(1; $shards + 1) | $s + {shard: .}]}')
-          echo "test_matrix=$test_matrix" >> $GITHUB_OUTPUT
-
   build-linux:
     runs-on: ubuntu-latest
-    needs: setup-linux-systems
     container: ghcr.io/geode-solutions/${{ matrix.system }}:master
     strategy:
-      matrix: ${{ fromJson(needs.setup-linux-systems.outputs.matrix) }}
+      matrix: ${{ fromJson(inputs.matrix) }}
     env:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
@@ -148,11 +132,24 @@ jobs:
           fi
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+      # A single shard runs in the build job: a test job would repeat the container, checkout and
+      # dependencies setup and transfer the tests as an artifact
+      - name: Test
+        if: ${{ inputs.shards == 1 }}
+        uses: Geode-solutions/actions/test/ctest-shard@master
+        with:
+          shard: 1
+          shards: 1
+          directory: test
+        env:
+          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
       - name: Package tests
+        if: ${{ inputs.shards > 1 }}
         run: |
           tar --exclude='*.o' --exclude='CMakeFiles' -I 'zstd -T0' -cf tests.tar.zst test build/${{ inputs.directory }}/install
           ls -lh tests.tar.zst
       - name: Upload tests
+        if: ${{ inputs.shards > 1 }}
         uses: actions/upload-artifact@v7
         with:
           name: cpp-tests-${{ matrix.system }}
@@ -162,11 +159,12 @@ jobs:
           overwrite: true
 
   test-linux:
+    if: ${{ inputs.shards > 1 }}
     runs-on: ubuntu-latest
-    needs: [setup-linux-systems, build-linux]
+    needs: build-linux
     container: ghcr.io/geode-solutions/${{ matrix.system }}:master
     strategy:
-      matrix: ${{ fromJson(needs.setup-linux-systems.outputs.test_matrix) }}
+      matrix: ${{ fromJson(inputs.test_matrix) }}
     env:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}

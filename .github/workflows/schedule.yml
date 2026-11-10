@@ -49,10 +49,6 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
-      - name: License
-        uses: Geode-solutions/actions/install/license@master
-        with:
-          license: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
@@ -74,7 +70,7 @@ jobs:
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DINCLUDE_PYBIND11:BOOL=ON ..
           cmake --build .
         env:
-          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Test
         run: |
           mkdir -p test
@@ -83,7 +79,7 @@ jobs:
           cmake --build .
           ctest --output-on-failure --stop-on-failure -j 2 -L essential
         env:
-          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Notify slack
         if: failure() && github.ref == 'refs/heads/master'
         uses: 8398a7/action-slack@v3
@@ -113,10 +109,6 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
-      - name: License
-        uses: Geode-solutions/actions/install/license@master
-        with:
-          license: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
@@ -145,7 +137,7 @@ jobs:
           cd ${{ inputs.directory}}
           ctest --output-on-failure --stop-on-failure -R -py- -j 2
         env:
-          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Notify slack
         if: failure() && github.ref == 'refs/heads/master'
         uses: 8398a7/action-slack@v3
@@ -170,10 +162,6 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
-      - name: License
-        uses: Geode-solutions/actions/install/license@master
-        with:
-          license: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
@@ -220,7 +208,7 @@ jobs:
           }
           ctest --output-on-failure --stop-on-failure -j 2 -L essential
         env:
-          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Notify slack
         if: failure()
         uses: 8398a7/action-slack@v3

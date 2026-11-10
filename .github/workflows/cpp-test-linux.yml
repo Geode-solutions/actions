@@ -87,10 +87,6 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
-      - name: License
-        uses: Geode-solutions/actions/install/license@master
-        with:
-          license: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
@@ -115,7 +111,7 @@ jobs:
           cmake --build . -t essential
           cmake --build . -t install
         env:
-          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Compile tests
         run: |
           rm -rf $GITHUB_WORKSPACE/build/${{ inputs.directory }}/bin
@@ -130,7 +126,7 @@ jobs:
             exit 1
           fi
         env:
-          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Package tests
         run: |
           tar --exclude='*.o' --exclude='CMakeFiles' -I 'zstd -T0' -cf tests.tar.zst test build/${{ inputs.directory }}/install
@@ -174,10 +170,6 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
-      - name: License
-        uses: Geode-solutions/actions/install/license@master
-        with:
-          license: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
@@ -206,4 +198,4 @@ jobs:
           shards: ${{ inputs.shards }}
           directory: test
         env:
-          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}

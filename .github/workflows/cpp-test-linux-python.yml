@@ -62,10 +62,6 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
-      - name: License
-        uses: Geode-solutions/actions/install/license@master
-        with:
-          license: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
@@ -129,7 +125,7 @@ jobs:
           ctest --output-on-failure --stop-on-failure -R py -j 2
           echo "LD_LIBRARY_PATH=" >> $GITHUB_ENV
         env:
-          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Wheels from Github in venv
         if: ${{ !inputs.wheels_from_pypi }}
         run: |

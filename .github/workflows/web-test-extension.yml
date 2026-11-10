@@ -98,10 +98,6 @@ jobs:
           tar --use-compress-program "zstd -d" -xf extension-build.tar.zst
           rm extension-build.tar.zst
         shell: bash
-      - name: License
-        uses: Geode-solutions/actions/install/license@master
-        with:
-          license: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Test Extension
         uses: Geode-solutions/actions/test/extension@master
         with:
@@ -112,3 +108,4 @@ jobs:
           shard_index: ${{ matrix.shard }}
           shard_total: 3
           prebuilt: true
+          license: ${{ secrets.GEODE_CI_LICENSE }}

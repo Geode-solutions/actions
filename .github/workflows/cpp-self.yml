@@ -41,10 +41,6 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
-      - name: License
-        uses: Geode-solutions/actions/install/license@master
-        with:
-          license: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
@@ -67,7 +63,7 @@ jobs:
           cd ${{ inputs.directory }}
           ctest --output-on-failure --stop-on-failure --no-tests=error -j -L local
         env:
-          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
 
   notify:
     runs-on: ubuntu-latest

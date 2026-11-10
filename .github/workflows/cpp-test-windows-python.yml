@@ -60,10 +60,6 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
-      - name: License
-        uses: Geode-solutions/actions/install/license@master
-        with:
-          license: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v6
         id: python
@@ -191,4 +187,4 @@ jobs:
           cmake --build . --target wheel
           cmake --build . --target test-wheel
         env:
-          GEODE_LICENSE_FILE: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}

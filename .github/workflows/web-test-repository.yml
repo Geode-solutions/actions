@@ -43,6 +43,8 @@ on:
         required: true
       SLACK_WEBHOOK_URL:
         required: true
+      GEODE_CI_LICENSE:
+        required: false
 
 jobs:
   test-python:
@@ -229,4 +231,4 @@ jobs:
         id: docker
         with:
           tag: next
-          license_token: ${{ steps.token.outputs.token }}
+          license: ${{ secrets.GEODE_CI_LICENSE }}

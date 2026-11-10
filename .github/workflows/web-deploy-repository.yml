@@ -51,6 +51,8 @@ on:
         required: true
       PYPI_TOKEN:
         required: true
+      GEODE_CI_LICENSE:
+        required: false
 
 jobs:
   release-python:
@@ -404,7 +406,7 @@ jobs:
       tag: ${{ github.ref_name || 'test' }}
     secrets: 
       TOKEN: ${{secrets.TOKEN}}
-      LICENSE_TOKEN: ${{secrets.TOKEN}}
+      GEODE_CI_LICENSE: ${{secrets.GEODE_CI_LICENSE}}
       APP_PRIVATE_KEY: ${{secrets.APP_PRIVATE_KEY}}
       GOOGLE_CLOUD_KEY: ${{secrets.GOOGLE_CLOUD_KEY}}
       GOOGLE_CLOUD_PROJECT_ID: ${{secrets.GOOGLE_CLOUD_PROJECT_ID}}

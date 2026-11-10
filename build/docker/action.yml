@@ -5,7 +5,8 @@ inputs:
   tag:
     type: string
     required: true
-  license_token:
+  license:
+    description: "Content of the Geode license file, given to the build as the BuildKit secret geode_license"
     type: string
 outputs:
   image:
@@ -23,9 +24,11 @@ runs:
       shell: bash
     - name: Build Docker image
       run: |
-        args=(-t ${{ steps.image.outputs.IMAGE }} --build-arg BRANCH=${{ inputs.tag }})
-        if [ "${{ inputs.license_token }}" != '' ]; then
-          args+=(--build-arg TOKEN=${{ inputs.license_token }})
+        args=(-t "$IMAGE" --build-arg BRANCH="$TAG")
+        if [ -n "$LICENSE" ]; then
+          license_file="$RUNNER_TEMP/geode_license"
+          printf '%s\n' "$LICENSE" > "$license_file"
+          args+=(--secret id=geode_license,src="$license_file")
         fi
         # A dependency released moments ago may not be served by every PyPI CDN node yet
         # (index pages are cached up to 10 min): retry only on that error
@@ -42,3 +45,8 @@ runs:
           sleep 60
         done
       shell: bash
+      env:
+        DOCKER_BUILDKIT: 1
+        IMAGE: ${{ steps.image.outputs.IMAGE }}
+        TAG: ${{ inputs.tag }}
+        LICENSE: ${{ inputs.license }}

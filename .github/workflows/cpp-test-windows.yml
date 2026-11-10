@@ -22,6 +22,10 @@ on:
         description: "selection output of get-release, skips the release lookup"
         type: string
         default: ""
+      package:
+        description: "release receiving the packages of the build (none when empty)"
+        type: string
+        default: ""
       test_matrix:
         description: "test matrix (shards), built by cpp-test-repository.yml"
         type: string
@@ -76,7 +80,7 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           if(!(test-path build)) { mkdir build }
           cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DCPACK_PACKAGE_VERSION:STRING=0.0.0 -DCPACK_SYSTEM_NAME:STRING=win64 ..
           cmake --build . -t third_party
           cd ${{ inputs.directory }}
           $paths = "${{ steps.libraries.outputs.bin }}"
@@ -105,6 +109,23 @@ jobs:
           }
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+      # Same private package as cpp-deploy-windows.yml (unsigned), from this build
+      - name: Package
+        if: ${{ inputs.package != '' }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+          cd build/${{ inputs.directory }}
+          cpack -D CPACK_COMPONENTS_ALL="public;private"
+          Get-ChildItem *.zip | Foreach-Object {
+            $private = $_.Name.Replace(".zip", "-private.zip")
+            Rename-Item $_.FullName $private
+            gh release upload --clobber --repo ${env:GITHUB_REPOSITORY} ${{ inputs.package }} $private
+            Remove-Item $private
+          }
+          Remove-Item -Recurse -Force _CPack_Packages
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       # A single shard runs in the build job: a test job would repeat the checkout and dependencies
       # setup and transfer the tests as an artifact
       - name: Test

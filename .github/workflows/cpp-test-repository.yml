@@ -27,6 +27,10 @@ on:
       shards:
         type: number
         default: 2
+      package:
+        description: "release receiving the packages of the builds (none when empty)"
+        type: string
+        default: ""
     secrets:
       APP_PRIVATE_KEY:
         required: false
@@ -85,6 +89,7 @@ jobs:
       releases: ${{ needs.releases.outputs.selection }}
       type: ${{ inputs.type }}
       branch: ${{ inputs.branch }}
+      package: ${{ inputs.package }}
       shards: ${{ inputs.shards }}
       matrix: ${{ needs.releases.outputs.linux }}
       test_matrix: ${{ needs.releases.outputs.linux_tests }}
@@ -102,6 +107,7 @@ jobs:
       light: ${{ inputs.light }}
       type: ${{ inputs.type }}
       branch: ${{ inputs.branch }}
+      package: ${{ inputs.package }}
       wheels_from_pypi: ${{ inputs.wheels_from_pypi }}
     secrets: inherit
 
@@ -115,6 +121,7 @@ jobs:
       releases: ${{ needs.releases.outputs.selection }}
       type: ${{ inputs.type }}
       branch: ${{ inputs.branch }}
+      package: ${{ inputs.package }}
       shards: ${{ inputs.shards }}
       test_matrix: ${{ needs.releases.outputs.windows_tests }}
     secrets: inherit
@@ -131,5 +138,6 @@ jobs:
       light: ${{ inputs.light }}
       type: ${{ inputs.type }}
       branch: ${{ inputs.branch }}
+      package: ${{ inputs.package }}
       wheels_from_pypi: ${{ inputs.wheels_from_pypi }}
     secrets: inherit

@@ -1,17 +1,21 @@
 name: "Install License"
 
 inputs:
-  token:
+  license:
+    description: "Content of the Geode license file"
     type: string
     required: true
 
 runs:
   using: "composite"
   steps:
-    - name: Get license
+    - name: Write license
       run: |
-        gh auth setup-git
-        gh api https://api.github.com/repos/Geode-solutions/open-license-manager/contents/projects/geode/geode.lic -H "Accept: application/vnd.github.raw" > geode.lic
+        if [ -z "$LICENSE" ]; then
+          echo "::error::The license input is empty: is the GEODE_CI_LICENSE secret defined and passed to this workflow?"
+          exit 1
+        fi
+        printf '%s\n' "$LICENSE" > "$GITHUB_WORKSPACE/geode.lic"
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ inputs.token }}
+        LICENSE: ${{ inputs.license }}

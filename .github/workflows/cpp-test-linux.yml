@@ -25,6 +25,10 @@ on:
         description: "selection output of get-release, skips the release lookup"
         type: string
         default: ""
+      package:
+        description: "release receiving the packages of the build (none when empty)"
+        type: string
+        default: ""
     secrets:
       APP_PRIVATE_KEY:
         required: false
@@ -103,13 +107,32 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_INSTALL_PREFIX:PATH="$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install" ..
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_INSTALL_PREFIX:PATH="$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install" -DCPACK_PACKAGE_VERSION:STRING=0.0.0 -DCPACK_SYSTEM_NAME:STRING=${{ matrix.system }} ..
           cmake --build . -t third_party
           cd ${{ inputs.directory }}
           cmake --build . -t essential
           cmake --build . -t install
         env:
           GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+      # Same private package as cpp-deploy-linux.yml, from this build
+      - name: Package
+        if: ${{ inputs.package != '' }}
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          cd build/${{ inputs.directory }}
+          cpack -D CPACK_COMPONENTS_ALL="public;private" .
+          for file in *.tar.gz
+          do
+            private=$(echo $file | sed 's/\.tar\.gz/\-private\.tar\.gz/g')
+            mv $file $private
+            counter=0
+            for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY ${{ inputs.package }} $private && break || counter=$[$counter +1] && sleep 30; done
+            if [ "$counter" -eq "5" ]; then exit 1; fi
+            rm $private
+          done
+          rm -rf _CPack_Packages
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Compile tests
         run: |
           rm -rf $GITHUB_WORKSPACE/build/${{ inputs.directory }}/bin

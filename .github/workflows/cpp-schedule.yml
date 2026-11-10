@@ -85,6 +85,8 @@ jobs:
       repos: ${{ inputs.repos }}
       light: true
       type: "Release"
+      # Nobody waits on the nightly tests: one build and test job per system, no shard overhead
+      shards: 1
       branch: ${{ inputs.branch }}
       wheels_from_pypi: true
       python: ${{ inputs.python }}

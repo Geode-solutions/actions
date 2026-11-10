@@ -36,12 +36,29 @@ on:
         required: true
 
 jobs:
-  # Release lookup done once for all jobs, instead of once per job and per dependency
+  # Release lookup done once for all jobs, instead of once per job and per dependency.
+  # Also builds the job matrices: a dedicated job would bill one more minute per run
   releases:
     runs-on: ubuntu-latest
     outputs:
       selection: ${{ steps.releases.outputs.selection }}
+      linux: ${{ steps.matrices.outputs.linux }}
+      linux_tests: ${{ steps.matrices.outputs.linux_tests }}
+      windows_tests: ${{ steps.matrices.outputs.windows_tests }}
     steps:
+      - name: Matrices
+        id: matrices
+        run: |
+          if [ "${{ inputs.light }}" == "true" ]; then
+            # Exclude rhel when light is true
+            systems='[{"system":"ubuntu","cc":"/usr/bin/clang","cxx":"/usr/bin/clang++"}]'
+          else
+            # Include both rhel and ubuntu
+            systems='[{"system":"rhel","cc":"/opt/rh/gcc-toolset-14/root/usr/bin/gcc","cxx":"/opt/rh/gcc-toolset-14/root/usr/bin/g++"},{"system":"ubuntu","cc":"/usr/bin/clang","cxx":"/usr/bin/clang++"}]'
+          fi
+          echo "linux={\"include\":$systems}" >> $GITHUB_OUTPUT
+          echo "linux_tests=$(echo "$systems" | jq -c --argjson shards ${{ inputs.shards }} '{include: [.[] as $s | range(1; $shards + 1) | $s + {shard: .}]}')" >> $GITHUB_OUTPUT
+          echo "windows_tests=$(jq -cn --argjson shards ${{ inputs.shards }} '{shard: [range(1; $shards + 1)]}')" >> $GITHUB_OUTPUT
       - name: Token
         uses: Geode-solutions/actions/install/token@master
         id: token
@@ -66,10 +83,11 @@ jobs:
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
       releases: ${{ needs.releases.outputs.selection }}
-      light: ${{ inputs.light }}
       type: ${{ inputs.type }}
       branch: ${{ inputs.branch }}
       shards: ${{ inputs.shards }}
+      matrix: ${{ needs.releases.outputs.linux }}
+      test_matrix: ${{ needs.releases.outputs.linux_tests }}
     secrets: inherit
 
   test-linux-python:
@@ -95,10 +113,10 @@ jobs:
       directory: ${{ inputs.directory }}
       repos: ${{ inputs.repos }}
       releases: ${{ needs.releases.outputs.selection }}
-      light: ${{ inputs.light }}
       type: ${{ inputs.type }}
       branch: ${{ inputs.branch }}
       shards: ${{ inputs.shards }}
+      test_matrix: ${{ needs.releases.outputs.windows_tests }}
     secrets: inherit
 
   test-windows-python:

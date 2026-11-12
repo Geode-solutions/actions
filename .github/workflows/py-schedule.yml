@@ -38,7 +38,7 @@ jobs:
     secrets: inherit
 
   notify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ${{ always() && needs.test-repository.result == 'failure' }}
     needs: test-repository
     steps:

@@ -45,7 +45,7 @@ jobs:
   # Release lookup done once for all jobs, instead of once per job and per dependency.
   # Also builds the job matrices: a dedicated job would bill one more minute per run
   releases:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       selection: ${{ steps.releases.outputs.selection }}
       linux: ${{ steps.matrices.outputs.linux }}

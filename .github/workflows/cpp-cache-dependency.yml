@@ -36,7 +36,7 @@ on:
 
 jobs:
   linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ghcr.io/geode-solutions/${{ matrix.system }}:master
     outputs:
       key: ${{ steps.info.outputs.key }}

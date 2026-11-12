@@ -66,7 +66,7 @@ jobs:
           GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
 
   notify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ${{ always() && needs.test-repository.result == 'failure' }}
     needs: test-repository
     steps:

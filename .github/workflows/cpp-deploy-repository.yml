@@ -40,7 +40,7 @@ on:
 jobs:
   # Release lookup done once for all jobs, instead of once per job and per dependency
   releases:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       selection: ${{ steps.releases.outputs.selection }}
     steps:

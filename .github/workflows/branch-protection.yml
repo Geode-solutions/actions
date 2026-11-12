@@ -10,7 +10,7 @@ on:
 
 jobs:
   check_branch:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check branch
         if: github.head_ref != inputs.branch_from && github.base_ref == inputs.branch_to

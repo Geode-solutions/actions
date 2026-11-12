@@ -22,7 +22,7 @@ on:
 
 jobs:
   semantic-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       new_release: ${{ steps.semantic.outputs.new_release_published }}
       new_version: ${{ steps.semantic.outputs.new_release_version }}

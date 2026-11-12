@@ -39,6 +39,10 @@ on:
       GEODE_CI_LICENSE:
         required: false
 
+# Optimized test builds keeping assertions (NDEBUG undefined), see OpenGeode cmake/CppTargets.cmake
+env:
+  GEODE_CI_DEBUG_FLAGS: "-O2 -D_GLIBCXX_ASSERTIONS"
+
 jobs:
   linux-python:
     runs-on: ubuntu-latest

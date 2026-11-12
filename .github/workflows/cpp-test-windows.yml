@@ -86,7 +86,7 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           if(!(test-path build)) { mkdir build }
           cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DCPACK_PACKAGE_VERSION:STRING=0.0.0 -DCPACK_SYSTEM_NAME:STRING=win64 ..
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=ON -DINCLUDE_PYBIND11:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DCPACK_PACKAGE_VERSION:STRING=0.0.0 -DCPACK_SYSTEM_NAME:STRING=win64 ..
           cmake --build . -t third_party
           cd ${{ inputs.directory }}
           $paths = "${{ steps.libraries.outputs.bin }}"

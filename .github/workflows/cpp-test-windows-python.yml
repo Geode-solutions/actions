@@ -36,6 +36,8 @@ on:
         required: true
       SLACK_WEBHOOK_URL:
         required: true
+      GEODE_CI_LICENSE:
+        required: false
 
 jobs:
   windows-python:
@@ -189,7 +191,7 @@ jobs:
           cmake --build . --target wheel
           cmake --build . --target test-wheel
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
       # Same wheel as cpp-deploy-windows-python.yml, from this build: downstream python tests install it
       - name: Package
         if: ${{ inputs.package != '' }}

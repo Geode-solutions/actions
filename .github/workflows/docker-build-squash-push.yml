@@ -12,7 +12,7 @@ on:
         required: false
       TOKEN:
         required: true
-      LICENSE_TOKEN:
+      GEODE_CI_LICENSE:
         required: false
       GOOGLE_CLOUD_KEY:
         required: false
@@ -52,7 +52,7 @@ jobs:
         id: docker
         with:
           tag: ${{ inputs.tag }}
-          license_token: ${{ secrets.LICENSE_TOKEN }}
+          license: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Push Docker image to ghcr.io
         run: docker push ${{ steps.docker.outputs.image }}
       - name: Tag and push to Google Artifact Registry

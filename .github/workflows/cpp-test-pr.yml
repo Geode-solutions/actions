@@ -17,6 +17,8 @@ on:
         required: false
       TOKEN:
         required: true
+      GEODE_CI_LICENSE:
+        required: false
 
 concurrency:
   group: ${{ github.ref }}

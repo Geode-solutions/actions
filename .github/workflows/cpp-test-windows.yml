@@ -37,6 +37,8 @@ on:
         required: true
       SLACK_WEBHOOK_URL:
         required: true
+      GEODE_CI_LICENSE:
+        required: false
 
 jobs:
   build-windows:
@@ -108,7 +110,7 @@ jobs:
             exit 1
           }
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
       # Same private package as cpp-deploy-windows.yml (unsigned), from this build
       - name: Package
         if: ${{ inputs.package != '' }}
@@ -136,7 +138,7 @@ jobs:
           shards: 1
           directory: build/${{ inputs.directory }}
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Upload tests
         if: ${{ inputs.shards > 1 }}
         uses: actions/upload-artifact@v7
@@ -191,4 +193,4 @@ jobs:
           shards: ${{ inputs.shards }}
           directory: build/${{ inputs.directory }}
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}

@@ -41,6 +41,8 @@ on:
         required: true
       SLACK_WEBHOOK_URL:
         required: true
+      GEODE_CI_LICENSE:
+        required: false
 
 jobs:
   build-linux:
@@ -97,7 +99,7 @@ jobs:
           cmake --build . -t essential
           cmake --build . -t install
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
       # Same private package as cpp-deploy-linux.yml, from this build
       - name: Package
         if: ${{ inputs.package != '' }}
@@ -131,7 +133,7 @@ jobs:
             exit 1
           fi
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
       # A single shard runs in the build job: a test job would repeat the container, checkout and
       # dependencies setup and transfer the tests as an artifact
       - name: Test
@@ -142,7 +144,7 @@ jobs:
           shards: 1
           directory: test
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
       - name: Package tests
         if: ${{ inputs.shards > 1 }}
         run: |
@@ -217,4 +219,4 @@ jobs:
           shards: ${{ inputs.shards }}
           directory: test
         env:
-          GEODE_LICENSE_LOCATION: ${{ github.workspace }}/geode.lic
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}

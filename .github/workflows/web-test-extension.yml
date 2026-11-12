@@ -14,6 +14,8 @@ on:
         required: false
       TOKEN:
         required: true
+      GEODE_CI_LICENSE:
+        required: false
 
 jobs:
   # Built workspace (node_modules, microservices, packaged extension) shared by the test shards,
@@ -106,3 +108,4 @@ jobs:
           shard_index: ${{ matrix.shard }}
           shard_total: 3
           prebuilt: true
+          license: ${{ secrets.GEODE_CI_LICENSE }}

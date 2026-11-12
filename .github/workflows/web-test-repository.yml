@@ -43,6 +43,8 @@ on:
         required: true
       SLACK_WEBHOOK_URL:
         required: true
+      GEODE_CI_LICENSE:
+        required: false
 
 jobs:
   test-python:
@@ -71,6 +73,7 @@ jobs:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
           use_registry: ${{ inputs.use_registry }}
+          license: ${{ secrets.GEODE_CI_LICENSE }}
 
   test-pyinstaller:
     if: inputs.pyinstaller == 'true'
@@ -229,4 +232,4 @@ jobs:
         id: docker
         with:
           tag: next
-          license_token: ${{ steps.token.outputs.token }}
+          license: ${{ secrets.GEODE_CI_LICENSE }}

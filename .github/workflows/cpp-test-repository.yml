@@ -38,6 +38,8 @@ on:
         required: true
       SLACK_WEBHOOK_URL:
         required: true
+      GEODE_CI_LICENSE:
+        required: false
 
 jobs:
   # Release lookup done once for all jobs, instead of once per job and per dependency.

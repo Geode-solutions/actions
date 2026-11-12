@@ -233,3 +233,4 @@ jobs:
         with:
           tag: next
           license: ${{ secrets.GEODE_CI_LICENSE }}
+          token: ${{ steps.token.outputs.token }}

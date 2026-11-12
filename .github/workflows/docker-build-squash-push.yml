@@ -53,6 +53,7 @@ jobs:
         with:
           tag: ${{ inputs.tag }}
           license: ${{ secrets.GEODE_CI_LICENSE }}
+          token: ${{ secrets.TOKEN }}
       - name: Push Docker image to ghcr.io
         run: docker push ${{ steps.docker.outputs.image }}
       - name: Tag and push to Google Artifact Registry

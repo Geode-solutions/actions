@@ -97,7 +97,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_INSTALL_PREFIX:PATH="$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install" -DCPACK_PACKAGE_VERSION:STRING=0.0.0 -DCPACK_SYSTEM_NAME:STRING=${{ matrix.system }} ..
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=ON -DINCLUDE_PYBIND11:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DCMAKE_INSTALL_PREFIX:PATH="$GITHUB_WORKSPACE/build/${{ inputs.directory }}/install" -DCPACK_PACKAGE_VERSION:STRING=0.0.0 -DCPACK_SYSTEM_NAME:STRING=${{ matrix.system }} ..
           cmake --build . -t third_party
           cd ${{ inputs.directory }}
           cmake --build . -t essential

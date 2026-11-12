@@ -25,6 +25,10 @@ on:
         description: "selection output of get-release, skips the release lookup"
         type: string
         default: ""
+      package:
+        description: "release receiving the packages of the build (none when empty)"
+        type: string
+        default: ""
     secrets:
       APP_PRIVATE_KEY:
         required: false
@@ -118,7 +122,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} ..
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} -DCPACK_PACKAGE_VERSION:STRING=0.0.0 -DCPACK_SYSTEM_NAME:STRING=rhel ${{ inputs.package != '' && '-DWHEEL_VERSION:STRING=0.0.0' || '' }} ..
           cmake --build .
           cd ${{ inputs.directory }}
           echo "Python testing"
@@ -158,3 +162,26 @@ jobs:
           cd build/${{ inputs.directory }}
           cmake --build . --target wheel
           cmake --build . --target test-wheel
+      # Same rhel private package and wheel as cpp-deploy-linux.yml and cpp-deploy-linux-python.yml,
+      # from this build: downstream python tests install them
+      - name: Package
+        if: ${{ inputs.package != '' }}
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          cd build/${{ inputs.directory }}
+          cpack -D CPACK_COMPONENTS_ALL="public;private" .
+          for file in *.tar.gz
+          do
+            mv $file $(echo $file | sed 's/\.tar\.gz/\-private\.tar\.gz/g')
+          done
+          rm -rf _CPack_Packages
+          (cd wheel/dist && rename linux manylinux_2_28 *.whl)
+          for file in *-private.tar.gz wheel/dist/*.whl
+          do
+            counter=0
+            for i in 1 2 3 4 5; do gh release upload --clobber --repo $GITHUB_REPOSITORY ${{ inputs.package }} $file && break || counter=$[$counter +1] && sleep 30; done
+            if [ "$counter" -eq "5" ]; then exit 1; fi
+          done
+          rm *-private.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

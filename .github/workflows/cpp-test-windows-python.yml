@@ -25,6 +25,10 @@ on:
         description: "selection output of get-release, skips the release lookup"
         type: string
         default: ""
+      package:
+        description: "release receiving the packages of the build (none when empty)"
+        type: string
+        default: ""
     secrets:
       APP_PRIVATE_KEY:
         required: false
@@ -133,7 +137,7 @@ jobs:
             mkdir build
           }
           cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} ..
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} ${{ inputs.package != '' && '-DWHEEL_VERSION:STRING=0.0.0' || '' }} ..
           cmake --build .
           cd ${{ inputs.directory }}
           $paths = "${{ steps.libraries.outputs.bin }}"
@@ -188,3 +192,12 @@ jobs:
           cmake --build . --target test-wheel
         env:
           GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
+      # Same wheel as cpp-deploy-windows-python.yml, from this build: downstream python tests install it
+      - name: Package
+        if: ${{ inputs.package != '' }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+          Get-ChildItem -Path "build/${{ inputs.directory }}/wheel/dist" -Filter *.whl | Foreach-Object { gh release upload --clobber --repo ${env:GITHUB_REPOSITORY} ${{ inputs.package }} $_.FullName }
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

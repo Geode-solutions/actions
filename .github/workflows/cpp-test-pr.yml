@@ -76,8 +76,14 @@ jobs:
           no-lgtm: false
           database: build/${{ inputs.directory }}
 
-  test-repository:
+  # Prerelease "<branch>" receiving the packages of the Debug builds below: downstream PRs on the
+  # same branch and the Versions branch check (both building Debug tests) install them
+  release:
     needs: prepare
+    uses: Geode-solutions/actions/.github/workflows/dev-release.yml@master
+
+  test-repository:
+    needs: [prepare, release]
     uses: Geode-solutions/actions/.github/workflows/cpp-test-repository.yml@master
     with:
       name: ${{ inputs.name }}
@@ -86,6 +92,7 @@ jobs:
       light: true
       branch: ${{ github.event.pull_request.head.ref }}
       python: ${{ inputs.python }}
+      package: ${{ github.head_ref }}-tag
     secrets: inherit
 
   semantic-commit:
@@ -93,29 +100,10 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/semantic-commit.yml@master
     secrets: inherit
 
-  # The Release build does not wait for the Debug tests: both run concurrently
-  release:
-    needs: semantic-commit
-    uses: Geode-solutions/actions/.github/workflows/dev-release.yml@master
-
-  deploy:
-    needs: release
-    uses: Geode-solutions/actions/.github/workflows/cpp-deploy-repository.yml@master
-    with:
-      name: ${{ inputs.name }}
-      directory: ${{ inputs.directory }}
-      repos: ${{ inputs.repos }}
-      version: "0.0.0"
-      release: ${{ github.head_ref }}-tag
-      upload-pypi: false
-      light: true
-      python: ${{ inputs.python }}
-    secrets: inherit
-
-  # Last job, once tests and deploy succeeded. Its job ids keep the check name required by the
-  # repositories branch protection: "test / deploy-repository / notify / notify"
+  # Last job, once tests, packages and commit checks succeeded. Its job ids keep the check name
+  # required by the repositories branch protection: "test / deploy-repository / notify / notify"
   deploy-repository:
-    needs: [test-repository, deploy]
+    needs: [test-repository, semantic-commit]
     if: ${{ !failure() && !cancelled() }}
     uses: Geode-solutions/actions/.github/workflows/cpp-test-pr-notify.yml@master
     secrets: inherit

@@ -27,7 +27,8 @@ on:
 
 jobs:
   # Skips the tests when neither the repository nor its dependency releases changed since the
-  # last green run. Every Sunday and every manual run test anyway (third-party, runner updates)
+  # last green run, scheduled or dispatched (Versions dispatches the master tests every night).
+  # Every Sunday and every re-run test anyway (third-party, runner updates)
   changes:
     runs-on: ubuntu-latest
     outputs:
@@ -70,7 +71,7 @@ jobs:
       - name: Decide
         id: decide
         run: |
-          if [ "${{ github.event_name }}" != "schedule" ] || [ "$(date -u +%u)" == "7" ] || [ "${{ steps.cache.outputs.cache-hit }}" != "true" ]; then
+          if [ "${{ github.run_attempt }}" != "1" ] || [ "$(date -u +%u)" == "7" ] || [ "${{ steps.cache.outputs.cache-hit }}" != "true" ]; then
             echo "run=true" >> $GITHUB_OUTPUT
           else
             echo "Same repository and dependencies as the last green run: skip"
@@ -87,6 +88,8 @@ jobs:
       repos: ${{ inputs.repos }}
       light: true
       type: "Release"
+      # Nobody waits on the nightly tests: one build and test job per system, no shard overhead
+      shards: 1
       branch: ${{ inputs.branch }}
       wheels_from_pypi: true
       python: ${{ inputs.python }}

@@ -21,7 +21,7 @@ jobs:
 
   sleep:
     needs: config
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Token
         uses: Geode-solutions/actions/install/token@master

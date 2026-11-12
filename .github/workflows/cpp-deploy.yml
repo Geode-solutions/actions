@@ -52,7 +52,7 @@ jobs:
     secrets: inherit
 
   notify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ${{ always() && needs.deploy-repository.result == 'failure' }}
     needs: [deploy-repository]
     steps:

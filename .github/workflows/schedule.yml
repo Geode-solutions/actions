@@ -21,7 +21,7 @@ on:
 
 jobs:
   linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ${{ matrix.config.container }}
     strategy:
       matrix:
@@ -90,7 +90,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   linux-python:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: "ghcr.io/geode-solutions/rhel:master"
     strategy:
       matrix:

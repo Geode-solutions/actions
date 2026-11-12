@@ -30,7 +30,7 @@ jobs:
   # last green run, scheduled or dispatched (Versions dispatches the master tests every night).
   # Every Sunday and every re-run test anyway (third-party, runner updates)
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       run: ${{ steps.decide.outputs.run }}
       key: ${{ steps.fingerprint.outputs.key }}
@@ -98,7 +98,7 @@ jobs:
   save-fingerprint:
     needs: [changes, test-repository]
     if: needs.test-repository.result == 'success' && needs.changes.outputs.cache-hit != 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - run: echo "${{ needs.changes.outputs.key }}" > schedule-fingerprint
       - uses: actions/cache/save@v4
@@ -107,7 +107,7 @@ jobs:
           key: ${{ needs.changes.outputs.key }}
 
   notify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ${{ always() && needs.test-repository.result == 'failure' }}
     needs: test-repository
     steps:

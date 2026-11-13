@@ -110,43 +110,43 @@ jobs:
           done
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - uses: Geode-solutions/actions/install/config-files@master
-        if: matrix.system == 'ubuntu' && github.ref == 'refs/heads/master'
-        with:
-          files: doc/style.py ${{ runner.temp }}/style.py
-      - name: Doc
-        shell: bash
-        if: matrix.system == 'ubuntu' && github.ref == 'refs/heads/master'
-        run: |
-          repo_name=${GITHUB_REPOSITORY##*/}
-          repo_name=${repo_name%_private}
-          repo_name=${repo_name,,}
-          docs_path="/docs"
+      # - uses: Geode-solutions/actions/install/config-files@master
+      #   if: matrix.system == 'ubuntu' && github.ref == 'refs/heads/master'
+      #   with:
+      #     files: doc/style.py ${{ runner.temp }}/style.py
+      # - name: Doc
+      #   shell: bash
+      #   if: matrix.system == 'ubuntu' && github.ref == 'refs/heads/master'
+      #   run: |
+      #     repo_name=${GITHUB_REPOSITORY##*/}
+      #     repo_name=${repo_name%_private}
+      #     repo_name=${repo_name,,}
+      #     docs_path="/docs"
 
-          cd build/${{ inputs.directory }}
-          jq 'map(select(.file | test("/private/"; "i") | not))' compile_commands.json > public_compile_commands.json
-          clang-doc-22 --output=doc --doxygen --public --format=md --executor=all-TUs public_compile_commands.json
-          cd doc/geode
-          python3 ${{ runner.temp }}/style.py .
+      #     cd build/${{ inputs.directory }}
+      #     jq 'map(select(.file | test("/private/"; "i") | not))' compile_commands.json > public_compile_commands.json
+      #     clang-doc-22 --output=doc --doxygen --public --format=md --executor=all-TUs public_compile_commands.json
+      #     cd doc/geode
+      #     python3 ${{ runner.temp }}/style.py .
 
-          # The checkout credentials may have expired during the build, and docs master is protected:
-          # only the personal token can bypass its rules
-          git config --global --get-regexp '^url\..*\.insteadof$' | cut -d' ' -f1 | xargs -r -n1 git config --global --unset-all
-          git config --global url."https://x-access-token:${{ secrets.TOKEN }}@github.com/".insteadOf "https://github.com/"
-          git clone https://github.com/Geode-solutions/docs $docs_path
-          cd $docs_path
-          git checkout master
-          git pull 
-          doc_folder=$docs_path/references/$repo_name
-          rm -rf $doc_folder
-          mkdir -p $doc_folder
-          cp -r $GITHUB_WORKSPACE/build/${{ inputs.directory }}/doc/geode/* $doc_folder
+      #     # The checkout credentials may have expired during the build, and docs master is protected:
+      #     # only the personal token can bypass its rules
+      #     git config --global --get-regexp '^url\..*\.insteadof$' | cut -d' ' -f1 | xargs -r -n1 git config --global --unset-all
+      #     git config --global url."https://x-access-token:${{ secrets.TOKEN }}@github.com/".insteadOf "https://github.com/"
+      #     git clone https://github.com/Geode-solutions/docs $docs_path
+      #     cd $docs_path
+      #     git checkout master
+      #     git pull
+      #     doc_folder=$docs_path/references/$repo_name
+      #     rm -rf $doc_folder
+      #     mkdir -p $doc_folder
+      #     cp -r $GITHUB_WORKSPACE/build/${{ inputs.directory }}/doc/geode/* $doc_folder
 
-          changes=$(git status --porcelain 2>/dev/null | wc -l)
-          if [ "$changes" -ne "0" ]; then
-              git config user.email $GITHUB_ACTOR@users.noreply.github.com
-              git config user.name $GITHUB_ACTOR
-              git add --all
-              git commit -m "Update $repo_name documentation"
-              git push https://x-access-token:${{ secrets.TOKEN }}@github.com/Geode-solutions/docs master
-          fi
+      #     changes=$(git status --porcelain 2>/dev/null | wc -l)
+      #     if [ "$changes" -ne "0" ]; then
+      #         git config user.email $GITHUB_ACTOR@users.noreply.github.com
+      #         git config user.name $GITHUB_ACTOR
+      #         git add --all
+      #         git commit -m "Update $repo_name documentation"
+      #         git push https://x-access-token:${{ secrets.TOKEN }}@github.com/Geode-solutions/docs master
+      #     fi

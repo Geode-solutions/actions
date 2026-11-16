@@ -203,7 +203,7 @@ jobs:
         with:
           arch: x64
       - name: Wheel 3.14
-        uses: Geode-solutions/actions/cpp-python-wheel@perf/windows-python-single-build
+        uses: Geode-solutions/actions/cpp-python-wheel@master
         with:
           python: "3.14"
           name: ${{ inputs.name }}
@@ -212,7 +212,7 @@ jobs:
           dependencies: ${{ steps.repos.outputs.path }}
       - name: Wheel 3.13
         if: ${{ !inputs.light }}
-        uses: Geode-solutions/actions/cpp-python-wheel@perf/windows-python-single-build
+        uses: Geode-solutions/actions/cpp-python-wheel@master
         with:
           python: "3.13"
           name: ${{ inputs.name }}
@@ -221,7 +221,7 @@ jobs:
           dependencies: ${{ steps.repos.outputs.path }}
       - name: Wheel 3.12
         if: ${{ !inputs.light }}
-        uses: Geode-solutions/actions/cpp-python-wheel@perf/windows-python-single-build
+        uses: Geode-solutions/actions/cpp-python-wheel@master
         with:
           python: "3.12"
           name: ${{ inputs.name }}
@@ -230,7 +230,7 @@ jobs:
           dependencies: ${{ steps.repos.outputs.path }}
       - name: Wheel 3.11
         if: ${{ !inputs.light }}
-        uses: Geode-solutions/actions/cpp-python-wheel@perf/windows-python-single-build
+        uses: Geode-solutions/actions/cpp-python-wheel@master
         with:
           python: "3.11"
           name: ${{ inputs.name }}
@@ -239,7 +239,7 @@ jobs:
           dependencies: ${{ steps.repos.outputs.path }}
       - name: Wheel 3.10
         if: ${{ !inputs.light }}
-        uses: Geode-solutions/actions/cpp-python-wheel@perf/windows-python-single-build
+        uses: Geode-solutions/actions/cpp-python-wheel@master
         with:
           python: "3.10"
           name: ${{ inputs.name }}

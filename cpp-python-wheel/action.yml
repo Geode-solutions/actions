@@ -1,8 +1,9 @@
 name: "C++ Python wheel"
 description: >
-  Build the Windows wheel of a C++ repository for one Python version, reusing the build folder of
-  the previous call: only the Python bindings are recompiled, the C++ libraries do not depend on
-  the Python version. Called once per Python version, the wheels are gathered in "wheels".
+  Build the wheel of a C++ repository for one Python version (Windows, or Linux in the rhel
+  container), reusing the build folder of the previous call: only the Python bindings are
+  recompiled, the C++ libraries do not depend on the Python version. Called once per Python
+  version, the wheels are gathered in "wheels".
 
 inputs:
   python:
@@ -30,10 +31,23 @@ runs:
   using: "composite"
   steps:
     - uses: actions/setup-python@v6
-      id: python
+      if: runner.os == 'Windows'
+      id: setup
       with:
         python-version: ${{ inputs.python }}
         pip-version: 25.2
+    # The rhel container provides every Python version in /opt/python
+    - name: Python
+      if: runner.os == 'Linux'
+      id: manylinux
+      shell: bash
+      run: |
+        tag=cp${PYTHON_VERSION//./}
+        bin=/opt/python/$tag-$tag/bin
+        echo "$bin" >> $GITHUB_PATH
+        echo "python-path=$bin/python" >> $GITHUB_OUTPUT
+      env:
+        PYTHON_VERSION: ${{ inputs.python }}
     # The requirements are resolved for each Python version: the latest release of a package
     # may not support the oldest Python
     - name: pip-compile
@@ -41,83 +55,120 @@ runs:
       with:
         dependencies: ${{ inputs.dependencies }}
     - name: Configure
-      shell: pwsh
+      shell: bash
       run: |
-        $tag = "cp" + "${{ inputs.python }}".Replace(".", "")
-        $project = Join-Path build "${{ inputs.directory }}"
+        version=${PYTHON_VERSION//./}
+        project=build/$DIRECTORY
         # Leftovers of the previous Python version: its virtual environment, its wheel and its
         # extension modules (named after their Python version) would end up in this wheel
-        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$project/wheel/venv", "$project/wheel/dist"
-        if (Test-Path build) {
-          Get-ChildItem -Path build -Recurse -File -Filter "*.cp3*-win_amd64.pyd" |
-            Where-Object { $_.FullName -notlike "*\build\third_party\*" -and $_.Name -notlike "*.$tag-*" } |
-            ForEach-Object { Write-Output "Remove $($_.FullName)"; Remove-Item -Force $_.FullName }
-        }
+        rm -rf "$project/wheel/venv" "$project/wheel/dist"
+        if [ -d build ]; then
+          find build -path build/third_party -prune -o -type f \
+            \( -name "*.cp3*-win_amd64.pyd" -o -name "*.cpython-3*.so" \) \
+            ! -name "*.cp$version-win_amd64.pyd" ! -name "*.cpython-$version-*" -print0 |
+            xargs -0 -r rm -fv
+        fi
         # The interpreter found for the previous Python version is cached by CMake
-        $python = @(
-          "-U", "PYTHON_*", "-U", "Python_*", "-U", "Python3_*", "-U", "_Python*",
-          "-DPYTHON_VERSION:STRING=${{ inputs.python }}",
-          "-DPYTHON_EXECUTABLE:FILEPATH=${{ steps.python.outputs.python-path }}",
-          "-DPython_EXECUTABLE:FILEPATH=${{ steps.python.outputs.python-path }}",
-          "-DPython3_EXECUTABLE:FILEPATH=${{ steps.python.outputs.python-path }}"
+        python=(
+          -U "PYTHON_*" -U "Python_*" -U "Python3_*" -U "_Python*"
+          "-DPYTHON_VERSION:STRING=$PYTHON_VERSION"
+          "-DPYTHON_EXECUTABLE:FILEPATH=$PYTHON_PATH"
+          "-DPython_EXECUTABLE:FILEPATH=$PYTHON_PATH"
+          "-DPython3_EXECUTABLE:FILEPATH=$PYTHON_PATH"
         )
         # Superbuild: the project folder is configured by the superbuild with the cache of the
         # previous call, clear it first
-        if ("${{ inputs.directory }}" -ne "." -and (Test-Path "$project/CMakeCache.txt")) {
-          cmake @python $project
-          if ($LASTEXITCODE -ne 0) { exit 1 }
-        }
-        New-Item -ItemType Directory -Force build | Out-Null
+        if [ "$DIRECTORY" != "." ] && [ -f "$project/CMakeCache.txt" ]; then
+          cmake "${python[@]}" "$project"
+        fi
+        mkdir -p build
         cd build
-        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ inputs.dependencies }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DWHEEL_VERSION:STRING=${{ inputs.version }} -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON @python ..
-        if ($LASTEXITCODE -ne 0) { exit 1 }
+        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH:PATH=$DEPENDENCIES" \
+          -D${NAME}_WITH_TESTS:BOOL=OFF "-DWHEEL_VERSION:STRING=$VERSION" \
+          -D${NAME}_WITH_PYTHON:BOOL=ON "${python[@]}" ..
+      env:
+        PYTHON_VERSION: ${{ inputs.python }}
+        PYTHON_PATH: ${{ steps.setup.outputs.python-path || steps.manylinux.outputs.python-path }}
+        DIRECTORY: ${{ inputs.directory }}
+        DEPENDENCIES: ${{ inputs.dependencies }}
+        NAME: ${{ inputs.name }}
+        VERSION: ${{ inputs.version }}
     - name: Compile
-      shell: pwsh
+      shell: bash
       run: |
         cd build
-        cmake --build .
-        if ($LASTEXITCODE -ne 0) { exit 1 }
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          cmake --build . -j 2
+        else
+          cmake --build .
+        fi
     - name: Wheels from Pypi in venv
-      shell: pwsh
+      shell: bash
       run: |
-        $requirements = "bindings/python/requirements.txt"
-        if(test-path -Path $requirements -PathType Leaf) {
+        requirements="bindings/python/requirements.txt"
+        if [ -f "$requirements" ]; then
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            pip="build/$DIRECTORY/wheel/venv/Scripts/pip"
+          else
+            pip="build/$DIRECTORY/wheel/venv/bin/pip"
+          fi
           # A dependency released moments ago may not be served by every PyPI CDN node yet
           # (index pages are cached up to 10 min): retry, bypassing pip's cache
-          $pip = "build/${{ inputs.directory }}/wheel/venv/Scripts/pip"
-          for ($attempt = 1; $attempt -le 5; $attempt++) {
-            if ($attempt -eq 1) { & $pip install --pre -r $requirements }
-            else { & $pip install --pre --no-cache-dir -r $requirements }
-            if ($LASTEXITCODE -eq 0) { break }
-            if ($attempt -eq 5) { Write-Output "pip install failed after $attempt attempts"; exit 1 }
-            Write-Output "pip install failed (attempt $attempt/5), retrying in 60s..."
-            Start-Sleep -Seconds 60
-          }
-        }
+          attempt=1
+          until $pip install --pre $([ $attempt -gt 1 ] && echo --no-cache-dir) -r $requirements; do
+            if [ $attempt -ge 5 ]; then
+              echo "pip install failed after $attempt attempts"
+              exit 1
+            fi
+            echo "pip install failed (attempt $attempt/5), retrying in 60s..."
+            sleep 60
+            attempt=$((attempt + 1))
+          done
+        fi
+      env:
+        DIRECTORY: ${{ inputs.directory }}
     - name: Compile wheel
-      shell: pwsh
+      shell: bash
       run: |
-        cd build/${{ inputs.directory }}
-        cmake --build . --target wheel
-        if ($LASTEXITCODE -ne 0) { exit 1 }
+        cd build/$DIRECTORY
+        cmake --build . --target wheel --config Release
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          cd wheel/dist
+          rename linux manylinux_2_28 *.whl
+        fi
+      env:
+        DIRECTORY: ${{ inputs.directory }}
     # Fails when the wheel does not target this Python version or carries the extension modules
     # of another one
     - name: Check wheel
-      shell: pwsh
+      shell: bash
       run: |
-        $tag = "cp" + "${{ inputs.python }}".Replace(".", "")
-        $wheels = @(Get-ChildItem -Path "build/${{ inputs.directory }}/wheel/dist" -Filter *.whl)
-        if ($wheels.Count -ne 1) { Write-Output "::error::Expected one wheel, found $($wheels.Count)"; exit 1 }
-        $wheel = $wheels[0]
-        if ($wheel.Name -notlike "*-$tag-$tag-win_amd64.whl") { Write-Output "::error::$($wheel.Name) is not a $tag wheel"; exit 1 }
-        Add-Type -AssemblyName System.IO.Compression.FileSystem
-        $zip = [System.IO.Compression.ZipFile]::OpenRead($wheel.FullName)
-        $modules = @($zip.Entries | Where-Object { $_.Name -like "*.pyd" } | ForEach-Object { $_.FullName })
-        $zip.Dispose()
-        Write-Output "Extension modules of $($wheel.Name):"
-        $modules | ForEach-Object { Write-Output "  $_" }
-        if ($modules.Count -eq 0) { Write-Output "::error::No extension module in $($wheel.Name)"; exit 1 }
-        $others = @($modules | Where-Object { $_ -notlike "*.$tag-win_amd64.pyd" })
-        if ($others.Count -ne 0) { Write-Output "::error::Modules of another Python version: $others"; exit 1 }
-        New-Item -ItemType Directory -Force wheels | Out-Null
-        Copy-Item $wheel.FullName wheels/
+        python - "$PYTHON_VERSION" build/$DIRECTORY/wheel/dist <<'EOF'
+        import pathlib, sys, zipfile
+        version = sys.argv[1].replace(".", "")
+        tag = f"cp{version}"
+        windows = sys.platform == "win32"
+        platform = "win_amd64" if windows else "manylinux_2_28_x86_64"
+        wheels = list(pathlib.Path(sys.argv[2]).glob("*.whl"))
+        if len(wheels) != 1:
+            sys.exit(f"::error::Expected one wheel, found {[w.name for w in wheels]}")
+        wheel = wheels[0]
+        if not wheel.name.endswith(f"-{tag}-{tag}-{platform}.whl"):
+            sys.exit(f"::error::{wheel.name} is not a {tag} {platform} wheel")
+        # Extension modules carry their Python version: ".cp312-win_amd64.pyd", ".cpython-312-x86_64-linux-gnu.so"
+        modules = [n for n in zipfile.ZipFile(wheel).namelist() if ".cp3" in n.rsplit("/", 1)[-1] or ".cpython-3" in n]
+        print(f"Extension modules of {wheel.name}:")
+        for module in modules:
+            print(f"  {module}")
+        if not modules:
+            sys.exit(f"::error::No extension module in {wheel.name}")
+        expected = f".{tag}-win_amd64.pyd" if windows else f".cpython-{version}-"
+        others = [m for m in modules if expected not in m]
+        if others:
+            sys.exit(f"::error::Modules of another Python version: {others}")
+        EOF
+        mkdir -p wheels
+        cp build/$DIRECTORY/wheel/dist/*.whl wheels/
+      env:
+        PYTHON_VERSION: ${{ inputs.python }}
+        DIRECTORY: ${{ inputs.directory }}

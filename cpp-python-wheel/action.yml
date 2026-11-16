@@ -1,0 +1,123 @@
+name: "C++ Python wheel"
+description: >
+  Build the Windows wheel of a C++ repository for one Python version, reusing the build folder of
+  the previous call: only the Python bindings are recompiled, the C++ libraries do not depend on
+  the Python version. Called once per Python version, the wheels are gathered in "wheels".
+
+inputs:
+  python:
+    description: "Python version, e.g. 3.12"
+    type: string
+    required: true
+  name:
+    description: "CMake prefix of the project options, e.g. GEODE_COMMON"
+    type: string
+    required: true
+  directory:
+    description: "Folder of the project in the build folder (superbuild), '.' otherwise"
+    type: string
+    default: "."
+  version:
+    description: "Wheel version"
+    type: string
+    required: true
+  dependencies:
+    description: "';'-separated folders of the installed C++ releases (cpp-dependencies 'path' output)"
+    type: string
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v6
+      id: python
+      with:
+        python-version: ${{ inputs.python }}
+        pip-version: 25.2
+    # The requirements are resolved for each Python version: the latest release of a package
+    # may not support the oldest Python
+    - name: pip-compile
+      uses: Geode-solutions/actions/install/cpp-pip-compile@master
+      with:
+        dependencies: ${{ inputs.dependencies }}
+    - name: Configure
+      shell: pwsh
+      run: |
+        $tag = "cp" + "${{ inputs.python }}".Replace(".", "")
+        $project = Join-Path build "${{ inputs.directory }}"
+        # Leftovers of the previous Python version: its virtual environment, its wheel and its
+        # extension modules (named after their Python version) would end up in this wheel
+        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$project/wheel/venv", "$project/wheel/dist"
+        if (Test-Path build) {
+          Get-ChildItem -Path build -Recurse -File -Filter "*.cp3*-win_amd64.pyd" |
+            Where-Object { $_.FullName -notlike "*\build\third_party\*" -and $_.Name -notlike "*.$tag-*" } |
+            ForEach-Object { Write-Output "Remove $($_.FullName)"; Remove-Item -Force $_.FullName }
+        }
+        # The interpreter found for the previous Python version is cached by CMake
+        $python = @(
+          "-U", "PYTHON_*", "-U", "Python_*", "-U", "Python3_*", "-U", "_Python*",
+          "-DPYTHON_VERSION:STRING=${{ inputs.python }}",
+          "-DPYTHON_EXECUTABLE:FILEPATH=${{ steps.python.outputs.python-path }}",
+          "-DPython_EXECUTABLE:FILEPATH=${{ steps.python.outputs.python-path }}",
+          "-DPython3_EXECUTABLE:FILEPATH=${{ steps.python.outputs.python-path }}"
+        )
+        # Superbuild: the project folder is configured by the superbuild with the cache of the
+        # previous call, clear it first
+        if ("${{ inputs.directory }}" -ne "." -and (Test-Path "$project/CMakeCache.txt")) {
+          cmake @python $project
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+        }
+        New-Item -ItemType Directory -Force build | Out-Null
+        cd build
+        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH:PATH="${{ inputs.dependencies }}" -D${{ inputs.name }}_WITH_TESTS:BOOL=OFF -DWHEEL_VERSION:STRING=${{ inputs.version }} -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON @python ..
+        if ($LASTEXITCODE -ne 0) { exit 1 }
+    - name: Compile
+      shell: pwsh
+      run: |
+        cd build
+        cmake --build .
+        if ($LASTEXITCODE -ne 0) { exit 1 }
+    - name: Wheels from Pypi in venv
+      shell: pwsh
+      run: |
+        $requirements = "bindings/python/requirements.txt"
+        if(test-path -Path $requirements -PathType Leaf) {
+          # A dependency released moments ago may not be served by every PyPI CDN node yet
+          # (index pages are cached up to 10 min): retry, bypassing pip's cache
+          $pip = "build/${{ inputs.directory }}/wheel/venv/Scripts/pip"
+          for ($attempt = 1; $attempt -le 5; $attempt++) {
+            if ($attempt -eq 1) { & $pip install --pre -r $requirements }
+            else { & $pip install --pre --no-cache-dir -r $requirements }
+            if ($LASTEXITCODE -eq 0) { break }
+            if ($attempt -eq 5) { Write-Output "pip install failed after $attempt attempts"; exit 1 }
+            Write-Output "pip install failed (attempt $attempt/5), retrying in 60s..."
+            Start-Sleep -Seconds 60
+          }
+        }
+    - name: Compile wheel
+      shell: pwsh
+      run: |
+        cd build/${{ inputs.directory }}
+        cmake --build . --target wheel
+        if ($LASTEXITCODE -ne 0) { exit 1 }
+    # Fails when the wheel does not target this Python version or carries the extension modules
+    # of another one
+    - name: Check wheel
+      shell: pwsh
+      run: |
+        $tag = "cp" + "${{ inputs.python }}".Replace(".", "")
+        $wheels = @(Get-ChildItem -Path "build/${{ inputs.directory }}/wheel/dist" -Filter *.whl)
+        if ($wheels.Count -ne 1) { Write-Output "::error::Expected one wheel, found $($wheels.Count)"; exit 1 }
+        $wheel = $wheels[0]
+        if ($wheel.Name -notlike "*-$tag-$tag-win_amd64.whl") { Write-Output "::error::$($wheel.Name) is not a $tag wheel"; exit 1 }
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        $zip = [System.IO.Compression.ZipFile]::OpenRead($wheel.FullName)
+        $modules = @($zip.Entries | Where-Object { $_.Name -like "*.pyd" } | ForEach-Object { $_.FullName })
+        $zip.Dispose()
+        Write-Output "Extension modules of $($wheel.Name):"
+        $modules | ForEach-Object { Write-Output "  $_" }
+        if ($modules.Count -eq 0) { Write-Output "::error::No extension module in $($wheel.Name)"; exit 1 }
+        $others = @($modules | Where-Object { $_ -notlike "*.$tag-win_amd64.pyd" })
+        if ($others.Count -ne 0) { Write-Output "::error::Modules of another Python version: $others"; exit 1 }
+        New-Item -ItemType Directory -Force wheels | Out-Null
+        Copy-Item $wheel.FullName wheels/

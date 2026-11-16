@@ -40,3 +40,6 @@ runs:
       with:
         name: pyinstaller-${{ runner.os }}
         path: pyinstaller_dist/*.zip
+        # Only downloaded later in the same run (web-deploy-repository rebuilds it when missing):
+        # the default 90 days kept ~30 GB of private storage
+        retention-days: 1

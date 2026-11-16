@@ -20,7 +20,7 @@ runs:
         if [ ! -f "$file" ]; then
           exit 0
         fi
-        pip install pip-tools typing_extensions
+        python -m pip install pip-tools typing_extensions
         # Each Python package must match the C++ release linked by the build:
         # without a pin, a release not yet listed by PyPI makes pip silently pick an older one
         constraints=$(mktemp)

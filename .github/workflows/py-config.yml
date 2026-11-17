@@ -23,7 +23,7 @@ on:
         required: true
 jobs:
   py-config:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     outputs:
       node: ${{ steps.config.outputs.node }}
       python: ${{ steps.config.outputs.python }}

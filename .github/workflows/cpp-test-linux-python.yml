@@ -136,7 +136,8 @@ jobs:
           # Without the C++ tests, run by build-linux. Older OpenGeode releases have no
           # deliverables target (Geode-solutions/OpenGeode#1411): build everything
           if ninja -t query deliverables > /dev/null 2>&1; then
-            cmake --build . -t deliverables
+            # Plus the Python test helpers (e.g. test modules built by bindings/python/tests)
+            cmake --build . -t deliverables bindings/python/all
           else
             cmake --build .
           fi

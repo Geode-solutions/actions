@@ -131,10 +131,12 @@ jobs:
           cmake --build . -t third_party
           cd ${{ inputs.directory }}
           # Libraries, executables and Python modules, without the C++ tests (build-linux runs
-          # them): the folder targets of the project that exist
-          targets=$(ninja -t targets all | sed -n -E 's#^((src/geode|src/bin|bindings/python)/all):.*#\1#p' | tr '\n' ' ')
-          echo "Targets: $targets"
-          cmake --build . -t $targets
+          # them): the deliverables target, everything with older OpenGeode releases
+          if ninja -t query deliverables > /dev/null 2>&1; then
+            cmake --build . -t deliverables
+          else
+            cmake --build .
+          fi
           # Superbuild: the wheel is made from the install folder
           if [ "${{ inputs.directory }}" != "." ]; then
             cmake --install .

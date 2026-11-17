@@ -30,6 +30,13 @@ on:
         description: "test matrix (shards), built by cpp-test-repository.yml"
         type: string
         required: true
+      python:
+        description: "also build and test the Python bindings and the wheel, in the build job"
+        type: boolean
+        default: false
+      wheels_from_pypi:
+        type: boolean
+        default: false
     secrets:
       APP_PRIVATE_KEY:
         required: false
@@ -60,6 +67,16 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
+      # Before the dependencies: their third_party cache is keyed by the exact Python version
+      - name: Python
+        if: ${{ inputs.python }}
+        uses: Geode-solutions/actions/install/cpp-python-test-dependencies@perf/windows-test-python-in-build
+        id: python
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ steps.token.outputs.token }}
+          wheels_from_pypi: ${{ inputs.wheels_from_pypi }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
@@ -69,6 +86,7 @@ jobs:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
           system: win64
+          cache-suffix: ${{ inputs.python && format('-py{0}', steps.python.outputs.python-version) || '' }}
       - name: Libraries
         id: libraries
         run: |
@@ -86,7 +104,7 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           if(!(test-path build)) { mkdir build }
           cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=ON -DINCLUDE_PYBIND11:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DCPACK_PACKAGE_VERSION:STRING=0.0.0 -DCPACK_SYSTEM_NAME:STRING=win64 ..
+          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DBUILD_SHARED_LIBS:BOOL=ON -DINCLUDE_PYBIND11:BOOL=ON -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -DCPACK_PACKAGE_VERSION:STRING=0.0.0 -DCPACK_SYSTEM_NAME:STRING=win64 ${{ inputs.python && format('-D{0}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=3.14', inputs.name) || '' }} ${{ inputs.python && inputs.package != '' && '-DWHEEL_VERSION:STRING=0.0.0' || '' }} ..
           cmake --build . -t third_party
           cd ${{ inputs.directory }}
           $paths = "${{ steps.libraries.outputs.bin }}"
@@ -115,6 +133,60 @@ jobs:
           }
         env:
           GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
+      - name: Compile Python
+        if: ${{ inputs.python }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+          cd build/${{ inputs.directory }}
+          # Modules imported by the Python tests and packaged in the wheel (also built by the
+          # essential target with recent OpenGeode releases)
+          cmake --build . -t bindings/python/all -j 2
+          # Superbuild: the wheel is made from the install folder
+          if ("${{ inputs.directory }}" -ne ".") {
+            cmake --install .
+          }
+        env:
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
+      - name: Wheels from Github in venv
+        if: ${{ inputs.python && !inputs.wheels_from_pypi }}
+        run: |
+          $wheels ="${{ steps.python.outputs.wheels }}"
+          if($wheels) {
+            Foreach($wheel in $wheels.split(";")){
+              build/${{ inputs.directory }}/wheel/venv/Scripts/pip install --no-deps $wheel
+            }
+          }
+      - name: Wheels from Pypi in venv
+        if: ${{ inputs.python && inputs.wheels_from_pypi }}
+        run: |
+          $requirements = "bindings/python/requirements.txt"
+          if(test-path -Path $requirements -PathType Leaf) {
+            # A dependency released moments ago may not be served by every PyPI CDN node yet
+            # (index pages are cached up to 10 min): retry, bypassing pip's cache
+            $pip = "build/${{ inputs.directory }}/wheel/venv/Scripts/pip"
+            for ($attempt = 1; $attempt -le 5; $attempt++) {
+              if ($attempt -eq 1) { & $pip install --pre -r $requirements }
+              else { & $pip install --pre --no-cache-dir -r $requirements }
+              if ($LASTEXITCODE -eq 0) { break }
+              if ($attempt -eq 5) { Write-Output "pip install failed after $attempt attempts"; exit 1 }
+              Write-Output "pip install failed (attempt $attempt/5), retrying in 60s..."
+              Start-Sleep -Seconds 60
+            }
+          }
+      - name: Wheel
+        if: ${{ inputs.python }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+          cd build/${{ inputs.directory }}
+          # Python tests without the essential label (older OpenGeode releases): the test shards
+          # run the labelled ones
+          ctest --output-on-failure --stop-on-failure -R -py- -LE essential -j 2
+          cmake --build . --target wheel
+          cmake --build . --target test-wheel
+        env:
+          GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
       # Same private package as cpp-deploy-windows.yml (unsigned), from this build
       - name: Package
         if: ${{ inputs.package != '' }}
@@ -130,6 +202,15 @@ jobs:
             Remove-Item $private
           }
           Remove-Item -Recurse -Force _CPack_Packages
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      # Same wheel as cpp-deploy-windows-python.yml, from this build: downstream python tests install it
+      - name: Package wheel
+        if: ${{ inputs.python && inputs.package != '' }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+          Get-ChildItem -Path "build/${{ inputs.directory }}/wheel/dist" -Filter *.whl | Foreach-Object { gh release upload --clobber --repo ${env:GITHUB_REPOSITORY} ${{ inputs.package }} $_.FullName }
         env:
           GITHUB_TOKEN: ${{ github.token }}
       # A single shard runs in the build job: a test job would repeat the checkout and dependencies
@@ -155,6 +236,7 @@ jobs:
             !build/**/*.ilk
             !build/**/*.lib
             !build/**/.ninja_*
+            !build/**/wheel
           retention-days: 1
           overwrite: true
 
@@ -177,6 +259,16 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
+      # The Python test environment uploaded with the tests is based on this Python
+      - name: Python
+        if: ${{ inputs.python }}
+        uses: Geode-solutions/actions/install/cpp-python-test-dependencies@perf/windows-test-python-in-build
+        id: python
+        with:
+          repos: ${{ inputs.repos }}
+          branch: ${{ inputs.branch }}
+          token: ${{ steps.token.outputs.token }}
+          wheels_from_pypi: ${{ inputs.wheels_from_pypi }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         with:
@@ -185,6 +277,7 @@ jobs:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
           system: win64
+          cache-suffix: ${{ inputs.python && format('-py{0}', steps.python.outputs.python-version) || '' }}
       - name: Download tests
         uses: actions/download-artifact@v8
         with:

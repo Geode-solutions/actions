@@ -2,7 +2,7 @@ name: "C++ Python test dependencies"
 description: >
   Set up the Python used to configure and test the Python bindings, with the Python packages of
   the dependencies installed: the Python test environment of the build sees them
-  (--system-site-packages), so every job running Python tests needs the same setup.
+  (--system-site-packages).
 
 inputs:
   python:

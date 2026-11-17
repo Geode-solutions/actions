@@ -139,8 +139,7 @@ jobs:
           $ErrorActionPreference = "Stop"
           $PSNativeCommandUseErrorActionPreference = $true
           cd build/${{ inputs.directory }}
-          # Modules imported by the Python tests and packaged in the wheel (also built by the
-          # essential target with recent OpenGeode releases)
+          # Modules imported by the Python tests and packaged in the wheel
           cmake --build . -t bindings/python/all -j 2
           # Superbuild: the wheel is made from the install folder
           if ("${{ inputs.directory }}" -ne ".") {
@@ -174,16 +173,16 @@ jobs:
               Start-Sleep -Seconds 60
             }
           }
-      # Python tests without the essential label (OpenGeode releases before the label): the test
-      # shards run the labelled ones. Their stub gates fail on Windows (DLLs not found, fixed with
-      # the label), so a failure is only a warning, as before
+      # The Python tests run here, not in the C++ test shards. Their stub gates fail on Windows
+      # until OpenGeode#1411 (DLLs not found) reaches the repositories: a failure is only a warning
+      # for now, as in the former windows-python job (TODO: fail the job once released)
       - name: Python tests
         if: ${{ inputs.python }}
         run: |
           cd build/${{ inputs.directory }}
-          ctest --output-on-failure -R -py- -LE essential -j 2
+          ctest --output-on-failure -R -py- -j 2
           if ($LASTEXITCODE -ne 0) {
-            Write-Output "::warning::Python tests failed (not labelled essential, see the log)"
+            Write-Output "::warning::Python tests failed, see the log"
           }
           exit 0
         env:
@@ -270,16 +269,6 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
-      # The Python test environment uploaded with the tests is based on this Python
-      - name: Python
-        if: ${{ inputs.python }}
-        uses: Geode-solutions/actions/install/cpp-python-test-dependencies@perf/windows-test-python-in-build
-        id: python
-        with:
-          repos: ${{ inputs.repos }}
-          branch: ${{ inputs.branch }}
-          token: ${{ steps.token.outputs.token }}
-          wheels_from_pypi: ${{ inputs.wheels_from_pypi }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         with:
@@ -288,7 +277,6 @@ jobs:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
           system: win64
-          cache-suffix: ${{ inputs.python && format('-py{0}', steps.python.outputs.python-version) || '' }}
       - name: Download tests
         uses: actions/download-artifact@v8
         with:

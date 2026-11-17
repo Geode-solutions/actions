@@ -113,6 +113,8 @@ jobs:
       wheels_from_pypi: ${{ inputs.wheels_from_pypi }}
     secrets: inherit
 
+  # Also builds and tests the Python bindings in the same job: a separate Python job would compile
+  # the C++ libraries a second time
   test-windows:
     needs: releases
     uses: Geode-solutions/actions/.github/workflows/cpp-test-windows.yml@master
@@ -126,20 +128,6 @@ jobs:
       package: ${{ inputs.package }}
       shards: ${{ inputs.shards }}
       test_matrix: ${{ needs.releases.outputs.windows_tests }}
-    secrets: inherit
-
-  test-windows-python:
-    if: ${{ inputs.python }}
-    needs: releases
-    uses: Geode-solutions/actions/.github/workflows/cpp-test-windows-python.yml@master
-    with:
-      name: ${{ inputs.name }}
-      directory: ${{ inputs.directory }}
-      repos: ${{ inputs.repos }}
-      releases: ${{ needs.releases.outputs.selection }}
-      light: ${{ inputs.light }}
-      type: ${{ inputs.type }}
-      branch: ${{ inputs.branch }}
-      package: ${{ inputs.package }}
+      python: ${{ inputs.python }}
       wheels_from_pypi: ${{ inputs.wheels_from_pypi }}
     secrets: inherit

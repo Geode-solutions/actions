@@ -1,10 +1,10 @@
 name: "Compiler cache"
 description: >
   Compiler cache of the C++ builds: ccache on Linux (installed in the build images), sccache on
-  Windows. CMake uses it through CMAKE_<LANG>_COMPILER_LAUNCHER, set in the environment so that
-  the projects configured by a superbuild use it too. The cache is restored from the last run of
-  the same branch, else of the base branch, and saved at the end of the job.
-  Call it before the first CMake configure.
+  Windows. The Geode projects use it as their C++ compiler launcher (GEODE_CI_COMPILER_LAUNCHER,
+  read by OpenGeode cmake/CppTargets.cmake), the third party projects of a superbuild do not.
+  The cache is restored from the last run of the same branch, else of the base branch, and saved
+  at the end of the job. Call it before the first CMake configure.
 
 inputs:
   key:
@@ -45,8 +45,7 @@ runs:
           echo "enabled=false" >> $GITHUB_OUTPUT
           exit 0
         fi
-        echo "CMAKE_C_COMPILER_LAUNCHER=$launcher" >> $GITHUB_ENV
-        echo "CMAKE_CXX_COMPILER_LAUNCHER=$launcher" >> $GITHUB_ENV
+        echo "GEODE_CI_COMPILER_LAUNCHER=$launcher" >> $GITHUB_ENV
         echo "enabled=true" >> $GITHUB_OUTPUT
       env:
         MAX_SIZE: ${{ inputs.max-size }}

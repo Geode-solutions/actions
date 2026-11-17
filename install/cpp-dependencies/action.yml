@@ -32,16 +32,36 @@ outputs:
 runs:
   using: "composite"
   steps:
+    # The third-party build trees embed the toolchain (CMake path and version,
+    # compilers, system): a container image update must not reuse them, e.g.
+    # OpenSSL refuses to build when its sources look newer than its configuration.
+    - id: toolchain
+      if: ${{ runner.environment == 'github-hosted' }}
+      shell: bash
+      run: |
+        {
+          cmake_path=$(command -v cmake || true)
+          echo "cmake: $cmake_path"
+          [ -n "$cmake_path" ] && readlink -f "$cmake_path" && cmake --version | head -1
+          [ -n "${CC:-}" ] && "$CC" --version 2>&1 | head -1
+          [ -n "${CXX:-}" ] && "$CXX" --version 2>&1 | head -1
+          cat /etc/os-release 2>/dev/null
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            echo "image: ${ImageOS:-} ${ImageVersion:-}"
+          fi
+        } > "$RUNNER_TEMP/toolchain.txt" || true
+        cat "$RUNNER_TEMP/toolchain.txt"
+        echo "hash=$(sha256sum "$RUNNER_TEMP/toolchain.txt" | cut -c1-16)" >> "$GITHUB_OUTPUT"
     - if: ${{ inputs.save && runner.environment == 'github-hosted' }}
       uses: actions/cache@v4
       with:
         path: build/third_party
-        key: ${{ inputs.system }}${{ inputs.cache-suffix }}-${{ hashFiles('cmake/Configure**.cmake') }}
+        key: ${{ inputs.system }}${{ inputs.cache-suffix }}-${{ steps.toolchain.outputs.hash }}-${{ hashFiles('cmake/Configure**.cmake') }}
     - if: ${{ !inputs.save && runner.environment == 'github-hosted' }}
       uses: actions/cache/restore@v4
       with:
         path: build/third_party
-        key: ${{ inputs.system }}${{ inputs.cache-suffix }}-${{ hashFiles('cmake/Configure**.cmake') }}
+        key: ${{ inputs.system }}${{ inputs.cache-suffix }}-${{ steps.toolchain.outputs.hash }}-${{ hashFiles('cmake/Configure**.cmake') }}
     - run: |
         if [ "${{ runner.os }}" == "Windows" ]; then
           echo "ext=zip" >> $GITHUB_ENV

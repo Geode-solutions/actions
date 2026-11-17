@@ -3,7 +3,7 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     steps:
       - name: Create Release
         uses: actions/github-script@v8

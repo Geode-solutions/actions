@@ -1,0 +1,66 @@
+name: "Compiler cache"
+description: >
+  Compiler cache of the C++ builds: ccache on Linux (installed in the build images), sccache on
+  Windows. The Geode projects use it as their C++ compiler launcher (GEODE_CI_COMPILER_LAUNCHER,
+  read by OpenGeode cmake/CppTargets.cmake), the third party projects of a superbuild do not.
+  The cache is restored from the last run of the same branch, else of the base branch, and saved
+  at the end of the job. Call it before the first CMake configure.
+
+inputs:
+  key:
+    description: "Cache name: one per compiler and build type, e.g. ubuntu-Debug"
+    type: string
+    required: true
+  max-size:
+    description: "Maximum size of the cache"
+    type: string
+    default: "500M"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install sccache
+      if: runner.os == 'Windows'
+      uses: mozilla-actions/sccache-action@v0.0.11
+      with:
+        version: v0.19.0
+        disable_annotations: true
+    - name: Configure
+      id: configure
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          launcher=sccache
+          echo "SCCACHE_DIR=$GITHUB_WORKSPACE/.compiler-cache" >> $GITHUB_ENV
+          echo "SCCACHE_CACHE_SIZE=$MAX_SIZE" >> $GITHUB_ENV
+        elif command -v ccache > /dev/null; then
+          launcher=ccache
+          # Options known by ccache 3.7 (rhel image) and 4.x (ubuntu image)
+          echo "CCACHE_DIR=$GITHUB_WORKSPACE/.compiler-cache" >> $GITHUB_ENV
+          echo "CCACHE_BASEDIR=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+          echo "CCACHE_MAXSIZE=$MAX_SIZE" >> $GITHUB_ENV
+          echo "CCACHE_COMPRESS=1" >> $GITHUB_ENV
+        else
+          echo "::warning::ccache is not installed in this image: no compiler cache"
+          echo "enabled=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        echo "GEODE_CI_COMPILER_LAUNCHER=$launcher" >> $GITHUB_ENV
+        echo "enabled=true" >> $GITHUB_OUTPUT
+      env:
+        MAX_SIZE: ${{ inputs.max-size }}
+    # A new entry per run (cache entries cannot be updated), restored by prefix: the last run of
+    # the branch, else of the base branch of the pull request, else of next
+    - uses: actions/cache@v4
+      if: steps.configure.outputs.enabled == 'true'
+      with:
+        path: .compiler-cache
+        key: compiler-cache-${{ inputs.key }}-${{ github.head_ref || github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
+        restore-keys: |
+          compiler-cache-${{ inputs.key }}-${{ github.head_ref || github.ref_name }}-
+          compiler-cache-${{ inputs.key }}-${{ github.base_ref || 'next' }}-
+          compiler-cache-${{ inputs.key }}-next-
+    - name: Reset the statistics
+      if: steps.configure.outputs.enabled == 'true' && runner.os == 'Linux'
+      shell: bash
+      run: ccache -z

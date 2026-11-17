@@ -70,6 +70,10 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
+      - name: Compiler cache
+        uses: Geode-solutions/actions/install/compiler-cache@master
+        with:
+          key: rhel-python-${{ inputs.type }}
       - name: Install dependencies
         uses: Geode-solutions/actions/install/cpp-dependencies@master
         id: repos
@@ -143,6 +147,9 @@ jobs:
           echo "LD_LIBRARY_PATH=" >> $GITHUB_ENV
         env:
           GEODE_LICENSE_DATA: ${{ secrets.GEODE_CI_LICENSE }}
+      - name: Compiler cache statistics
+        if: always()
+        run: ccache -s || true
       - name: Wheels from Github in venv
         if: ${{ !inputs.wheels_from_pypi }}
         run: |

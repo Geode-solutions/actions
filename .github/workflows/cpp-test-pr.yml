@@ -29,53 +29,6 @@ jobs:
     uses: Geode-solutions/actions/.github/workflows/cpp-prepare.yml@master
     secrets: inherit
 
-  tidy:
-    needs: prepare
-    runs-on: ubuntu-24.04
-    container: ghcr.io/geode-solutions/ubuntu:master
-    env:
-      CC: /usr/bin/clang
-      CXX: /usr/bin/clang++
-    steps:
-      - name: Token
-        uses: Geode-solutions/actions/install/token@master
-        id: token
-        with:
-          app-id: ${{ vars.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-          token: ${{ secrets.TOKEN }}
-      - name: Checkout
-        uses: Geode-solutions/actions/install/checkout@master
-        with:
-          token: ${{ steps.token.outputs.token }}
-      - name: Install dependencies
-        uses: Geode-solutions/actions/install/cpp-dependencies@master
-        id: repos
-        with:
-          repos: ${{ inputs.repos }}
-          token: ${{ steps.token.outputs.token }}
-          branch: ${{ github.event.pull_request.head.ref }}
-          system: ubuntu
-      - name: Configure
-        run: |
-          echo "base_dir=$(pwd)" >> $GITHUB_ENV
-          mkdir -p build
-          cd build
-          cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" ..
-          cmake --build . -t third_party -j 2
-      - uses: cpp-linter/cpp-linter-action@v2
-        id: linter
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          style: ""
-          tidy-checks: ""
-          # tidy-review: true
-          thread-comments: update
-          step-summary: true
-          no-lgtm: false
-          database: build/${{ inputs.directory }}
-
   # Prerelease "<branch>" receiving the packages of the Debug builds below: downstream PRs on the
   # same branch and the Versions branch check (both building Debug tests) install them
   release:

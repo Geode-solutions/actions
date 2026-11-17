@@ -70,7 +70,7 @@ jobs:
       # Before the dependencies: their third_party cache is keyed by the exact Python version
       - name: Python
         if: ${{ inputs.python }}
-        uses: Geode-solutions/actions/install/cpp-python-test-dependencies@perf/windows-test-python-in-build
+        uses: Geode-solutions/actions/install/cpp-python-test-dependencies@master
         id: python
         with:
           repos: ${{ inputs.repos }}

@@ -117,7 +117,7 @@ jobs:
   # the C++ libraries a second time
   test-windows:
     needs: releases
-    uses: Geode-solutions/actions/.github/workflows/cpp-test-windows.yml@perf/windows-test-python-in-build
+    uses: Geode-solutions/actions/.github/workflows/cpp-test-windows.yml@master
     with:
       name: ${{ inputs.name }}
       directory: ${{ inputs.directory }}

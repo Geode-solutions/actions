@@ -86,6 +86,9 @@ jobs:
       upload-pypi: ${{ inputs.upload-pypi }}
       light: ${{ inputs.light || github.ref_name != 'master' }}
       wheels_from_pypi: ${{ inputs.wheels_from_pypi }}
+      # Private repositories: one job building the C++ libraries once for every Python version
+      # (public ones are not billed)
+      combined: ${{ github.event.repository.private && inputs.wheels_from_pypi }}
     secrets: inherit
 
   release-windows:
@@ -114,4 +117,7 @@ jobs:
       upload-pypi: ${{ inputs.upload-pypi }}
       light: ${{ inputs.light || github.ref_name != 'master' }}
       wheels_from_pypi: ${{ inputs.wheels_from_pypi }}
+      # Private repositories: one job building the C++ libraries once for every Python version
+      # (public ones are not billed)
+      combined: ${{ github.event.repository.private && inputs.wheels_from_pypi }}
     secrets: inherit

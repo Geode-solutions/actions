@@ -31,6 +31,14 @@ on:
         description: "selection output of get-release, skips the release lookup"
         type: string
         default: ""
+      combined:
+        description: "one job compiling the C++ libraries once for every Python version (wheels from PyPI only)"
+        type: boolean
+        default: false
+      upload-github:
+        description: "upload the wheels to the GitHub release (the combined job uploads an artifact instead)"
+        type: boolean
+        default: true
     secrets:
       APP_PRIVATE_KEY:
         required: false
@@ -42,7 +50,9 @@ on:
         required: true
 
 jobs:
+  # One job per Python version, each compiling the C++ libraries
   windows-python:
+    if: ${{ !inputs.combined }}
     runs-on: windows-2022
     strategy:
       matrix:
@@ -139,6 +149,7 @@ jobs:
           cd build/${{ inputs.directory }}
           cmake --build . --target wheel
       - name: Upload GH
+        if: inputs.upload-github
         run: |
           Get-ChildItem -Path "build/${{ inputs.directory }}/wheel/dist" -Filter *.whl | Foreach-Object { gh release upload --clobber --repo ${env:GITHUB_REPOSITORY} ${{ inputs.release }} $_.FullName }
         env:
@@ -148,3 +159,108 @@ jobs:
         run: |
           pip install twine
           twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --skip-existing --verbose build/${{ inputs.directory }}/wheel/dist/*.whl
+
+  # One job for every Python version: the first wheel compiles the C++ libraries, the next ones
+  # only recompile the Python bindings
+  windows-python-combined:
+    if: ${{ inputs.combined }}
+    runs-on: windows-2022
+    steps:
+      - name: Check inputs
+        if: ${{ !inputs.wheels_from_pypi }}
+        run: |
+          Write-Output "::error::the combined job only installs the wheels of the dependencies from PyPI"
+          exit 1
+      - name: Token
+        uses: Geode-solutions/actions/install/token@master
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          token: ${{ secrets.TOKEN }}
+      - name: Checkout
+        uses: Geode-solutions/actions/install/checkout@master
+        with:
+          token: ${{ steps.token.outputs.token }}
+          branch: ${{ inputs.branch }}
+      # Before the dependencies: their third_party cache is keyed by the exact Python version
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        id: python
+        with:
+          python-version: "3.14"
+      - name: Install dependencies
+        uses: Geode-solutions/actions/install/cpp-dependencies@master
+        id: repos
+        with:
+          repos: ${{ inputs.repos }}
+          releases: ${{ inputs.releases }}
+          token: ${{ steps.token.outputs.token }}
+          branch: ${{ inputs.branch }}
+          system: win64
+          cache-suffix: -py${{ steps.python.outputs.python-version }}
+      - uses: TheMrMilchmann/setup-msvc-dev@v4
+        with:
+          arch: x64
+      - name: Wheel 3.14
+        uses: Geode-solutions/actions/cpp-python-wheel@master
+        with:
+          python: "3.14"
+          name: ${{ inputs.name }}
+          directory: ${{ inputs.directory }}
+          version: ${{ inputs.version }}
+          dependencies: ${{ steps.repos.outputs.path }}
+      - name: Wheel 3.13
+        if: ${{ !inputs.light }}
+        uses: Geode-solutions/actions/cpp-python-wheel@master
+        with:
+          python: "3.13"
+          name: ${{ inputs.name }}
+          directory: ${{ inputs.directory }}
+          version: ${{ inputs.version }}
+          dependencies: ${{ steps.repos.outputs.path }}
+      - name: Wheel 3.12
+        if: ${{ !inputs.light }}
+        uses: Geode-solutions/actions/cpp-python-wheel@master
+        with:
+          python: "3.12"
+          name: ${{ inputs.name }}
+          directory: ${{ inputs.directory }}
+          version: ${{ inputs.version }}
+          dependencies: ${{ steps.repos.outputs.path }}
+      - name: Wheel 3.11
+        if: ${{ !inputs.light }}
+        uses: Geode-solutions/actions/cpp-python-wheel@master
+        with:
+          python: "3.11"
+          name: ${{ inputs.name }}
+          directory: ${{ inputs.directory }}
+          version: ${{ inputs.version }}
+          dependencies: ${{ steps.repos.outputs.path }}
+      - name: Wheel 3.10
+        if: ${{ !inputs.light }}
+        uses: Geode-solutions/actions/cpp-python-wheel@master
+        with:
+          python: "3.10"
+          name: ${{ inputs.name }}
+          directory: ${{ inputs.directory }}
+          version: ${{ inputs.version }}
+          dependencies: ${{ steps.repos.outputs.path }}
+      - name: Upload GH
+        if: inputs.upload-github
+        run: |
+          Get-ChildItem -Path wheels -Filter *.whl | Foreach-Object { gh release upload --clobber --repo ${env:GITHUB_REPOSITORY} ${{ inputs.release }} $_.FullName }
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Artifact
+        if: ${{ !inputs.upload-github }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: wheels-win64
+          path: wheels/*.whl
+          retention-days: 1
+      - name: PyPI
+        if: inputs.upload-pypi
+        run: |
+          pip install twine
+          twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} --skip-existing --verbose wheels/*.whl

@@ -129,8 +129,13 @@ jobs:
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} -DCPACK_PACKAGE_VERSION:STRING=0.0.0 -DCPACK_SYSTEM_NAME:STRING=rhel ${{ inputs.package != '' && '-DWHEEL_VERSION:STRING=0.0.0' || '' }} ..
           cmake --build . -t third_party
           cd ${{ inputs.directory }}
-          # Without the C++ tests, run by build-linux
-          cmake --build . -t deliverables
+          # Without the C++ tests, run by build-linux. Older OpenGeode releases have no
+          # deliverables target (Geode-solutions/OpenGeode#1411): build everything
+          if ninja -t query deliverables > /dev/null 2>&1; then
+            cmake --build . -t deliverables
+          else
+            cmake --build .
+          fi
           # Superbuild: the wheel is made from the install folder
           [ "${{ inputs.directory }}" = "." ] || cmake --install .
           echo "Python testing"

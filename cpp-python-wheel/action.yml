@@ -57,6 +57,11 @@ runs:
     - name: Configure
       shell: bash
       run: |
+        # Git Bash puts its own Perl first (C:/Program Files/Git/usr/bin): OpenSSL's configure
+        # (third party of a superbuild) fails on the space of its path. Same Perl as PowerShell
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          export PATH="/c/Strawberry/perl/bin:$PATH"
+        fi
         version=${PYTHON_VERSION//./}
         project=build/$DIRECTORY
         # Leftovers of the previous Python version: its virtual environment, its wheel and its
@@ -96,6 +101,11 @@ runs:
     - name: Compile
       shell: bash
       run: |
+        # Git Bash puts its own Perl first (C:/Program Files/Git/usr/bin): OpenSSL's configure
+        # (third party of a superbuild) fails on the space of its path. Same Perl as PowerShell
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          export PATH="/c/Strawberry/perl/bin:$PATH"
+        fi
         cd build
         if [ "$RUNNER_OS" == "Linux" ]; then
           cmake --build . -j 2

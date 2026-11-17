@@ -67,6 +67,10 @@ jobs:
         with:
           token: ${{ steps.token.outputs.token }}
           branch: ${{ inputs.branch }}
+      - name: Compiler cache
+        uses: Geode-solutions/actions/install/compiler-cache@feat/compiler-cache
+        with:
+          key: win64-${{ inputs.type }}${{ inputs.python && '-python' || '' }}
       # Before the dependencies: their third_party cache is keyed by the exact Python version
       - name: Python
         if: ${{ inputs.python }}

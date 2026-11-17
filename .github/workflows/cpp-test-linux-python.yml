@@ -127,8 +127,18 @@ jobs:
           mkdir -p build
           cd build
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{ inputs.type }} -DCMAKE_PREFIX_PATH="${{ steps.repos.outputs.path }}" -D${{ inputs.name }}_WITH_PYTHON:BOOL=ON -DPYTHON_VERSION:STRING=${{ matrix.python }} -DCPACK_PACKAGE_VERSION:STRING=0.0.0 -DCPACK_SYSTEM_NAME:STRING=rhel ${{ inputs.package != '' && '-DWHEEL_VERSION:STRING=0.0.0' || '' }} ..
-          cmake --build .
+          # Superbuild: also configures the project folder
+          cmake --build . -t third_party
           cd ${{ inputs.directory }}
+          # Libraries, executables and Python modules, without the C++ tests (build-linux runs
+          # them): the folder targets of the project that exist
+          targets=$(ninja -t targets all | sed -n -E 's#^((src/geode|src/bin|bindings/python)/all):.*#\1#p' | tr '\n' ' ')
+          echo "Targets: $targets"
+          cmake --build . -t $targets
+          # Superbuild: the wheel is made from the install folder
+          if [ "${{ inputs.directory }}" != "." ]; then
+            cmake --install .
+          fi
           echo "Python testing"
           ctest --output-on-failure --stop-on-failure -R py -j 2
           echo "LD_LIBRARY_PATH=" >> $GITHUB_ENV

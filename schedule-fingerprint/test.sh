@@ -96,7 +96,7 @@ test_branch_not_in_key() {
   [ "$k1" = "$KEY" ] && [[ "$KEY" == schedule-tree-* ]]; assert test_branch_not_in_key $?
 }
 
-test_selection_order_independent() {
+test_selection_order_does_not_matter() {
   new_case
   head_fixture master aaa T1; dep_fixture A/dep1 1 v33.33.0-rc.1 D1; dep_fixture B/dep2 2 v33.33.0 D2
   local s1 s2
@@ -104,27 +104,27 @@ test_selection_order_independent() {
   s2="{$(selection_entry B/dep2 2 2024-02-01T00:00:00Z),$(selection_entry A/dep1 1 2024-01-01T00:00:00Z)}"
   run_fp master "$s1"; local k1="$KEY"
   run_fp master "$s2"
-  [ -n "$k1" ] && [ "$k1" = "$KEY" ]; assert test_selection_order_independent $?
+  [ -n "$k1" ] && [ "$k1" = "$KEY" ]; assert test_selection_order_does_not_matter $?
 }
 
-test_head_lookup_failure_degrades() {
+test_head_failure_forces_run() {
   new_case # no head fixture
   run_fp master ""
   local k1="$KEY" rc1=$RC log1="$LOG"
   run_fp master ""
   [ "$rc1" = 0 ] && [[ "$k1" == schedule-tree-* ]] && [[ "$log1" == *"unresolved-42"* ]] \
-    && [ "$k1" = "$KEY" ]; assert test_head_lookup_failure_degrades $?
+    && [ "$k1" = "$KEY" ]; assert test_head_failure_forces_run $?
 }
 
-test_non_release_tag_falls_back_to_build_id() {
+test_branch_package_uses_build_identity() {
   new_case
-  head_fixture master aaa T1; dep_fixture A/dep1 1 nightly D1
+  head_fixture master aaa T1; dep_fixture A/dep1 1 next D1
   local s1 s2
   s1="{$(selection_entry A/dep1 1 2024-01-01T00:00:00Z)}"
   s2="{$(selection_entry A/dep1 1 2024-03-01T00:00:00Z)}"
   run_fp master "$s1"; local k1="$KEY" log1="$LOG"
   run_fp master "$s2"
-  [ "$k1" != "$KEY" ] && [[ "$log1" != *"D1"* ]]; assert test_non_release_tag_falls_back_to_build_id $?
+  [ "$k1" != "$KEY" ] && [[ "$log1" != *"D1"* ]]; assert test_branch_package_uses_build_identity $?
 }
 
 test_dependency_lookup_failure_falls_back() {
@@ -138,14 +138,23 @@ test_dependency_lookup_failure_falls_back() {
   [ "$rc1" = 0 ] && [[ "$k1" == schedule-tree-* ]] && [ "$k1" != "$KEY" ]; assert test_dependency_lookup_failure_falls_back $?
 }
 
-test_empty_selection_only_head() {
+test_no_dependencies() {
   new_case
   head_fixture master aaa T1
   run_fp master ""; local k1="$KEY" rc1=$RC
   run_fp master "{}"
   local expected
   expected="$(printf '%s' 'OpenGeode:T1' | sha256sum | cut -d' ' -f1)"
-  [ "$rc1" = 0 ] && [ "$k1" = "schedule-tree-$expected" ] && [ "$KEY" = "$k1" ]; assert test_empty_selection_only_head $?
+  [ "$rc1" = 0 ] && [ "$k1" = "schedule-tree-$expected" ] && [ "$KEY" = "$k1" ]; assert test_no_dependencies $?
+}
+
+test_owner_taken_from_selection() {
+  new_case
+  head_fixture master aaa T1; dep_fixture Acme/dep 1 v1.0.0 D9
+  run_fp master "{$(selection_entry Acme/dep 1 2024-01-01T00:00:00Z)}"
+  local expected
+  expected="$(printf '%s' 'OpenGeode:T1;Acme/dep:D9' | sha256sum | cut -d' ' -f1)"
+  [[ "$LOG" == *"dependency: Acme/dep v1.0.0 tree D9"* ]] && [ "$KEY" = "schedule-tree-$expected" ]; assert test_owner_taken_from_selection $?
 }
 
 test_hash_file_written() {

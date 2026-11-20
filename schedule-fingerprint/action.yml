@@ -1,0 +1,33 @@
+name: "Schedule fingerprint"
+description: "Key identifying the sources a scheduled run would test, based on git trees of the repository head and of the dependency releases"
+
+inputs:
+  branch:
+    description: "Branch of the repository to fingerprint"
+    type: string
+    required: true
+  selection:
+    description: "JSON `selection` output of get-release"
+    type: string
+    default: ""
+  token:
+    description: "Token used to query the GitHub API"
+    type: string
+    required: true
+
+outputs:
+  key:
+    description: "Cache key: schedule-tree-<sha256>"
+    value: ${{ steps.fingerprint.outputs.key }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Fingerprint
+      id: fingerprint
+      shell: bash
+      run: "${{ github.action_path }}/fingerprint.sh"
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        BRANCH: ${{ inputs.branch }}
+        SELECTION: ${{ inputs.selection }}

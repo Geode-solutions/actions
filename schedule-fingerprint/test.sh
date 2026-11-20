@@ -25,9 +25,12 @@ new_case() {
   mkdir -p "$FIXTURES" "$CASE/work"
 }
 
+# tree_of <label>: deterministic 40-hex tree sha
+tree_of() { printf "%s" "$1" | sha1sum | cut -c1-40; }
+
 # head_fixture <branch> <commit sha> <tree sha>
 head_fixture() {
-  echo "{\"sha\":\"$2\",\"commit\":{\"tree\":{\"sha\":\"$3\"}}}" \
+  echo "{\"sha\":\"$2\",\"commit\":{\"tree\":{\"sha\":\"$(tree_of "$3")\"}}}" \
     > "$FIXTURES/repos_Geode-solutions_OpenGeode_commits_$1.json"
 }
 
@@ -35,7 +38,7 @@ head_fixture() {
 dep_fixture() {
   local base="${1//\//_}"
   echo "{\"tag_name\":\"$3\"}" > "$FIXTURES/repos_${base}_releases_$2.json"
-  echo "{\"sha\":\"x\",\"commit\":{\"tree\":{\"sha\":\"$4\"}}}" \
+  echo "{\"sha\":\"x\",\"commit\":{\"tree\":{\"sha\":\"$(tree_of "$4")\"}}}" \
     > "$FIXTURES/repos_${base}_commits_$3.json"
 }
 
@@ -49,7 +52,7 @@ run_fp() {
   rm -f "$CASE/work/out" "$CASE/work/schedule-fingerprint"
   LOG="$(cd "$CASE/work" && PATH="$ROOT/bin:$PATH" BRANCH="$1" SELECTION="$2" GH_TOKEN=t \
     GITHUB_REPOSITORY=Geode-solutions/OpenGeode GITHUB_OUTPUT="$CASE/work/out" \
-    GITHUB_RUN_ID=42 bash "$HERE/fingerprint.sh" 2>&1)"
+    GITHUB_RUN_ID="${RUN_ID:-42}" bash "$HERE/fingerprint.sh" 2>&1)"
   RC=$?
   KEY="$(sed -n 's/^key=//p' "$CASE/work/out" 2>/dev/null)"
 }
@@ -111,9 +114,8 @@ test_head_failure_forces_run() {
   new_case # no head fixture
   run_fp master ""
   local k1="$KEY" rc1=$RC log1="$LOG"
-  run_fp master ""
-  [ "$rc1" = 0 ] && [[ "$k1" == schedule-tree-* ]] && [[ "$log1" == *"unresolved-42"* ]] \
-    && [ "$k1" = "$KEY" ]; assert test_head_failure_forces_run $?
+  RUN_ID=43 run_fp master ""
+  [ "$rc1" = 0 ] && [[ "$k1" == schedule-tree-* ]] && [[ "$log1" == *"unresolved-42"* ]] && [[ "$KEY" == schedule-tree-* ]] && [ "$k1" != "$KEY" ]; assert test_head_failure_forces_run $?
 }
 
 test_branch_package_uses_build_identity() {
@@ -124,7 +126,7 @@ test_branch_package_uses_build_identity() {
   s2="{$(selection_entry A/dep1 1 2024-03-01T00:00:00Z)}"
   run_fp master "$s1"; local k1="$KEY" log1="$LOG"
   run_fp master "$s2"
-  [ "$k1" != "$KEY" ] && [[ "$log1" != *"D1"* ]]; assert test_branch_package_uses_build_identity $?
+  [ "$k1" != "$KEY" ] && [[ "$log1" == *"dependency: A/dep1 next build 1"* ]]; assert test_branch_package_uses_build_identity $?
 }
 
 test_dependency_lookup_failure_falls_back() {
@@ -144,7 +146,7 @@ test_no_dependencies() {
   run_fp master ""; local k1="$KEY" rc1=$RC
   run_fp master "{}"
   local expected
-  expected="$(printf '%s' 'OpenGeode:T1' | sha256sum | cut -d' ' -f1)"
+  expected="$(printf '%s' "OpenGeode:$(tree_of T1)" | sha256sum | cut -d' ' -f1)"
   [ "$rc1" = 0 ] && [ "$k1" = "schedule-tree-$expected" ] && [ "$KEY" = "$k1" ]; assert test_no_dependencies $?
 }
 
@@ -153,8 +155,8 @@ test_owner_taken_from_selection() {
   head_fixture master aaa T1; dep_fixture Acme/dep 1 v1.0.0 D9
   run_fp master "{$(selection_entry Acme/dep 1 2024-01-01T00:00:00Z)}"
   local expected
-  expected="$(printf '%s' 'OpenGeode:T1;Acme/dep:D9' | sha256sum | cut -d' ' -f1)"
-  [[ "$LOG" == *"dependency: Acme/dep v1.0.0 tree D9"* ]] && [ "$KEY" = "schedule-tree-$expected" ]; assert test_owner_taken_from_selection $?
+  expected="$(printf '%s' "OpenGeode:$(tree_of T1);Acme/dep:$(tree_of D9)" | sha256sum | cut -d' ' -f1)"
+  [[ "$LOG" == *"dependency: Acme/dep v1.0.0 tree $(tree_of D9)"* ]] && [ "$KEY" = "schedule-tree-$expected" ]; assert test_owner_taken_from_selection $?
 }
 
 test_hash_file_written() {
@@ -170,7 +172,41 @@ test_log_lines() {
   new_case
   head_fixture master aaa T1; dep_fixture A/dep1 1 v1.0.0 D1
   run_fp master "{$(selection_entry A/dep1 1 2024-01-01T00:00:00Z)}"
-  [[ "$LOG" == *"head: aaa tree T1"* ]] && [[ "$LOG" == *"dependency: A/dep1 v1.0.0 tree D1"* ]]; assert test_log_lines $?
+  [[ "$LOG" == *"head: aaa tree $(tree_of T1)"* ]] && [[ "$LOG" == *"dependency: A/dep1 v1.0.0 tree $(tree_of D1)"* ]]; assert test_log_lines $?
+}
+
+test_invalid_selection_forces_run() {
+  new_case
+  head_fixture master aaa T1
+  run_fp master ""; local base="$KEY" ok=0
+  local sel
+  for sel in '{' '{"A/x":{"release_id":1}}'; do
+    run_fp master "$sel"; local k1="$KEY" rc1=$RC
+    RUN_ID=43 run_fp master "$sel"
+    { [ "$rc1" = 0 ] && [ -n "$k1" ] && [ "$k1" != "$base" ] && [ "$k1" != "$KEY" ]; } || ok=1
+  done
+  assert test_invalid_selection_forces_run $ok
+}
+
+test_null_tree_falls_back() {
+  new_case
+  head_fixture master aaa T1; dep_fixture A/dep1 1 v1.0.0 D1
+  echo '{"commit":{"tree":{"sha":null}}}' > "$FIXTURES/repos_A_dep1_commits_v1.0.0.json"
+  local s1 s2
+  s1="{$(selection_entry A/dep1 1 2024-01-01T00:00:00Z)}"
+  s2="{$(selection_entry A/dep1 1 2024-03-01T00:00:00Z)}"
+  run_fp master "$s1"; local k1="$KEY" log1="$LOG"
+  run_fp master "$s2"
+  [ "$k1" != "$KEY" ] && [[ "$log1" == *"dependency: A/dep1 v1.0.0 build 1"* ]]; assert test_null_tree_falls_back $?
+}
+
+test_rc_to_final_promotion_same_key() {
+  new_case
+  head_fixture master aaa T1; dep_fixture A/dep1 1 v33.33.0-rc.1 D1; dep_fixture A/dep1 2 v33.33.0 D1
+  run_fp master "{$(selection_entry A/dep1 1 2024-01-01T00:00:00Z)}"; local k1="$KEY"
+  head_fixture master bbb T1
+  run_fp master "{$(selection_entry A/dep1 2 2024-02-01T00:00:00Z)}"
+  [ -n "$k1" ] && [ "$k1" = "$KEY" ]; assert test_rc_to_final_promotion_same_key $?
 }
 
 for t in $(declare -F | awk '{print $3}' | grep '^test_'); do "$t"; done

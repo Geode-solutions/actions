@@ -28,7 +28,9 @@ on:
 jobs:
   # Skips the tests when neither the repository nor its dependency releases changed since the
   # last green run, scheduled or dispatched (Versions dispatches the master tests every night).
-  # Every Sunday and every re-run test anyway (third-party, runner updates)
+  # The fingerprint is made of git trees, shared by master and next: the master test runs only
+  # when the sources differ.
+  # Every Sunday and every re-run test anyway (toolchain, runner, re-uploaded assets)
   changes:
     runs-on: ubuntu-slim
     outputs:
@@ -52,16 +54,12 @@ jobs:
           branch: ${{ inputs.branch }}
           download: false
       - name: Fingerprint
+        uses: Geode-solutions/actions/schedule-fingerprint@master
         id: fingerprint
-        run: |
-          head=$(gh api "repos/$GITHUB_REPOSITORY/commits/${{ inputs.branch }}" --jq .sha)
-          echo "head: $head"
-          echo "releases: ${{ steps.releases.outputs.releases }}"
-          hash=$(echo "$head;${{ steps.releases.outputs.releases }}" | sha256sum | cut -d' ' -f1)
-          echo "key=schedule-${{ inputs.branch }}-$hash" >> $GITHUB_OUTPUT
-          echo "$hash" > schedule-fingerprint
-        env:
-          GH_TOKEN: ${{ github.token }}
+        with:
+          branch: ${{ inputs.branch }}
+          selection: ${{ steps.releases.outputs.selection }}
+          token: ${{ steps.token.outputs.token }}
       - uses: actions/cache/restore@v4
         id: cache
         with:

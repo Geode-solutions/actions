@@ -36,18 +36,21 @@ runs:
         if [ -n "$TOKEN" ]; then
           args+=(--build-arg TOKEN="$TOKEN")
         fi
-        # A dependency released moments ago may not be served by every PyPI CDN node yet
-        # (index pages are cached up to 10 min): retry only on that error
+        # A dependency released moments ago (e.g. by a sibling repo's deploy) may not be served by
+        # every PyPI/npm CDN node yet (index pages and tarballs are cached up to ~10 min): retry
+        # only on those errors. npm reports E404 when the packument lists the version but the
+        # tarball is not reachable yet, ETARGET when the packument does not list it yet.
+        not_yet_published='No matching distribution found|npm (error|ERR!) code (E404|ETARGET)'
         log="$RUNNER_TEMP/docker-build.log"
         max_attempts=5
         for attempt in $(seq 1 $max_attempts); do
           if docker build "${args[@]}" . 2>&1 | tee "$log"; [ "${PIPESTATUS[0]}" -eq 0 ]; then
             break
           fi
-          if ! grep -q "No matching distribution found" "$log" || [ "$attempt" -eq "$max_attempts" ]; then
+          if ! grep -Eq "$not_yet_published" "$log" || [ "$attempt" -eq "$max_attempts" ]; then
             exit 1
           fi
-          echo "A dependency is not available on PyPI yet (attempt $attempt/$max_attempts), retrying in 60s..."
+          echo "A dependency is not available on PyPI/npm yet (attempt $attempt/$max_attempts), retrying in 60s..."
           sleep 60
         done
       shell: bash

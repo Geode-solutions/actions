@@ -271,20 +271,14 @@ jobs:
               repos: ${{ inputs.repos }}
               branch: ${{ inputs.branch }}
               token: ${{ steps.token.outputs.token }}
-          - name: Install Azure Sign Tool
-            if: steps.artifact.outcome != 'success'
-            uses: Geode-solutions/actions/install/azure-sign@master
+      - name: Azure Artifact Signing
+        if: steps.artifact.outcome != 'success'
+        uses: Geode-solutions/actions/install/azure-sign@master
       - name: Package
         if: steps.artifact.outcome != 'success'
         run: |
           jq '.version = "${{ inputs.version }}"' package.json > temp && mv temp package.json
           npm run package
-        env:
-          AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
         shell: bash
       - name: Release
         run: |

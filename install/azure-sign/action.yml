@@ -1,9 +1,33 @@
-name: "Install Azure Sign Tool"
+name: "Azure Artifact Signing"
+description: "Install jsign and get an Azure Artifact Signing token (GitHub OIDC) on Windows, on master and next only"
+
+inputs:
+  force:
+    description: "Sign on any ref (the federated credential of the app must accept it)"
+    type: boolean
+    default: false
 
 runs:
   using: "composite"
   steps:
-    - name: Install Azure Sign Tool
-      if: ${{ runner.os == 'Windows' }}
-      run: dotnet tool install --global AzureSignTool --version 5.0.0
+    - name: Azure login
+      if: ${{ runner.os == 'Windows' && (inputs.force == 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/next') }}
+      uses: azure/login@v2
+      with:
+        client-id: 68365bdc-7f42-4b6b-831f-de393d1947b8
+        tenant-id: 6dd63d3c-bf33-4442-816b-d59b2981acd9
+        allow-no-subscriptions: true
+    # The token lasts about one hour: run this action right before signing, after the long builds
+    - name: Signing environment
+      if: ${{ runner.os == 'Windows' && (inputs.force == 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/next') }}
+      run: |
+        jar="$RUNNER_TEMP/jsign-7.6.jar"
+        curl -sSfL -o "$jar" https://github.com/ebourg/jsign/releases/download/7.6/jsign-7.6.jar
+        echo "6cf58aa080e7ff82656f320cff8d4a3bff30408df8766806dcba3740dd839fa5  $jar" | sha256sum -c -
+        token=$(az account get-access-token --resource https://codesigning.azure.net --query accessToken -o tsv)
+        echo "::add-mask::$token"
+        echo "JSIGN_JAR=$jar" >> "$GITHUB_ENV"
+        echo "ARTIFACT_SIGNING_TOKEN=$token" >> "$GITHUB_ENV"
+        echo "ARTIFACT_SIGNING_ENDPOINT=neu.codesigning.azure.net" >> "$GITHUB_ENV"
+        echo "ARTIFACT_SIGNING_PROFILE=geodesigning/geode-public" >> "$GITHUB_ENV"
       shell: bash

@@ -14,16 +14,6 @@ on:
         required: false
       TOKEN:
         required: true
-      AZURE_KEY_VAULT_URI:
-        required: false
-      AZURE_CLIENT_ID:
-        required: false
-      AZURE_TENANT_ID:
-        required: false
-      AZURE_CLIENT_SECRET:
-        required: false
-      AZURE_CERT_NAME:
-        required: false
 
 jobs:
   # node_modules and unpacked app shared by the test shards and the installer packaging
@@ -60,18 +50,10 @@ jobs:
               repos: ${{ inputs.repos }}
               branch: ${{ inputs.branch }}
               token: ${{ steps.token.outputs.token }}
-          - name: Install Azure Sign Tool
-            uses: Geode-solutions/actions/install/azure-sign@master
       - name: Build
         run: |
           npm run build:desktop:unpacked
         shell: bash
-        env:
-          AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
       # Tar keeps executable bits and symlinks, which upload-artifact drops
       - name: Archive
         run: |
@@ -152,8 +134,6 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - name: Install Azure Sign Tool
-        uses: Geode-solutions/actions/install/azure-sign@master
       - uses: actions/download-artifact@v8
         with:
           name: desktop-build-${{ runner.os }}
@@ -163,12 +143,6 @@ jobs:
           rm desktop-build.tar.zst
           npx electron-builder build --prepackaged "$(ls -d release/0.0.0/*-unpacked)" --publish=never
         shell: bash
-        env:
-          AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
       - uses: actions/upload-artifact@v7
         with:
           name: desktop-${{ runner.os }}

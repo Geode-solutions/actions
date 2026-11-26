@@ -28,16 +28,6 @@ inputs:
     description: "node_modules and the unpacked app in release/0.0.0 are already extracted (see web-test-desktop.yml)"
     type: boolean
     default: false
-  AZURE_KEY_VAULT_URI:
-    type: string
-  AZURE_CLIENT_ID:
-    type: string
-  AZURE_TENANT_ID:
-    type: string
-  AZURE_CLIENT_SECRET:
-    type: string
-  AZURE_CERT_NAME:
-    type: string
 
 runs:
   using: "composite"
@@ -64,9 +54,6 @@ runs:
         branch: ${{ inputs.branch }}
         token: ${{ inputs.token }}
         pyinstallers: ${{ inputs.pyinstallers }}
-    - name: Install Azure Sign Tool
-      if: ${{ inputs.use_registry == 'false' && inputs.prebuilt != 'true' }}
-      uses: Geode-solutions/actions/install/azure-sign@master
     - name: Install OSMesa
       uses: Geode-solutions/actions/install/osmesa@master
     - name: Install desktop app
@@ -85,12 +72,6 @@ runs:
       run: |
         npm run build:desktop:unpacked
       shell: bash
-      env:
-        AZURE_KEY_VAULT_URI: ${{ inputs.AZURE_KEY_VAULT_URI }}
-        AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}
-        AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
-        AZURE_CLIENT_SECRET: ${{ inputs.AZURE_CLIENT_SECRET }}
-        AZURE_CERT_NAME: ${{ inputs.AZURE_CERT_NAME }}
     - name: Shard arguments
       id: shard
       run: |
